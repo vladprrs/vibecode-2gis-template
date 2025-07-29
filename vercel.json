@@ -1,6 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "builds": [{ "src": "package.json", "use": "@vercel/static-build" }],
   "outputDirectory": "dist",
-  "framework": "vite"
+  "env": { "VITE_MAPGL_KEY": "@vite_mapgl_key" },
+  "nodeVersion": "18.x"
 }

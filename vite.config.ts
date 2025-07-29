@@ -37,12 +37,10 @@ export default defineConfig({
     sourcemap: true,
     minify: 'terser',
     target: 'es2022',
-    lib: {
-      entry: resolve(__dirname, 'src/main.ts'),
-      formats: ['es']
-    },
     rollupOptions: {
-      external: [],
+      input: {
+        main: resolve(__dirname, 'index.html')
+      },
       output: {
         chunkFileNames: 'assets/[name].[hash].js',
         entryFileNames: 'assets/[name].[hash].js',

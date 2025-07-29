@@ -1,0 +1,6 @@
+figma_export/
+docs/
+*.test.*
+deprecated/
+demo/
+src/demo/ 
