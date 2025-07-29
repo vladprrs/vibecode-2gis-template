@@ -165,7 +165,7 @@ export class AdviceGrid {
 
     // Image
     const image = document.createElement('img');
-    image.src = '/figma_export/dashboard/components/promo/assets/images/img-c1dcdcdd.png';
+    image.src = '/assets/images/promo/img-c1dcdcdd.png';
     image.alt = 'Туристический слой';
     image.style.cssText = `
       display: flex;

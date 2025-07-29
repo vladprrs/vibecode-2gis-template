@@ -128,9 +128,8 @@ export class ButtonRow {
 
     // Load icon from assets
     const icon = document.createElement('img');
-    // Convert @/assets path to relative path for browser
-    const iconPath = item.iconSrc.replace('@/assets/', '/src/assets/');
-    icon.src = iconPath;
+    // Use the iconSrc directly as it's already a proper path
+    icon.src = item.iconSrc;
     icon.alt = item.text;
     icon.style.cssText = `
       width: 22px;

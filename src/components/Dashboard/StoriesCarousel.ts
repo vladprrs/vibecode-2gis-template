@@ -50,25 +50,25 @@ export class StoriesCarousel {
       { 
         id: 'story1', 
         title: 'Заголовок сторис три строки',
-        imageUrl: '/figma_export/dashboard/components/stories/assets/images/img-69ff32d9.png',
+        imageUrl: '/assets/images/stories/img-69ff32d9.png',
         isViewed: false
       },
       { 
         id: 'story2', 
         title: 'Заголовок сторис три строки',
-        imageUrl: '/figma_export/dashboard/components/stories/assets/images/img-5549a895.png',
+        imageUrl: '/assets/images/stories/img-5549a895.png',
         isViewed: false
       },
       { 
         id: 'story3', 
         title: 'Заголовок сторис три строки',
-        imageUrl: '/figma_export/dashboard/components/stories/assets/images/img-62839f12.png',
+        imageUrl: '/assets/images/stories/img-62839f12.png',
         isViewed: false
       },
       { 
         id: 'story4', 
         title: 'Заголовок сторис три строки',
-        imageUrl: '/figma_export/dashboard/components/stories/assets/images/img-0f61e5de.png',
+        imageUrl: '/assets/images/stories/img-0f61e5de.png',
         isViewed: false
       }
     ];
