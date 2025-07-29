@@ -12,3 +12,6 @@ export { MapSyncService, MapSyncServiceFactory } from './MapSyncService';
 
 // Экспорт менеджера карты
 export { MapManager } from './MapManager';
+
+// Экспорт менеджера панели фильтров
+export { FilterBarManager } from './FilterBarManager';
