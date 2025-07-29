@@ -13,5 +13,8 @@ export { MapSyncService, MapSyncServiceFactory } from './MapSyncService';
 // Экспорт менеджера карты
 export { MapManager } from './MapManager';
 
+// Экспорт менеджера контента
+export { ContentManager } from './ContentManager';
+
 // Экспорт менеджера панели фильтров
 export { FilterBarManager } from './FilterBarManager';
