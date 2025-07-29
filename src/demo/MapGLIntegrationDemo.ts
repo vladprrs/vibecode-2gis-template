@@ -4,9 +4,9 @@ import { BottomsheetManager } from '../services/BottomsheetManager';
 import { SearchFlowManager } from '../services/SearchFlowManager';
 import {
   DashboardScreenFactory,
-  SuggestScreenFactory, 
-  SearchResultScreenFactory,
-  OrganizationScreenFactory
+  SuggestScreen,
+  SearchResultScreen,
+  OrganizationScreen
 } from '../components/Screens';
 import { MAPGL_API_KEY } from '../config/mapgl';
 import { BottomsheetState, ScreenType } from '../types';
@@ -129,9 +129,8 @@ export class MapGLIntegrationDemo {
   private async createMap(): Promise<void> {
     console.log('🗺️ Создание карты MapGL...');
     
-    this.mapComponent = MapGLComponentFactory.createDefault(
-      this.mapContainer,
-      MAPGL_API_KEY
+    this.mapComponent = MapGLComponentFactory.createForDashboard(
+      this.mapContainer
     );
 
     // Ждем инициализации карты
@@ -208,7 +207,7 @@ export class MapGLIntegrationDemo {
 
     // Suggest Screen
     const suggestContainer = document.getElementById(`screen-${ScreenType.SUGGEST}`)!;
-    const suggestScreen = new (SuggestScreenFactory as any).create({
+    const suggestScreen = new SuggestScreen({
       container: suggestContainer,
       searchFlowManager: this.searchFlowManager,
       bottomsheetManager: this.bottomsheetManager,
@@ -218,7 +217,7 @@ export class MapGLIntegrationDemo {
 
     // Search Result Screen
     const searchResultContainer = document.getElementById(`screen-${ScreenType.SEARCH_RESULT}`)!;
-    const searchResultScreen = new (SearchResultScreenFactory as any).create({
+    const searchResultScreen = new SearchResultScreen({
       container: searchResultContainer,  
       searchFlowManager: this.searchFlowManager,
       bottomsheetManager: this.bottomsheetManager,
@@ -243,7 +242,7 @@ export class MapGLIntegrationDemo {
       isAdvertiser: true
     };
     
-    const organizationScreen = new (OrganizationScreenFactory as any).create({
+    const organizationScreen = new OrganizationScreen({
       container: organizationContainer,
       searchFlowManager: this.searchFlowManager,
       bottomsheetManager: this.bottomsheetManager,

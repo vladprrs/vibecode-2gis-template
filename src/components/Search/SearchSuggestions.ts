@@ -164,7 +164,9 @@ export class SearchSuggestions {
     group.suggestions.forEach((suggestion, groupIndex) => {
       const globalIndex = this.props.suggestions.indexOf(suggestion);
       const suggestionElement = this.createSuggestionElement(suggestion, globalIndex);
-      this.suggestionsContainer.appendChild(suggestionElement);
+      if (this.suggestionsContainer) {
+        this.suggestionsContainer.appendChild(suggestionElement);
+      }
     });
   }
 

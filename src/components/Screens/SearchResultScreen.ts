@@ -769,7 +769,8 @@ export class SearchResultScreen {
         workingHours: '8:00 - 22:00',
         isAdvertiser: true,
         photoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=300&h=200&fit=crop',
-        description: 'Уютная кофейня в центре города с большим выбором кофе и десертов.'
+        description: 'Уютная кофейня в центре города с большим выбором кофе и десертов.',
+        coordinates: [59.9311, 30.3609]
       },
       {
         id: '2',
@@ -783,7 +784,8 @@ export class SearchResultScreen {
         workingHours: '24 часа',
         isAdvertiser: false,
         photoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop',
-        description: 'Популярная сеть ресторанов быстрого питания.'
+        description: 'Популярная сеть ресторанов быстрого питания.',
+        coordinates: [59.9321, 30.3619]
       },
       {
         id: '3',
@@ -797,7 +799,8 @@ export class SearchResultScreen {
         workingHours: '12:00 - 00:00',
         isAdvertiser: true,
         photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=200&fit=crop',
-        description: 'Изысканный ресторан русской кухни с элегантным интерьером.'
+        description: 'Изысканный ресторан русской кухни с элегантным интерьером.',
+        coordinates: [59.9331, 30.3629]
       }
     ];
 
@@ -812,11 +815,11 @@ export class SearchResultScreen {
         return false;
       }
 
-      if (this.currentFilters.ratingFrom && org.rating < this.currentFilters.ratingFrom) {
+      if (this.currentFilters.ratingFrom && org.rating && org.rating < this.currentFilters.ratingFrom) {
         return false;
       }
 
-      if (this.currentFilters.distance && org.distance > this.currentFilters.distance) {
+      if (this.currentFilters.distance && org.distance && org.distance > this.currentFilters.distance) {
         return false;
       }
 
