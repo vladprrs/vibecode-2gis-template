@@ -31,4 +31,3 @@ export class MapContainer {
     return this.element;
   }
 }
-

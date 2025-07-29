@@ -23,7 +23,7 @@ export class BottomsheetScrollManager {
     this.container = container;
     this.contentContainer = contentContainer;
     this.bottomsheetManager = bottomsheetManager;
-    
+
     this.initialize();
   }
 
@@ -41,10 +41,14 @@ export class BottomsheetScrollManager {
   private setupEventListeners(): void {
     // Обработчик wheel событий для десктопа
     this.container.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
-    
+
     // Обработчики touch событий для мобильных устройств
-    this.container.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
-    this.container.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+    this.container.addEventListener('touchstart', this.handleTouchStart.bind(this), {
+      passive: false,
+    });
+    this.container.addEventListener('touchmove', this.handleTouchMove.bind(this), {
+      passive: false,
+    });
     this.container.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
 
     // Блокируем стандартное поведение скролла для контента когда нужно
@@ -56,44 +60,44 @@ export class BottomsheetScrollManager {
    */
   private handleWheel(event: WheelEvent): void {
     const currentState = this.bottomsheetManager.getCurrentState();
-    
+
     // В состоянии fullscreen_scroll разрешаем обычный скролл контента
     if (currentState.currentState === BottomsheetState.FULLSCREEN_SCROLL) {
       // Проверяем, достиг ли контент границ прокрутки
       const { scrollTop, scrollHeight, clientHeight } = this.contentContainer;
       const isAtTop = scrollTop <= 0;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
-      
+
       // Если прокручиваем вверх на самом верху - уменьшаем шторку
       if (event.deltaY < 0 && isAtTop) {
         event.preventDefault();
         this.handleStateTransition(-1);
         return;
       }
-      
+
       // Разрешаем обычный скролл внутри контента
       return;
     }
 
     // В остальных состояниях блокируем скролл контента и управляем высотой шторки
     event.preventDefault();
-    
+
     // Накапливаем значения wheel для плавного изменения
     this.wheelAccumulator += event.deltaY;
     this.isWheelScrolling = true;
-    
+
     // Сбрасываем таймер
     if (this.wheelTimeout) {
       clearTimeout(this.wheelTimeout);
     }
-    
+
     // Проверяем, достигли ли порога для изменения состояния
     if (Math.abs(this.wheelAccumulator) >= this.wheelThreshold) {
       const direction = this.wheelAccumulator > 0 ? 1 : -1;
       this.handleStateTransition(direction);
       this.wheelAccumulator = 0;
     }
-    
+
     // Устанавливаем таймер для сброса накопителя
     this.wheelTimeout = window.setTimeout(() => {
       this.wheelAccumulator = 0;
@@ -110,12 +114,12 @@ export class BottomsheetScrollManager {
       BottomsheetState.SMALL,
       BottomsheetState.DEFAULT,
       BottomsheetState.FULLSCREEN,
-      BottomsheetState.FULLSCREEN_SCROLL
+      BottomsheetState.FULLSCREEN_SCROLL,
     ];
-    
+
     const currentIndex = states.indexOf(currentState.currentState);
     let targetIndex = currentIndex;
-    
+
     if (direction > 0) {
       // Скролл вниз - уменьшаем высоту шторки
       targetIndex = Math.max(0, currentIndex - 1);
@@ -123,7 +127,7 @@ export class BottomsheetScrollManager {
       // Скролл вверх - увеличиваем высоту шторки
       targetIndex = Math.min(states.length - 1, currentIndex + 1);
     }
-    
+
     if (targetIndex !== currentIndex) {
       const targetState = states[targetIndex];
       this.bottomsheetManager.snapToState(targetState).then(() => {
@@ -142,7 +146,7 @@ export class BottomsheetScrollManager {
    */
   private handleTouchStart(event: TouchEvent): void {
     if (event.touches.length !== 1) return;
-    
+
     this.touchStartY = event.touches[0].clientY;
     this.touchCurrentY = this.touchStartY;
     this.isTouchScrolling = false;
@@ -153,32 +157,32 @@ export class BottomsheetScrollManager {
    */
   private handleTouchMove(event: TouchEvent): void {
     if (event.touches.length !== 1) return;
-    
+
     const currentY = event.touches[0].clientY;
     const deltaY = this.touchCurrentY - currentY;
     const totalDelta = this.touchStartY - currentY;
-    
+
     const currentState = this.bottomsheetManager.getCurrentState();
-    
+
     // В состоянии fullscreen_scroll проверяем границы контента
     if (currentState.currentState === BottomsheetState.FULLSCREEN_SCROLL) {
       const { scrollTop, scrollHeight, clientHeight } = this.contentContainer;
       const isAtTop = scrollTop <= 0;
-      
+
       // Если тянем вниз на самом верху контента - уменьшаем шторку
       if (totalDelta < -30 && isAtTop) {
         event.preventDefault();
         this.handleStateTransition(-1);
         return;
       }
-      
+
       // Разрешаем обычный скролл
       return;
     }
-    
+
     // В остальных состояниях блокируем скролл контента
     event.preventDefault();
-    
+
     // Определяем направление для изменения состояния
     if (Math.abs(totalDelta) > 30) {
       if (!this.isTouchScrolling) {
@@ -187,7 +191,7 @@ export class BottomsheetScrollManager {
         this.isTouchScrolling = true;
       }
     }
-    
+
     this.touchCurrentY = currentY;
   }
 
@@ -203,7 +207,7 @@ export class BottomsheetScrollManager {
    */
   private handleContentScroll(event: Event): void {
     const currentState = this.bottomsheetManager.getCurrentState();
-    
+
     // Блокируем скролл контента если не в состоянии fullscreen_scroll
     if (currentState.currentState !== BottomsheetState.FULLSCREEN_SCROLL && this.isScrollBlocked) {
       event.preventDefault();
@@ -217,9 +221,9 @@ export class BottomsheetScrollManager {
   public updateScrollBehavior(): void {
     const currentState = this.bottomsheetManager.getCurrentState();
     const isScrollableState = currentState.currentState === BottomsheetState.FULLSCREEN_SCROLL;
-    
+
     this.isScrollBlocked = !isScrollableState;
-    
+
     // Обновляем CSS для контейнера контента
     if (isScrollableState) {
       this.contentContainer.style.overflowY = 'auto';
@@ -230,7 +234,7 @@ export class BottomsheetScrollManager {
       // Сбрасываем позицию скролла
       this.contentContainer.scrollTop = 0;
     }
-    
+
     // Добавляем CSS классы для визуальной индикации
     this.container.classList.toggle('scroll-blocked', !isScrollableState);
     this.container.classList.toggle('scroll-enabled', isScrollableState);
@@ -246,11 +250,11 @@ export class BottomsheetScrollManager {
   } {
     const currentState = this.bottomsheetManager.getCurrentState();
     const canScrollContent = currentState.currentState === BottomsheetState.FULLSCREEN_SCROLL;
-    
+
     return {
       isBlocked: this.isScrollBlocked,
       currentState: currentState.currentState,
-      canScrollContent
+      canScrollContent,
     };
   }
 
@@ -269,7 +273,7 @@ export class BottomsheetScrollManager {
     if (this.wheelTimeout) {
       clearTimeout(this.wheelTimeout);
     }
-    
+
     // Удаляем обработчики событий
     this.container.removeEventListener('wheel', this.handleWheel.bind(this));
     this.container.removeEventListener('touchstart', this.handleTouchStart.bind(this));
@@ -277,4 +281,4 @@ export class BottomsheetScrollManager {
     this.container.removeEventListener('touchend', this.handleTouchEnd.bind(this));
     this.contentContainer.removeEventListener('scroll', this.handleContentScroll.bind(this));
   }
-} 
+}

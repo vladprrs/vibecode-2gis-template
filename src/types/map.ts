@@ -3,11 +3,7 @@ import { Organization } from './navigation';
 /**
  * Тип контента для синхронизации с картой
  */
-export type MapContentType = 
-  | 'dashboard' 
-  | 'search_results' 
-  | 'organization'
-  | 'suggestions';
+export type MapContentType = 'dashboard' | 'search_results' | 'organization' | 'suggestions';
 
 /**
  * Пин на карте
@@ -87,25 +83,25 @@ export interface MapConfig {
 export interface MapBottomsheetSync {
   /** Обновление пинов на основе содержимого шторки */
   syncPinsWithContent: (contentType: MapContentType, data: any) => void;
-  
+
   /** Выделение пина организации */
   highlightOrganizationPin: (organizationId: string) => void;
-  
+
   /** Снятие выделения со всех пинов */
   clearHighlights: () => void;
-  
+
   /** Адаптация видимой области карты под высоту шторки */
   adjustMapViewport: (bottomsheetHeight: number) => void;
-  
+
   /** Центрирование карты на организации */
   centerOnOrganization: (organization: Organization) => void;
-  
+
   /** Центрирование карты на результатах поиска */
   fitToSearchResults: (organizations: Organization[]) => void;
-  
+
   /** Обновление пользовательского местоположения */
   updateUserLocation: (coordinates: [number, number]) => void;
-  
+
   /** Получение видимых организаций в области карты */
   getVisibleOrganizations: () => Organization[];
 }
@@ -192,4 +188,4 @@ export interface MapRef {
   getMapState: () => MapState;
   /** Подстройка под границы */
   fitBounds: (bounds: MapState['bounds'], options?: MapAnimationOptions) => void;
-} 
+}

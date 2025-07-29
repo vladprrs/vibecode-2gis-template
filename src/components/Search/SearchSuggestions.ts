@@ -40,9 +40,9 @@ export class SearchSuggestions {
     this.props = {
       showGroupHeaders: true,
       maxSuggestions: 10,
-      ...props
+      ...props,
     };
-    
+
     this.initialize();
   }
 
@@ -62,7 +62,7 @@ export class SearchSuggestions {
     Object.assign(this.element.style, {
       display: 'flex',
       flexDirection: 'column',
-      width: '100%'
+      width: '100%',
     });
 
     if (this.props.className) {
@@ -75,11 +75,11 @@ export class SearchSuggestions {
    */
   private createSuggestionsContainer(): void {
     this.suggestionsContainer = document.createElement('div');
-    
+
     Object.assign(this.suggestionsContainer.style, {
       display: 'flex',
       flexDirection: 'column',
-      width: '100%'
+      width: '100%',
     });
 
     this.suggestionsContainer.className = 'suggestions-container';
@@ -115,14 +115,20 @@ export class SearchSuggestions {
    */
   private groupSuggestions(): GroupedSuggestions[] {
     const groups: Record<string, GroupedSuggestions> = {};
-    const typeOrder: SearchSuggestion['type'][] = ['history', 'popular', 'organization', 'address', 'category'];
-         const typeTitles: Record<SearchSuggestion['type'], string> = {
-       history: 'История поиска',
-       popular: 'Популярные запросы',
-       organization: 'Организации',
-       address: 'Адреса',
-       category: 'Категории'
-     };
+    const typeOrder: SearchSuggestion['type'][] = [
+      'history',
+      'popular',
+      'organization',
+      'address',
+      'category',
+    ];
+    const typeTitles: Record<SearchSuggestion['type'], string> = {
+      history: 'История поиска',
+      popular: 'Популярные запросы',
+      organization: 'Организации',
+      address: 'Адреса',
+      category: 'Категории',
+    };
 
     // Ограничиваем количество подсказок
     const limitedSuggestions = this.props.suggestions.slice(0, this.props.maxSuggestions);
@@ -130,22 +136,20 @@ export class SearchSuggestions {
     // Группируем подсказки
     limitedSuggestions.forEach(suggestion => {
       const type = suggestion.type;
-      
-             if (!groups[type]) {
-         groups[type] = {
-           type,
-           title: typeTitles[type] || String(type),
-           suggestions: []
-         };
-       }
-      
+
+      if (!groups[type]) {
+        groups[type] = {
+          type,
+          title: typeTitles[type] || String(type),
+          suggestions: [],
+        };
+      }
+
       groups[type].suggestions.push(suggestion);
     });
 
-         // Сортируем группы по порядку
-     return typeOrder
-       .filter(type => groups[type])
-       .map(type => groups[type]!);
+    // Сортируем группы по порядку
+    return typeOrder.filter(type => groups[type]).map(type => groups[type]);
   }
 
   /**
@@ -175,19 +179,19 @@ export class SearchSuggestions {
    */
   private createGroupHeader(title: string): HTMLElement {
     const header = document.createElement('div');
-    
+
     Object.assign(header.style, {
       padding: '12px 16px 8px 16px',
       fontSize: '14px',
       fontWeight: '600',
       color: '#666666',
       textTransform: 'uppercase',
-      letterSpacing: '0.5px'
+      letterSpacing: '0.5px',
     });
 
     header.textContent = title;
     header.className = 'suggestions-group-header';
-    
+
     return header;
   }
 
@@ -196,14 +200,14 @@ export class SearchSuggestions {
    */
   private createSuggestionElement(suggestion: SearchSuggestion, index: number): HTMLElement {
     const element = document.createElement('div');
-    
+
     Object.assign(element.style, {
       display: 'flex',
       alignItems: 'center',
       padding: '12px 16px',
       cursor: 'pointer',
       transition: 'background-color 0.2s ease',
-      borderRadius: '0'
+      borderRadius: '0',
     });
 
     // Создаем содержимое подсказки
@@ -217,7 +221,7 @@ export class SearchSuggestions {
     this.setupSuggestionEventListeners(element, suggestion, index);
 
     element.className = `suggestion-item suggestion-${suggestion.type}`;
-    
+
     return element;
   }
 
@@ -226,7 +230,7 @@ export class SearchSuggestions {
    */
   private createSuggestionIcon(type: SearchSuggestion['type']): HTMLElement {
     const icon = document.createElement('div');
-    
+
     Object.assign(icon.style, {
       width: '20px',
       height: '20px',
@@ -235,12 +239,12 @@ export class SearchSuggestions {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      opacity: '0.6'
+      opacity: '0.6',
     });
 
     // Различные иконки для разных типов
     let iconSvg = '';
-    
+
     switch (type) {
       case 'history':
         iconSvg = `
@@ -290,7 +294,7 @@ export class SearchSuggestions {
 
     icon.innerHTML = iconSvg;
     icon.className = 'suggestion-icon';
-    
+
     return icon;
   }
 
@@ -299,12 +303,12 @@ export class SearchSuggestions {
    */
   private createSuggestionContent(suggestion: SearchSuggestion): HTMLElement {
     const content = document.createElement('div');
-    
+
     Object.assign(content.style, {
       display: 'flex',
       flexDirection: 'column',
       flex: '1',
-      minWidth: '0'
+      minWidth: '0',
     });
 
     // Основной текст
@@ -315,7 +319,7 @@ export class SearchSuggestions {
       fontWeight: '400',
       whiteSpace: 'nowrap',
       overflow: 'hidden',
-      textOverflow: 'ellipsis'
+      textOverflow: 'ellipsis',
     });
     mainText.textContent = suggestion.text;
     content.appendChild(mainText);
@@ -329,14 +333,14 @@ export class SearchSuggestions {
         marginTop: '2px',
         whiteSpace: 'nowrap',
         overflow: 'hidden',
-        textOverflow: 'ellipsis'
+        textOverflow: 'ellipsis',
       });
       subtitle.textContent = suggestion.subtitle;
       content.appendChild(subtitle);
     }
 
     content.className = 'suggestion-content';
-    
+
     return content;
   }
 
@@ -344,8 +348,8 @@ export class SearchSuggestions {
    * Настройка обработчиков событий для подсказки
    */
   private setupSuggestionEventListeners(
-    element: HTMLElement, 
-    suggestion: SearchSuggestion, 
+    element: HTMLElement,
+    suggestion: SearchSuggestion,
     index: number
   ): void {
     // Hover эффект
@@ -362,7 +366,7 @@ export class SearchSuggestions {
     element.addEventListener('click', () => {
       // Добавляем эффект нажатия
       element.style.backgroundColor = '#E0E0E0';
-      
+
       setTimeout(() => {
         element.style.backgroundColor = '#F5F5F5';
       }, 100);
@@ -389,7 +393,7 @@ export class SearchSuggestions {
     if (!this.suggestionsContainer) return;
 
     const emptyState = document.createElement('div');
-    
+
     Object.assign(emptyState.style, {
       display: 'flex',
       flexDirection: 'column',
@@ -397,7 +401,7 @@ export class SearchSuggestions {
       justifyContent: 'center',
       padding: '40px 16px',
       textAlign: 'center',
-      color: '#666666'
+      color: '#666666',
     });
 
     emptyState.innerHTML = `
@@ -474,7 +478,7 @@ export class SearchSuggestions {
    * Обновление пропсов
    */
   public updateProps(newProps: Partial<SearchSuggestionsProps>): void {
-    const shouldRerender = 
+    const shouldRerender =
       newProps.suggestions !== undefined ||
       newProps.showGroupHeaders !== this.props.showGroupHeaders ||
       newProps.maxSuggestions !== this.props.maxSuggestions;
@@ -502,10 +506,7 @@ export class SearchSuggestionsFactory {
   /**
    * Создание компонента подсказок
    */
-  static create(
-    containerElement: HTMLElement,
-    props: SearchSuggestionsProps
-  ): SearchSuggestions {
+  static create(containerElement: HTMLElement, props: SearchSuggestionsProps): SearchSuggestions {
     return new SearchSuggestions(containerElement, props);
   }
 
@@ -519,7 +520,7 @@ export class SearchSuggestionsFactory {
     return new SearchSuggestions(containerElement, {
       suggestions,
       showGroupHeaders: true,
-      maxSuggestions: 10
+      maxSuggestions: 10,
     });
   }
 
@@ -533,7 +534,7 @@ export class SearchSuggestionsFactory {
     return new SearchSuggestions(containerElement, {
       suggestions,
       showGroupHeaders: false,
-      maxSuggestions: 8
+      maxSuggestions: 8,
     });
   }
-} 
+}

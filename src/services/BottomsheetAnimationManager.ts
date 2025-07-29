@@ -21,8 +21,7 @@ export class BottomsheetAnimationManager {
       const progress = Math.min(elapsed / duration, 1);
 
       const easeProgress = this.cubicBezierEasing(progress, 0.4, 0.0, 0.2, 1);
-      const currentHeight =
-        startHeight + (targetHeight - startHeight) * easeProgress;
+      const currentHeight = startHeight + (targetHeight - startHeight) * easeProgress;
 
       onUpdate(currentHeight);
 
@@ -39,13 +38,7 @@ export class BottomsheetAnimationManager {
   /**
    * Simplified cubic-bezier easing function
    */
-  cubicBezierEasing(
-    t: number,
-    _x1: number,
-    _y1: number,
-    _x2: number,
-    _y2: number
-  ): number {
+  cubicBezierEasing(t: number, _x1: number, _y1: number, _x2: number, _y2: number): number {
     // Simple ease-in-out approximation
     return t * t * (3 - 2 * t);
   }

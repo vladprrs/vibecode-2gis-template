@@ -1,11 +1,11 @@
-import { 
+import {
   SearchFlowManager as ISearchFlowManager,
-  ScreenType, 
-  SearchContext, 
-  SearchFilters,
-  Organization,
   NavigationEvents,
-  SearchSuggestion 
+  Organization,
+  ScreenType,
+  SearchContext,
+  SearchFilters,
+  SearchSuggestion,
 } from '../types';
 
 /**
@@ -16,9 +16,10 @@ export class SearchFlowManager implements ISearchFlowManager {
   public currentScreen: ScreenType;
   public searchContext: SearchContext;
   public navigationHistory: ScreenType[];
-  
+
   private events: Partial<NavigationEvents>;
   private screenChangeCallbacks: Array<(screen: ScreenType) => void> = [];
+  private scrollPositions: Map<ScreenType, number> = new Map();
 
   constructor(
     initialScreen: ScreenType = ScreenType.DASHBOARD,
@@ -27,7 +28,7 @@ export class SearchFlowManager implements ISearchFlowManager {
     this.currentScreen = initialScreen;
     this.events = events;
     this.navigationHistory = [initialScreen];
-    
+
     // Инициализация пустого поискового контекста
     this.searchContext = this.createEmptySearchContext();
   }
@@ -37,7 +38,7 @@ export class SearchFlowManager implements ISearchFlowManager {
    */
   goToSuggest(): void {
     this.navigateToScreen(ScreenType.SUGGEST);
-    
+
     // Загружаем подсказки при переходе
     this.loadSuggestions();
   }
@@ -51,16 +52,16 @@ export class SearchFlowManager implements ISearchFlowManager {
     if (filters) {
       this.updateFilters(filters);
     }
-    
+
     // Добавляем в историю поиска
     this.addToHistory(query);
-    
+
     // Переходим к экрану результатов
     this.navigateToScreen(ScreenType.SEARCH_RESULT);
-    
+
     // Инициируем поиск
     this.performSearch(query, this.searchContext.filters);
-    
+
     // Аналитика
     this.events.onSearchInitiated?.(query, 'search_bar');
   }
@@ -69,14 +70,17 @@ export class SearchFlowManager implements ISearchFlowManager {
    * Переход к карточке организации
    */
   goToOrganization(organization: Organization): void {
+    // Сохраняем позицию скролла текущего экрана
+    this.saveCurrentScrollPosition();
+
     // Сохраняем выбранную организацию в контекст
     this.searchContext = {
       ...this.searchContext,
-      selectedOrganization: organization
+      selectedOrganization: organization,
     };
-    
+
     this.navigateToScreen(ScreenType.ORGANIZATION);
-    
+
     // Аналитика
     const position = this.searchContext.results.findIndex(org => org.id === organization.id);
     this.events.onOrganizationSelected?.(organization, position);
@@ -89,12 +93,17 @@ export class SearchFlowManager implements ISearchFlowManager {
     if (this.navigationHistory.length > 1) {
       // Убираем текущий экран из истории
       this.navigationHistory.pop();
-      
+
       // Получаем предыдущий экран
       const previousScreen = this.navigationHistory[this.navigationHistory.length - 1];
-      
+
       // Переходим без добавления в историю
       this.setCurrentScreen(previousScreen);
+
+      // Восстанавливаем позицию скролла после короткой задержки
+      setTimeout(() => {
+        this.restoreScrollPosition(previousScreen);
+      }, 100);
     }
   }
 
@@ -104,7 +113,7 @@ export class SearchFlowManager implements ISearchFlowManager {
   goToDashboard(): void {
     // Очищаем поисковый контекст при возврате к дашборду
     this.searchContext = this.createEmptySearchContext();
-    
+
     this.navigateToScreen(ScreenType.DASHBOARD);
   }
 
@@ -114,7 +123,7 @@ export class SearchFlowManager implements ISearchFlowManager {
   updateQuery(query: string): void {
     this.searchContext = {
       ...this.searchContext,
-      query: query.trim()
+      query: query.trim(),
     };
   }
 
@@ -124,9 +133,9 @@ export class SearchFlowManager implements ISearchFlowManager {
   updateFilters(filters: Partial<SearchFilters>): void {
     this.searchContext = {
       ...this.searchContext,
-      filters: { ...this.searchContext.filters, ...filters }
+      filters: { ...this.searchContext.filters, ...filters },
     };
-    
+
     // Аналитика
     this.events.onFilterApplied?.(this.searchContext.filters);
   }
@@ -137,16 +146,16 @@ export class SearchFlowManager implements ISearchFlowManager {
   addToHistory(query: string): void {
     const trimmedQuery = query.trim();
     if (!trimmedQuery) return;
-    
+
     // Убираем дубликаты и добавляем в начало
     const updatedHistory = [
       trimmedQuery,
-      ...this.searchContext.searchHistory.filter(item => item !== trimmedQuery)
+      ...this.searchContext.searchHistory.filter(item => item !== trimmedQuery),
     ].slice(0, 10); // Оставляем только последние 10 запросов
-    
+
     this.searchContext = {
       ...this.searchContext,
-      searchHistory: updatedHistory
+      searchHistory: updatedHistory,
     };
   }
 
@@ -156,7 +165,7 @@ export class SearchFlowManager implements ISearchFlowManager {
   clearHistory(): void {
     this.searchContext = {
       ...this.searchContext,
-      searchHistory: []
+      searchHistory: [],
     };
   }
 
@@ -166,7 +175,7 @@ export class SearchFlowManager implements ISearchFlowManager {
   selectSuggestion(suggestion: SearchSuggestion, position: number): void {
     // Аналитика
     this.events.onSuggestionSelected?.(suggestion, position);
-    
+
     switch (suggestion.type) {
       case 'organization':
         // Если подсказка - организация, переходим сразу к карточке
@@ -178,7 +187,7 @@ export class SearchFlowManager implements ISearchFlowManager {
           }
         }
         break;
-      
+
       case 'history':
       case 'popular':
       case 'address':
@@ -194,7 +203,7 @@ export class SearchFlowManager implements ISearchFlowManager {
    */
   onScreenChange(callback: (screen: ScreenType) => void): () => void {
     this.screenChangeCallbacks.push(callback);
-    
+
     // Возвращаем функцию отписки
     return () => {
       const index = this.screenChangeCallbacks.indexOf(callback);
@@ -223,14 +232,14 @@ export class SearchFlowManager implements ISearchFlowManager {
    */
   private navigateToScreen(screen: ScreenType): void {
     const fromScreen = this.currentScreen;
-    
+
     // Добавляем в историю только если это новый экран
     if (screen !== this.currentScreen) {
       this.navigationHistory.push(screen);
     }
-    
+
     this.setCurrentScreen(screen);
-    
+
     // Аналитика
     this.events.onScreenChange?.(fromScreen, screen, this.searchContext);
   }
@@ -240,7 +249,7 @@ export class SearchFlowManager implements ISearchFlowManager {
    */
   private setCurrentScreen(screen: ScreenType): void {
     this.currentScreen = screen;
-    
+
     // Уведомляем подписчиков
     this.screenChangeCallbacks.forEach(callback => callback(screen));
   }
@@ -257,7 +266,7 @@ export class SearchFlowManager implements ISearchFlowManager {
       selectedOrganization: undefined,
       searchHistory: [],
       isLoading: false,
-      error: undefined
+      error: undefined,
     };
   }
 
@@ -267,20 +276,20 @@ export class SearchFlowManager implements ISearchFlowManager {
   private async loadSuggestions(): Promise<void> {
     try {
       this.searchContext = { ...this.searchContext, isLoading: true, error: undefined };
-      
+
       // В реальной реализации здесь будет API вызов
       const suggestions = await this.fetchSuggestions(this.searchContext.query);
-      
+
       this.searchContext = {
         ...this.searchContext,
         suggestions,
-        isLoading: false
+        isLoading: false,
       };
     } catch (error) {
       this.searchContext = {
         ...this.searchContext,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Ошибка загрузки подсказок'
+        error: error instanceof Error ? error.message : 'Ошибка загрузки подсказок',
       };
     }
   }
@@ -291,20 +300,20 @@ export class SearchFlowManager implements ISearchFlowManager {
   private async performSearch(query: string, filters: SearchFilters): Promise<void> {
     try {
       this.searchContext = { ...this.searchContext, isLoading: true, error: undefined };
-      
+
       // В реальной реализации здесь будет API вызов
       const results = await this.fetchSearchResults(query, filters);
-      
+
       this.searchContext = {
         ...this.searchContext,
         results,
-        isLoading: false
+        isLoading: false,
       };
     } catch (error) {
       this.searchContext = {
         ...this.searchContext,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Ошибка поиска'
+        error: error instanceof Error ? error.message : 'Ошибка поиска',
       };
     }
   }
@@ -323,31 +332,31 @@ export class SearchFlowManager implements ISearchFlowManager {
   private async fetchSuggestions(query: string): Promise<SearchSuggestion[]> {
     // Симуляция API вызова
     await new Promise(resolve => setTimeout(resolve, 300));
-    
+
     return [
       {
         id: '1',
         text: 'кафе',
         type: 'popular',
-        subtitle: 'Популярный запрос'
+        subtitle: 'Популярный запрос',
       },
       {
-        id: '2', 
+        id: '2',
         text: 'ресторан',
         type: 'popular',
-        subtitle: 'Популярный запрос'
-      }
+        subtitle: 'Популярный запрос',
+      },
     ];
   }
 
   /**
    * Моковый метод для поиска
-   * В реальной реализации будет заменен на API вызов  
+   * В реальной реализации будет заменен на API вызов
    */
   private async fetchSearchResults(query: string, filters: SearchFilters): Promise<Organization[]> {
     // Симуляция API вызова
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     return [
       {
         id: '1',
@@ -359,8 +368,45 @@ export class SearchFlowManager implements ISearchFlowManager {
         reviewsCount: 120,
         category: 'Кафе',
         description: 'Описание организации',
-        phone: '+7 (495) 123-45-67'
-      }
+        phone: '+7 (495) 123-45-67',
+      },
     ];
   }
-} 
+
+  /**
+   * Сохранение текущей позиции скролла
+   */
+  private saveCurrentScrollPosition(): void {
+    const scrollableElement = document.querySelector('.bottomsheet-content');
+    if (scrollableElement) {
+      this.scrollPositions.set(this.currentScreen, scrollableElement.scrollTop);
+    }
+  }
+
+  /**
+   * Восстановление позиции скролла для указанного экрана
+   */
+  private restoreScrollPosition(screen: ScreenType): void {
+    const savedPosition = this.scrollPositions.get(screen);
+    if (savedPosition !== undefined) {
+      const scrollableElement = document.querySelector('.bottomsheet-content');
+      if (scrollableElement) {
+        scrollableElement.scrollTop = savedPosition;
+      }
+    }
+  }
+
+  /**
+   * Получение сохраненной позиции скролла для экрана
+   */
+  getSavedScrollPosition(screen: ScreenType): number | undefined {
+    return this.scrollPositions.get(screen);
+  }
+
+  /**
+   * Очистка сохраненных позиций скролла
+   */
+  clearScrollPositions(): void {
+    this.scrollPositions.clear();
+  }
+}

@@ -1,23 +1,24 @@
-import { ScreenType, BottomsheetState, SearchContext } from '../../types';
+import { BottomsheetState, ScreenType, SearchContext } from '../../types';
 
 import {
-  SearchFlowManager,
-  BottomsheetManager,
-  MapSyncService,
-  MapManager,
-  FilterBarManager,
-  BottomsheetGestureManager,
   BottomsheetAnimationManager,
-  ContentManager
+  BottomsheetGestureManager,
+  BottomsheetManager,
+  ContentManager,
+  FilterBarManager,
+  MapManager,
+  MapSyncService,
+  SearchFlowManager,
 } from '../../services';
 
-import { 
-  BottomsheetContainer, 
-  BottomsheetHeader, 
+import {
+  BottomsheetContainer,
+  BottomsheetContainerProps,
   BottomsheetContent,
-  BottomsheetContainerProps 
+  BottomsheetHeader,
 } from '../Bottomsheet';
 import { SearchBar, SearchBarState } from '../Search';
+import { OrganizationScreen } from './OrganizationScreen';
 import { ButtonRow, ButtonRowItem, StoriesCarousel } from '../Dashboard';
 
 /**
@@ -95,14 +96,14 @@ export class DashboardScreen {
   private props: DashboardScreenProps;
   private element: HTMLElement;
   private mapManager: MapManager;
-  
+
   // Компоненты
   private bottomsheetContainer?: BottomsheetContainer;
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
   private filterBarManager: FilterBarManager;
-  
+
   // Оригинальные параметры bottomsheet
   private bottomsheetElement?: HTMLElement;
   private currentState: string = 'default';
@@ -116,7 +117,8 @@ export class DashboardScreen {
   // Content management
   private currentScreen: ScreenType = ScreenType.DASHBOARD;
   private contentManager: ContentManager;
-  
+  private organizationScreen?: OrganizationScreen;
+
   // Filter bar management
   private fixedFilterBar?: HTMLElement;
 
@@ -200,7 +202,7 @@ export class DashboardScreen {
         setHeight: (h: number) => this.setBottomsheetHeight(h),
         onStateChange: (s: string) => {
           this.currentState = s;
-        }
+        },
       });
       this.gestureManager.setupBottomsheetEventListeners();
     }
@@ -227,14 +229,14 @@ export class DashboardScreen {
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
       z-index: 1000;
     `;
-    
+
     // Инициализируем текущую высоту
     const screenHeight = window.innerHeight;
     this.currentHeight = screenHeight * 0.55; // default состояние
-    
+
     this.updateBottomsheetHeight();
     this.createFigmaHeader();
-    
+
     // Create content container
     const content = document.createElement('div');
     content.className = 'dashboard-content';
@@ -244,10 +246,10 @@ export class DashboardScreen {
       overflow-y: auto;
       padding-top: 16px;
     `;
-    
+
     // Add the new dashboard content
     this.createDashboardContent(content);
-    
+
     this.bottomsheetElement.appendChild(content);
     this.element.appendChild(this.bottomsheetElement);
   }
@@ -262,7 +264,7 @@ export class DashboardScreen {
   private createDashboardContent(container: HTMLElement): void {
     // 1. Quick action buttons (horizontal row) - stays in white area
     this.createQuickActionButtons(container);
-    
+
     // 2. Create grey section container for everything from Stories downward
     const greySectionContainer = document.createElement('div');
     greySectionContainer.className = 'dashboard-grey-section';
@@ -276,16 +278,16 @@ export class DashboardScreen {
       position: relative;
       width: 100%;
     `;
-    
-    // 3. Stories carousel 
+
+    // 3. Stories carousel
     this.createStoriesCarousel(greySectionContainer);
-    
+
     // 4. "Советы к месту" heading
     this.createSectionHeading(greySectionContainer, 'Советы к месту');
-    
+
     // 5. Content masonry grid (AdviceGrid component) and promo banner
     this.createContentMasonryGrid(greySectionContainer);
-    
+
     // Add the grey section to the main container
     container.appendChild(greySectionContainer);
   }
@@ -308,20 +310,20 @@ export class DashboardScreen {
         id: 'bookmark',
         text: 'В путь',
         iconSrc: '/assets/images/bookmark.svg',
-        type: 'icon'
+        type: 'icon',
       },
       {
         id: 'home',
         text: 'Домой',
         iconSrc: '/assets/images/home.svg',
-        type: 'icon'
+        type: 'icon',
       },
       {
         id: 'work',
         text: 'На работу',
         iconSrc: '/assets/images/work.svg',
-        type: 'icon'
-      }
+        type: 'icon',
+      },
     ];
 
     // Create ButtonRow component
@@ -331,7 +333,7 @@ export class DashboardScreen {
       onButtonClick: (buttonId: string) => {
         console.log('Button clicked:', buttonId);
         // Handle button clicks here
-      }
+      },
     });
 
     container.appendChild(buttonRowContainer);
@@ -343,14 +345,14 @@ export class DashboardScreen {
   private createStoriesCarousel(container: HTMLElement): void {
     const storiesContainer = document.createElement('div');
     storiesContainer.className = 'stories-section';
-    
+
     // Create StoriesCarousel component
     new StoriesCarousel({
       container: storiesContainer,
       onStoryClick: (storyId: string) => {
         console.log('Story clicked:', storyId);
         this.props.onStoryClick?.(storyId);
-      }
+      },
     });
 
     container.appendChild(storiesContainer);
@@ -389,37 +391,39 @@ export class DashboardScreen {
   }
 
   /**
-   * Создание масонри сетки контента  
+   * Создание масонри сетки контента
    */
   private createContentMasonryGrid(container: HTMLElement): void {
     // Use the new AdviceGrid component directly
-    import('./../Dashboard/AdviceGrid').then(({ AdviceGrid }) => {
-      new AdviceGrid({
-        container,
-        onItemClick: (itemId: string) => {
-          console.log('Advice item clicked:', itemId);
-          this.props.onMetaItemClick?.(itemId);
-        }
-      });
-      
-      // Create promo banner after advice grid is loaded
-      this.createPromoBanner(container);
-    }).catch(error => {
-      console.error('Failed to load AdviceGrid component:', error);
-      // Create a simple placeholder if component fails to load
-      const placeholder = document.createElement('div');
-      placeholder.style.cssText = `
+    import('./../Dashboard/AdviceGrid')
+      .then(({ AdviceGrid }) => {
+        new AdviceGrid({
+          container,
+          onItemClick: (itemId: string) => {
+            console.log('Advice item clicked:', itemId);
+            this.props.onMetaItemClick?.(itemId);
+          },
+        });
+
+        // Create promo banner after advice grid is loaded
+        this.createPromoBanner(container);
+      })
+      .catch(error => {
+        console.error('Failed to load AdviceGrid component:', error);
+        // Create a simple placeholder if component fails to load
+        const placeholder = document.createElement('div');
+        placeholder.style.cssText = `
         padding: 20px;
         text-align: center;
         color: #666;
         font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
       `;
-      placeholder.textContent = 'Советы к месту - компонент загружается...';
-      container.appendChild(placeholder);
-      
-      // Create promo banner after placeholder
-      this.createPromoBanner(container);
-    });
+        placeholder.textContent = 'Советы к месту - компонент загружается...';
+        container.appendChild(placeholder);
+
+        // Create promo banner after placeholder
+        this.createPromoBanner(container);
+      });
   }
 
   // createCategoriesGrid method removed - not part of the Figma design
@@ -539,7 +543,8 @@ export class DashboardScreen {
       line-height: 18px;
       letter-spacing: -0.28px;
     `;
-    subtitleText.textContent = 'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
+    subtitleText.textContent =
+      'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
 
     // CTA button
     const ctaButton = document.createElement('div');
@@ -561,8 +566,6 @@ export class DashboardScreen {
       letter-spacing: -0.28px;
     `;
     ctaText.textContent = 'Получить подарок';
-
-
 
     // Footer
     const footer = document.createElement('div');
@@ -694,11 +697,16 @@ export class DashboardScreen {
    */
   private getHeightForState(state: string): number {
     switch (state) {
-      case 'small': return 0.2;
-      case 'default': return 0.55;
-      case 'fullscreen': return 0.9;
-      case 'fullscreen_scroll': return 0.95;
-      default: return 0.55;
+      case 'small':
+        return 0.2;
+      case 'default':
+        return 0.55;
+      case 'fullscreen':
+        return 0.9;
+      case 'fullscreen_scroll':
+        return 0.95;
+      default:
+        return 0.55;
     }
   }
 
@@ -711,8 +719,8 @@ export class DashboardScreen {
       icon: {
         type: 'circle',
         size: 8,
-        color: '#FF0000'
-      }
+        color: '#FF0000',
+      },
     });
 
     // Убираем маркер через 3 секунды
@@ -720,8 +728,6 @@ export class DashboardScreen {
       marker.destroy();
     }, 3000);
   }
-
-
 
   /**
    * Публичные методы для управления экраном
@@ -736,28 +742,22 @@ export class DashboardScreen {
 
   public snapToState(state: BottomsheetState): void {
     this.currentState = state.toString();
-    
+
     const screenHeight = window.innerHeight;
     const heights = {
-      'small': screenHeight * 0.2,
-      'default': screenHeight * 0.55,
-      'fullscreen': screenHeight * 0.9,
-      'fullscreen_scroll': screenHeight * 0.95
+      small: screenHeight * 0.2,
+      default: screenHeight * 0.55,
+      fullscreen: screenHeight * 0.9,
+      fullscreen_scroll: screenHeight * 0.95,
     };
-    
+
     const targetHeight = heights[this.currentState as keyof typeof heights];
-    if (
-      targetHeight &&
-      this.currentHeight !== undefined &&
-      this.animationManager
-    ) {
-      this.animationManager.animateToHeight(
-        this.currentHeight,
-        targetHeight,
-        (h) => this.setBottomsheetHeight(h)
+    if (targetHeight && this.currentHeight !== undefined && this.animationManager) {
+      this.animationManager.animateToHeight(this.currentHeight, targetHeight, h =>
+        this.setBottomsheetHeight(h)
       );
     }
-    
+
     // Also update the original bottomsheet container if it exists
     this.bottomsheetContainer?.snapToState(state);
   }
@@ -771,16 +771,18 @@ export class DashboardScreen {
   public testRandomMarkers(): void {
     const map = this.mapManager.getMapInstance();
     if (!map) return;
-    
+
     const moscowBounds = {
-      minLng: 37.3, maxLng: 37.9,
-      minLat: 55.5, maxLat: 55.9
+      minLng: 37.3,
+      maxLng: 37.9,
+      minLat: 55.5,
+      maxLat: 55.9,
     };
 
     for (let i = 0; i < 5; i++) {
       const lng = moscowBounds.minLng + Math.random() * (moscowBounds.maxLng - moscowBounds.minLng);
       const lat = moscowBounds.minLat + Math.random() * (moscowBounds.maxLat - moscowBounds.minLat);
-      
+
       setTimeout(() => {
         this.addTemporaryMarker([lng, lat]);
       }, i * 500);
@@ -794,6 +796,12 @@ export class DashboardScreen {
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
     this.filterBarManager.hide();
+    
+    // Clean up organization screen if it exists
+    if (this.organizationScreen) {
+      this.organizationScreen.destroy();
+      this.organizationScreen = undefined;
+    }
   }
 
   /**
@@ -801,41 +809,43 @@ export class DashboardScreen {
    */
   private updateBottomsheetHeight(): void {
     if (!this.bottomsheetElement) return;
-    
+
     const screenHeight = window.innerHeight;
     const heights = {
-      'small': screenHeight * 0.2,
-      'default': screenHeight * 0.55,
-      'fullscreen': screenHeight * 0.9,
-      'fullscreen-scroll': screenHeight * 0.95
+      small: screenHeight * 0.2,
+      default: screenHeight * 0.55,
+      fullscreen: screenHeight * 0.9,
+      'fullscreen-scroll': screenHeight * 0.95,
     };
-    
+
     const height = heights[this.currentState as keyof typeof heights];
     this.setBottomsheetHeight(height);
   }
 
   private setBottomsheetHeight(height: number): void {
     if (!this.bottomsheetElement) return;
-    
+
     const screenHeight = window.innerHeight;
     const minHeight = screenHeight * 0.15;
     const maxHeight = screenHeight * 0.95;
-    
+
     const clampedHeight = Math.max(minHeight, Math.min(maxHeight, height));
-    
+
     this.currentHeight = clampedHeight;
     this.bottomsheetElement.style.height = `${clampedHeight}px`;
-    
+
     this.updateScrollBehaviorByHeight(clampedHeight);
   }
 
   private updateScrollBehaviorByHeight(height: number): void {
     if (!this.bottomsheetElement) return;
-    
+
     const screenHeight = window.innerHeight;
     const scrollableThreshold = screenHeight * 0.92;
-    
-    const contentContainer = this.bottomsheetElement.querySelector('.dashboard-content') as HTMLElement;
+
+    const contentContainer = this.bottomsheetElement.querySelector(
+      '.dashboard-content'
+    ) as HTMLElement;
     if (contentContainer) {
       if (height > scrollableThreshold) {
         contentContainer.style.overflowY = 'auto';
@@ -847,20 +857,19 @@ export class DashboardScreen {
     }
   }
 
-
   private createFigmaHeader(): void {
     if (!this.bottomsheetElement) return;
 
     const header = document.createElement('div');
     header.className = 'bottomsheet-header';
-    
+
     // Dragger
     const dragger = document.createElement('div');
     dragger.className = 'dragger';
     const draggerHandle = document.createElement('div');
     draggerHandle.className = 'dragger-handle';
     dragger.appendChild(draggerHandle);
-    
+
     // Search bar
     const searchContainer = document.createElement('div');
     searchContainer.className = 'search-nav-bar';
@@ -879,7 +888,7 @@ export class DashboardScreen {
         </div>
       </div>
     `;
-    
+
     // Add click handler to search field
     const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
     if (searchField) {
@@ -888,7 +897,7 @@ export class DashboardScreen {
         this.handleSearchFieldClick();
       });
     }
-    
+
     header.appendChild(dragger);
     header.appendChild(searchContainer);
     this.bottomsheetElement.appendChild(header);
@@ -900,7 +909,7 @@ export class DashboardScreen {
   private handleSearchFieldClick(): void {
     // Navigate to SuggestScreen
     this.props.searchFlowManager.goToSuggest();
-    
+
     // Call onSearchFocus callback if provided
     this.props.onSearchFocus?.();
   }
@@ -910,12 +919,12 @@ export class DashboardScreen {
    */
   public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
     console.log(`📱 DashboardScreen handling navigation: ${from} → ${to}`);
-    
+
     // Hide filter bar when leaving search result screen
     if (from === ScreenType.SEARCH_RESULT && to !== ScreenType.SEARCH_RESULT) {
       this.filterBarManager.hide();
     }
-    
+
     switch (to) {
       case ScreenType.SUGGEST:
         this.showSuggestContent();
@@ -927,10 +936,10 @@ export class DashboardScreen {
         this.showSearchResultContent(context);
         break;
       case ScreenType.ORGANIZATION:
-        // Handle organization screen
+        this.showOrganizationContent(context);
         break;
     }
-    
+
     this.currentScreen = to;
   }
 
@@ -939,16 +948,18 @@ export class DashboardScreen {
    */
   private showSuggestContent(): void {
     if (!this.bottomsheetElement) return;
-    
+
     // First snap to fullscreen using both managers
     this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
     this.snapToState(BottomsheetState.FULLSCREEN);
-    
+
     // Update header to suggest state
     this.updateHeaderForSuggest();
-    
+
     // Update content to suggest content
-    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+    const contentContainer = this.bottomsheetElement?.querySelector(
+      '.dashboard-content'
+    ) as HTMLElement;
     if (contentContainer) {
       this.contentManager.updateContentForSuggest(contentContainer);
     }
@@ -959,15 +970,17 @@ export class DashboardScreen {
    */
   private showDashboardContent(): void {
     if (!this.bottomsheetElement) return;
-    
+
     // Snap to default height
     this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
-    
+
     // Update header to dashboard state
     this.updateHeaderForDashboard();
-    
+
     // Update content to dashboard content
-    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+    const contentContainer = this.bottomsheetElement?.querySelector(
+      '.dashboard-content'
+    ) as HTMLElement;
     if (contentContainer) {
       this.contentManager.updateContentForDashboard(contentContainer);
     }
@@ -978,20 +991,74 @@ export class DashboardScreen {
    */
   private showSearchResultContent(context: SearchContext): void {
     if (!this.bottomsheetElement) return;
-    
+
     // Snap to fullscreen
     this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
     this.snapToState(BottomsheetState.FULLSCREEN);
-    
+
     // Update header to search result state
     this.updateHeaderForSearchResult(context);
-    
+
     // Update content to search result content
-    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+    const contentContainer = this.bottomsheetElement?.querySelector(
+      '.dashboard-content'
+    ) as HTMLElement;
     if (contentContainer) {
       this.contentManager.updateContentForSearchResult(contentContainer, context);
-      this.filterBarManager.show(); 
+      this.filterBarManager.show();
     }
+  }
+
+  /**
+   * Show organization content in the bottomsheet
+   */
+  private showOrganizationContent(context: SearchContext): void {
+    if (!this.bottomsheetElement || !context.selectedOrganization) return;
+
+    // Clean up any existing organization screen
+    if (this.organizationScreen) {
+      this.organizationScreen.destroy();
+      this.organizationScreen = undefined;
+    }
+
+    // Create a container for the organization screen
+    const orgContainer = document.createElement('div');
+    orgContainer.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #ffffff;
+      z-index: 100;
+    `;
+
+    // Add the container to the bottomsheet element
+    this.bottomsheetElement.appendChild(orgContainer);
+
+    // Create the organization screen
+    this.organizationScreen = new OrganizationScreen({
+      container: orgContainer,
+      searchFlowManager: this.props.searchFlowManager,
+      bottomsheetManager: this.props.bottomsheetManager,
+      mapSyncService: this.props.mapSyncService,
+      organization: context.selectedOrganization,
+      previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(ScreenType.SEARCH_RESULT),
+      onBack: () => {
+        // Clean up organization screen when going back
+        if (this.organizationScreen) {
+          this.organizationScreen.destroy();
+          this.organizationScreen = undefined;
+        }
+        // Remove the organization container
+        if (orgContainer && orgContainer.parentNode) {
+          orgContainer.parentNode.removeChild(orgContainer);
+        }
+      }
+    });
+
+    // Activate the organization screen
+    this.organizationScreen.activate();
   }
 
   /**
@@ -1000,11 +1067,11 @@ export class DashboardScreen {
   private updateHeaderForSuggest(): void {
     const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
     if (!header) return;
-    
+
     // Clear existing header and apply exact Figma CSS structure
     header.innerHTML = '';
     header.className = 'inline-element-1';
-    
+
     // Apply header styles from Figma CSS - exact match
     header.style.cssText = `
       display: flex;
@@ -1017,7 +1084,7 @@ export class DashboardScreen {
       backdrop-filter: blur(20px);
       position: relative;
     `;
-    
+
     // Drag handle section (inline-element-2)
     const dragSection = document.createElement('div');
     dragSection.className = 'inline-element-2';
@@ -1031,7 +1098,7 @@ export class DashboardScreen {
       align-self: stretch;
       position: relative;
     `;
-    
+
     // Drag handle (inline-element-3)
     const dragHandle = document.createElement('div');
     dragHandle.className = 'inline-element-3';
@@ -1044,7 +1111,7 @@ export class DashboardScreen {
       position: relative;
     `;
     dragSection.appendChild(dragHandle);
-    
+
     // Nav bar (inline-element-4)
     const navBar = document.createElement('div');
     navBar.className = 'inline-element-4';
@@ -1054,7 +1121,7 @@ export class DashboardScreen {
       align-self: stretch;
       position: relative;
     `;
-    
+
     // Nav bar inner (inline-element-5)
     const navBarInner = document.createElement('div');
     navBarInner.className = 'inline-element-5';
@@ -1066,7 +1133,7 @@ export class DashboardScreen {
       flex: 1 0 0;
       position: relative;
     `;
-    
+
     // Header (text field container - inline-element-6)
     const headerContainer = document.createElement('div');
     headerContainer.className = 'inline-element-6';
@@ -1077,7 +1144,7 @@ export class DashboardScreen {
       flex: 1 0 0;
       position: relative;
     `;
-    
+
     // Text field (inline-element-7)
     const textField = document.createElement('div');
     textField.className = 'inline-element-7';
@@ -1092,7 +1159,7 @@ export class DashboardScreen {
       position: relative;
       gap: 4px;
     `;
-    
+
     // Search icon position (inline-element-8)
     const searchIconPosition = document.createElement('div');
     searchIconPosition.className = 'inline-element-8';
@@ -1105,8 +1172,8 @@ export class DashboardScreen {
       flex-shrink: 0;
       position: relative;
     `;
-    
-    // Search icon (inline-element-10)  
+
+    // Search icon (inline-element-10)
     const searchIcon = document.createElement('div');
     searchIcon.className = 'inline-element-10';
     searchIcon.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -1115,9 +1182,9 @@ export class DashboardScreen {
       height: 19px;
       flex-shrink: 0;
     `;
-    
+
     searchIconPosition.appendChild(searchIcon);
-    
+
     // Cursor line (inline-element-11)
     const cursorLine = document.createElement('div');
     cursorLine.className = 'inline-element-11';
@@ -1128,8 +1195,8 @@ export class DashboardScreen {
       background: #1BA136;
       flex-shrink: 0;
     `;
-    
-    // Create input element for functionality  
+
+    // Create input element for functionality
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.value = 'ме';
@@ -1152,7 +1219,7 @@ export class DashboardScreen {
       text-overflow: ellipsis;
       white-space: nowrap;
     `;
-    
+
     // Clear icon container (fixed width to prevent overflow)
     const clearIconContainer = document.createElement('div');
     clearIconContainer.className = 'inline-element-15';
@@ -1165,7 +1232,7 @@ export class DashboardScreen {
       flex-shrink: 0;
       cursor: pointer;
     `;
-    
+
     // Clear icon color (inline-element-16)
     const clearIconColor = document.createElement('div');
     clearIconColor.className = 'inline-element-16';
@@ -1175,18 +1242,18 @@ export class DashboardScreen {
       height: 20px;
       flex-shrink: 0;
     `;
-    
+
     clearIconContainer.appendChild(clearIconColor);
-    
+
     // Assemble text field in proper order
     textField.appendChild(searchIconPosition);
     textField.appendChild(cursorLine);
     textField.appendChild(searchInput);
     textField.appendChild(clearIconContainer);
-    
+
     headerContainer.appendChild(textField);
     navBarInner.appendChild(headerContainer);
-    
+
     // Action right - close button (inline-element-17)
     const actionRight = document.createElement('div');
     actionRight.className = 'inline-element-17';
@@ -1197,7 +1264,7 @@ export class DashboardScreen {
       position: relative;
       cursor: pointer;
     `;
-    
+
     // Button (inline-element-18)
     const button = document.createElement('div');
     button.className = 'inline-element-18';
@@ -1210,7 +1277,7 @@ export class DashboardScreen {
       position: relative;
       border-radius: 8px;
     `;
-    
+
     // Icon position close (inline-element-19)
     const iconPositionClose = document.createElement('div');
     iconPositionClose.className = 'inline-element-19';
@@ -1222,7 +1289,7 @@ export class DashboardScreen {
       align-items: center;
       position: relative;
     `;
-    
+
     // Close icon container (inline-element-20)
     const closeIconContainer = document.createElement('div');
     closeIconContainer.className = 'inline-element-20';
@@ -1234,7 +1301,7 @@ export class DashboardScreen {
       left: 0px;
       top: 0px;
     `;
-    
+
     // Close icon color (inline-element-21)
     const closeIconColor = document.createElement('div');
     closeIconColor.className = 'inline-element-21';
@@ -1248,32 +1315,32 @@ export class DashboardScreen {
       left: 5px;
       top: 5px;
     `;
-    
+
     closeIconContainer.appendChild(closeIconColor);
     iconPositionClose.appendChild(closeIconContainer);
     button.appendChild(iconPositionClose);
     actionRight.appendChild(button);
     navBarInner.appendChild(actionRight);
-    
+
     navBar.appendChild(navBarInner);
-    
+
     // Assemble header
     header.appendChild(dragSection);
     header.appendChild(navBar);
-    
+
     // Event listeners
     actionRight.addEventListener('click', () => {
       this.props.searchFlowManager.goToDashboard();
     });
-    
-    clearIconContainer.addEventListener('click', (e) => {
+
+    clearIconContainer.addEventListener('click', e => {
       e.stopPropagation();
       searchInput.value = '';
       searchInput.focus();
     });
-    
+
     // Add Enter key handler
-    searchInput.addEventListener('keydown', (e) => {
+    searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const query = searchInput.value.trim();
@@ -1293,17 +1360,17 @@ export class DashboardScreen {
   private updateHeaderForDashboard(): void {
     const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
     if (!header) return;
-    
+
     // Clear existing header
     header.innerHTML = '';
-    
+
     // Create dashboard header with clickable search field
     const dragger = document.createElement('div');
     dragger.className = 'dragger';
     const draggerHandle = document.createElement('div');
     draggerHandle.className = 'dragger-handle';
     dragger.appendChild(draggerHandle);
-    
+
     const searchContainer = document.createElement('div');
     searchContainer.className = 'search-nav-bar';
     searchContainer.innerHTML = `
@@ -1321,7 +1388,7 @@ export class DashboardScreen {
         </div>
       </div>
     `;
-    
+
     // Add click handler to search field
     const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
     if (searchField) {
@@ -1330,7 +1397,7 @@ export class DashboardScreen {
         this.handleSearchFieldClick();
       });
     }
-    
+
     header.appendChild(dragger);
     header.appendChild(searchContainer);
   }
@@ -1562,7 +1629,7 @@ export class DashboardScreen {
       { text: '8', hasCounter: true },
       { text: 'Рядом', hasCounter: false },
       { text: 'Открыто', hasCounter: false },
-      { text: 'Доставка', hasCounter: false }
+      { text: 'Доставка', hasCounter: false },
     ];
 
     filters.forEach(filter => {
@@ -1642,7 +1709,7 @@ export class DashboardScreen {
       border: 0.5px solid rgba(137, 137, 137, 0.30);
       overflow: hidden;
     `;
-    
+
     // Image container
     const imageContainer = document.createElement('div');
     imageContainer.style.cssText = `
@@ -1651,7 +1718,7 @@ export class DashboardScreen {
               background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
       flex-shrink: 0;
     `;
-    
+
     // Content container
     const contentContainer = document.createElement('div');
     contentContainer.style.cssText = `
@@ -1663,7 +1730,7 @@ export class DashboardScreen {
       flex: 1 0 0;
       gap: 4px;
     `;
-    
+
     const title = document.createElement('h4');
     title.textContent = 'Суши Маке';
     title.style.cssText = `
@@ -1675,9 +1742,10 @@ export class DashboardScreen {
       letter-spacing: -0.24px;
       margin: 0;
     `;
-    
+
     const description = document.createElement('p');
-    description.textContent = 'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
+    description.textContent =
+      'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
     description.style.cssText = `
       color: #141414;
       font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
@@ -1687,7 +1755,7 @@ export class DashboardScreen {
       letter-spacing: -0.28px;
       margin: 0;
     `;
-    
+
     const ctaText = document.createElement('p');
     ctaText.textContent = 'Получить подарок';
     ctaText.style.cssText = `
@@ -1700,17 +1768,16 @@ export class DashboardScreen {
       margin: 0;
       cursor: pointer;
     `;
-    
+
     contentContainer.appendChild(title);
     contentContainer.appendChild(description);
     contentContainer.appendChild(ctaText);
-    
+
     banner.appendChild(imageContainer);
     banner.appendChild(contentContainer);
-    
+
     return banner;
   }
-
 }
 
 /**
@@ -1739,7 +1806,7 @@ export class DashboardScreenFactory {
       searchFlowManager,
       bottomsheetManager,
       filterBarManager,
-      mapManager
+      mapManager,
     });
   }
 }

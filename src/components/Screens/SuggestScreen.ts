@@ -1,10 +1,10 @@
-import { ScreenType, SearchSuggestion, BottomsheetState } from '../../types';
-import { SearchFlowManager, BottomsheetManager, MapSyncService } from '../../services';
-import { 
-  BottomsheetContainer, 
-  BottomsheetHeader, 
+import { BottomsheetState, ScreenType, SearchSuggestion } from '../../types';
+import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
+import {
+  BottomsheetContainer,
+  BottomsheetContainerProps,
   BottomsheetContent,
-  BottomsheetContainerProps 
+  BottomsheetHeader,
 } from '../Bottomsheet';
 import { SearchBar, SearchBarState, SearchSuggestions } from '../Search';
 
@@ -37,14 +37,14 @@ export interface SuggestScreenProps {
 export class SuggestScreen {
   private props: SuggestScreenProps;
   private element: HTMLElement;
-  
+
   // Компоненты
   private bottomsheetContainer?: BottomsheetContainer;
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
   private searchSuggestions?: SearchSuggestions;
-  
+
   // Контейнеры для компонентов
   private headerContainer?: HTMLElement;
   private contentContainer?: HTMLElement;
@@ -58,7 +58,7 @@ export class SuggestScreen {
     this.props = props;
     this.element = props.container;
     this.currentQuery = props.initialQuery || '';
-    
+
     this.initialize();
   }
 
@@ -82,7 +82,7 @@ export class SuggestScreen {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
     });
 
     if (this.props.className) {
@@ -99,7 +99,7 @@ export class SuggestScreen {
     // Создаем контейнер для шторки
     const bottomsheetElement = document.createElement('div');
     bottomsheetElement.style.height = '100%';
-    
+
     this.element.appendChild(bottomsheetElement);
 
     // Создаем шторку с состоянием FULLSCREEN для подсказок
@@ -108,20 +108,20 @@ export class SuggestScreen {
         state: this.props.bottomsheetManager.getCurrentState().currentState,
         snapPoints: [0.2, 0.5, 0.9, 0.95],
         isDraggable: true,
-        hasScrollableContent: true
+        hasScrollableContent: true,
       },
       events: {
-        onStateChange: (newState) => {
+        onStateChange: newState => {
           // Синхронизируем состояние с менеджером шторки
           this.props.bottomsheetManager.snapToState(newState);
-          
+
           // Синхронизируем с картой если есть сервис
           if (this.props.mapSyncService && this.bottomsheetContainer) {
             const currentStateData = this.bottomsheetContainer.getCurrentState();
             this.props.mapSyncService.adjustMapViewport(currentStateData.height);
           }
-        }
-      }
+        },
+      },
     };
 
     this.bottomsheetContainer = new BottomsheetContainer(bottomsheetElement, bottomsheetConfig);
@@ -135,7 +135,7 @@ export class SuggestScreen {
 
     // Создаем заголовок
     this.createHeader();
-    
+
     // Создаем контентную область
     this.createContentArea();
   }
@@ -145,21 +145,21 @@ export class SuggestScreen {
    */
   private createHeader(): void {
     this.headerContainer = document.createElement('div');
-    
+
     this.bottomsheetHeader = new BottomsheetHeader(this.headerContainer, {
       placeholder: 'Введите запрос...',
       showDragger: true,
       isSearchActive: true,
       searchQuery: this.currentQuery,
-      onSearchChange: (query) => {
+      onSearchChange: query => {
         this.handleQueryChange(query);
       },
-      onSearchSubmit: (query) => {
+      onSearchSubmit: query => {
         this.handleQuerySubmit(query);
       },
       onClearSearch: () => {
         this.handleClearSearch();
-      }
+      },
     });
 
     // Настраиваем кастомную поисковую строку
@@ -188,10 +188,10 @@ export class SuggestScreen {
       showClearButton: true,
       autoFocus: true,
       debounceMs: 300,
-      onChange: (query) => {
+      onChange: query => {
         this.handleQueryChange(query);
       },
-      onSubmit: (query) => {
+      onSubmit: query => {
         this.handleQuerySubmit(query);
       },
       onClear: () => {
@@ -202,7 +202,7 @@ export class SuggestScreen {
         if (!this.currentQuery.trim()) {
           this.handleBackToDashboard();
         }
-      }
+      },
     });
   }
 
@@ -211,7 +211,7 @@ export class SuggestScreen {
    */
   private createContentArea(): void {
     this.contentContainer = document.createElement('div');
-    
+
     this.bottomsheetContent = new BottomsheetContent(this.contentContainer, {
       scrollable: true,
       scrollType: 'vertical',
@@ -220,8 +220,8 @@ export class SuggestScreen {
         top: 0,
         right: 0,
         bottom: 16,
-        left: 0
-      }
+        left: 0,
+      },
     });
 
     // Создаем содержимое с подсказками
@@ -250,7 +250,7 @@ export class SuggestScreen {
         if (this.props.mapSyncService) {
           // Подсвечиваем соответствующий элемент на карте
         }
-      }
+      },
     });
 
     // Добавляем контейнер в контент
@@ -263,7 +263,7 @@ export class SuggestScreen {
   private loadSuggestions(): void {
     // Генерируем мок подсказки на основе текущего запроса
     this.suggestions = this.generateMockSuggestions(this.currentQuery);
-    
+
     // Обновляем компонент подсказок
     if (this.searchSuggestions) {
       this.searchSuggestions.updateSuggestions(this.suggestions);
@@ -283,13 +283,13 @@ export class SuggestScreen {
           id: 'history_1',
           text: 'Кафе на Невском',
           type: 'history',
-          subtitle: 'Недавний поиск'
+          subtitle: 'Недавний поиск',
         },
         {
-          id: 'history_2', 
+          id: 'history_2',
           text: 'Рестораны рядом',
           type: 'history',
-          subtitle: 'Вчера'
+          subtitle: 'Вчера',
         }
       );
     }
@@ -300,26 +300,26 @@ export class SuggestScreen {
         id: 'popular_1',
         text: 'Пиццерии',
         type: 'popular',
-        subtitle: 'Популярно сегодня'
+        subtitle: 'Популярно сегодня',
       },
       {
         id: 'popular_2',
         text: 'Салоны красоты',
         type: 'popular',
-        subtitle: 'Часто ищут'
+        subtitle: 'Часто ищут',
       }
     );
 
     // Подсказки по запросу
     if (query.trim()) {
       const lowerQuery = query.toLowerCase();
-      
+
       // Организации
       const organizations = [
         { name: 'Макдоналдс', category: 'Ресторан быстрого питания' },
         { name: 'Кофе Хауз', category: 'Кофейня' },
         { name: 'Пятерочка', category: 'Продуктовый магазин' },
-        { name: 'Аптека.ру', category: 'Аптека' }
+        { name: 'Аптека.ру', category: 'Аптека' },
       ];
 
       organizations
@@ -329,16 +329,12 @@ export class SuggestScreen {
             id: `org_${index}`,
             text: org.name,
             type: 'organization',
-            subtitle: org.category
+            subtitle: org.category,
           });
         });
 
       // Адреса
-      const addresses = [
-        'Невский проспект, 28',
-        'ул. Рубинштейна, 15/17',
-        'пр. Ленина, 45'
-      ];
+      const addresses = ['Невский проспект, 28', 'ул. Рубинштейна, 15/17', 'пр. Ленина, 45'];
 
       addresses
         .filter(addr => addr.toLowerCase().includes(lowerQuery))
@@ -347,18 +343,12 @@ export class SuggestScreen {
             id: `addr_${index}`,
             text: addr,
             type: 'address',
-            subtitle: 'Санкт-Петербург'
+            subtitle: 'Санкт-Петербург',
           });
         });
 
       // Категории
-      const categories = [
-        'Рестораны',
-        'Кафе',
-        'Магазины',
-        'Аптеки',
-        'Банки'
-      ];
+      const categories = ['Рестораны', 'Кафе', 'Магазины', 'Аптеки', 'Банки'];
 
       categories
         .filter(cat => cat.toLowerCase().includes(lowerQuery))
@@ -367,7 +357,7 @@ export class SuggestScreen {
             id: `cat_${index}`,
             text: cat,
             type: 'category',
-            subtitle: 'Категория'
+            subtitle: 'Категория',
           });
         });
     }
@@ -381,7 +371,7 @@ export class SuggestScreen {
   private setupEventListeners(): void {
     // Обработчик изменения размера экрана
     window.addEventListener('resize', this.handleResize.bind(this));
-    
+
     // Обработчик клавиш
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
@@ -392,17 +382,17 @@ export class SuggestScreen {
   private syncWithServices(): void {
     // Устанавливаем текущий экран в менеджере флоу
     this.props.searchFlowManager.currentScreen = ScreenType.SUGGEST;
-    
+
     // Обновляем запрос в контексте
     if (this.currentQuery) {
       this.props.searchFlowManager.updateQuery(this.currentQuery);
     }
-    
+
     // Синхронизируем карту с содержимым подсказок
     if (this.props.mapSyncService) {
       this.props.mapSyncService.syncPinsWithContent('suggestions', {
         query: this.currentQuery,
-        suggestions: this.suggestions
+        suggestions: this.suggestions,
       });
     }
   }
@@ -412,21 +402,21 @@ export class SuggestScreen {
    */
   private handleQueryChange(query: string): void {
     this.currentQuery = query;
-    
+
     // Обновляем подсказки
     this.loadSuggestions();
-    
+
     // Обновляем контекст поиска
     this.props.searchFlowManager.updateQuery(query);
-    
+
     // Синхронизируем с картой
     if (this.props.mapSyncService) {
       this.props.mapSyncService.syncPinsWithContent('suggestions', {
         query,
-        suggestions: this.suggestions
+        suggestions: this.suggestions,
       });
     }
-    
+
     // Уведомляем родительский компонент
     this.props.onQueryChange?.(query);
   }
@@ -436,10 +426,10 @@ export class SuggestScreen {
    */
   private handleQuerySubmit(query: string): void {
     if (!query.trim()) return;
-    
+
     // Переходим к результатам поиска
     this.props.searchFlowManager.goToSearchResults(query);
-    
+
     // Добавляем в историю
     this.addQueryToHistory(query);
   }
@@ -449,18 +439,18 @@ export class SuggestScreen {
    */
   private handleClearSearch(): void {
     this.currentQuery = '';
-    
+
     // Обновляем подсказки
     this.loadSuggestions();
-    
+
     // Очищаем контекст поиска
     this.props.searchFlowManager.updateQuery('');
-    
+
     // Синхронизируем с картой
     if (this.props.mapSyncService) {
       this.props.mapSyncService.syncPinsWithContent('suggestions', {
         query: '',
-        suggestions: this.suggestions
+        suggestions: this.suggestions,
       });
     }
   }
@@ -472,10 +462,10 @@ export class SuggestScreen {
     // Устанавливаем выбранную подсказку как запрос
     this.currentQuery = suggestion.text;
     this.searchBar?.setValue(suggestion.text);
-    
+
     // Обновляем контекст поиска
     this.props.searchFlowManager.updateQuery(suggestion.text);
-    
+
     // В зависимости от типа подсказки выполняем разные действия
     switch (suggestion.type) {
       case 'history':
@@ -484,21 +474,21 @@ export class SuggestScreen {
         // Переходим к результатам поиска
         this.props.searchFlowManager.goToSearchResults(suggestion.text);
         break;
-        
+
       case 'organization':
         // Можно сразу перейти к карточке организации если есть ID
         this.props.searchFlowManager.goToSearchResults(suggestion.text);
         break;
-        
+
       case 'address':
         // Показываем результаты по адресу
         this.props.searchFlowManager.goToSearchResults(suggestion.text);
         break;
     }
-    
+
     // Добавляем в историю
     this.addQueryToHistory(suggestion.text);
-    
+
     // Уведомляем родительский компонент
     this.props.onSuggestionSelect?.(suggestion);
   }
@@ -520,7 +510,7 @@ export class SuggestScreen {
         // Возвращаемся к дашборду
         this.handleBackToDashboard();
         break;
-        
+
       case 'ArrowDown':
       case 'ArrowUp':
         // Можно добавить навигацию по подсказкам с клавиатуры
@@ -554,15 +544,15 @@ export class SuggestScreen {
    */
   public activate(): void {
     this.element.style.display = 'flex';
-    
+
     // Устанавливаем состояние шторки в FULLSCREEN для подсказок
     this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
-    
+
     // Фокусируемся на поисковой строке
     setTimeout(() => {
       this.searchBar?.focus();
     }, 100);
-    
+
     // Синхронизируем с сервисами
     this.syncWithServices();
   }
@@ -572,7 +562,7 @@ export class SuggestScreen {
    */
   public deactivate(): void {
     this.element.style.display = 'none';
-    
+
     // Снимаем фокус с поисковой строки
     this.searchBar?.blur();
   }
@@ -602,7 +592,7 @@ export class SuggestScreen {
       screen: ScreenType.SUGGEST,
       query: this.currentQuery,
       suggestions: this.suggestions,
-      bottomsheetState: this.bottomsheetContainer?.getCurrentState()
+      bottomsheetState: this.bottomsheetContainer?.getCurrentState(),
     };
   }
 
@@ -613,14 +603,14 @@ export class SuggestScreen {
     // Удаляем обработчики событий
     window.removeEventListener('resize', this.handleResize.bind(this));
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-    
+
     // Очищаем компоненты
     this.bottomsheetContainer?.destroy();
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
     this.searchSuggestions?.destroy();
-    
+
     // Очищаем ссылки
     this.headerContainer = undefined;
     this.contentContainer = undefined;
@@ -652,7 +642,7 @@ export class SuggestScreenFactory {
       container,
       searchFlowManager,
       bottomsheetManager,
-      initialQuery
+      initialQuery,
     });
   }
-} 
+}

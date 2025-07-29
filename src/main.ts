@@ -7,12 +7,11 @@ import './styles/_variables.css';
 import './styles/base.css';
 import './styles/dashboard.css';
 
-
 import { ScreenType } from './types/navigation';
-import { BottomsheetState, BottomsheetConfig } from './types/bottomsheet';
+import { BottomsheetConfig, BottomsheetState } from './types/bottomsheet';
 import { SearchFlowManager } from './services/SearchFlowManager';
 import { BottomsheetManager } from './services/BottomsheetManager';
-import { MapSyncService, MapManager, FilterBarManager } from './services';
+import { FilterBarManager, MapManager, MapSyncService } from './services';
 import { DashboardScreen, DashboardScreenFactory } from './components/Screens/DashboardScreen';
 
 /**
@@ -42,13 +41,13 @@ class App {
   async initialize(): Promise<void> {
     try {
       console.log(`🚀 2GIS Dashboard v${APP_VERSION} starting...`);
-      
+
       // Initialize services
       this.initializeServices();
-      
+
       // Create dashboard screen using the modular component
       this.createDashboardScreen();
-      
+
       console.log('✅ Dashboard initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize dashboard:', error);
@@ -70,7 +69,7 @@ class App {
       },
       onSearchInitiated: (query, source) => {
         console.log(`🔍 Search initiated: "${query}" from ${source}`);
-      }
+      },
     });
 
     // Initialize BottomsheetManager with configuration
@@ -78,7 +77,7 @@ class App {
       state: BottomsheetState.DEFAULT,
       snapPoints: [0.2, 0.55, 0.9, 0.95],
       isDraggable: true,
-      hasScrollableContent: true
+      hasScrollableContent: true,
     };
 
     this.bottomsheetManager = new BottomsheetManager(
@@ -87,12 +86,12 @@ class App {
         onStateChange: (fromState, toState) => {
           console.log(`📋 Bottomsheet: ${fromState} → ${toState}`);
         },
-        onDragStart: (height) => {
+        onDragStart: height => {
           console.log(`🖱️ Drag start: ${height}px`);
         },
         onDragEnd: (startHeight, endHeight) => {
           console.log(`🖱️ Drag end: ${startHeight}px → ${endHeight}px`);
-        }
+        },
       },
       window.innerHeight
     );
@@ -105,7 +104,7 @@ class App {
 
     // Initialize MapManager with API key from environment
     this.mapManager = new MapManager({
-      mapApiKey: import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+      mapApiKey: import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc',
     });
   }
 
@@ -122,7 +121,7 @@ class App {
       this.container,
       this.searchFlowManager,
       this.bottomsheetManager,
-      this.filterBarManager!,
+      this.filterBarManager,
       this.mapManager!
     );
 
@@ -130,17 +129,13 @@ class App {
     this.dashboardScreen.activate();
   }
 
-
-
-
-
   /**
    * Show error in UI
    */
   private showError(error: any): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : 'No stack trace available';
-    
+
     this.container.innerHTML = `
       <div style="padding: 20px; background: #ffe6e6; color: #d00; border-radius: 8px; margin: 20px;">
         <h2>❌ Ошибка инициализации</h2>
@@ -170,9 +165,9 @@ export async function initializeApp(container: HTMLElement): Promise<App> {
 /**
  * Global error handler for unhandled promise rejections
  */
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener('unhandledrejection', event => {
   console.error('Unhandled promise rejection:', event.reason);
-  
+
   // Show user-friendly error in development
   const errorDiv = document.createElement('div');
   errorDiv.style.cssText = `
@@ -190,7 +185,7 @@ window.addEventListener('unhandledrejection', (event) => {
   `;
   errorDiv.textContent = `Error: ${event.reason}`;
   document.body.appendChild(errorDiv);
-  
+
   setTimeout(() => {
     if (document.body.contains(errorDiv)) {
       document.body.removeChild(errorDiv);
@@ -213,4 +208,4 @@ if (document.readyState === 'loading') {
   if (appContainer) {
     initializeApp(appContainer).catch(console.error);
   }
-} 
+}

@@ -1,12 +1,5 @@
-import { ScreenType, Organization } from '../../types';
-import { SearchFlowManager, BottomsheetManager, MapSyncService } from '../../services';
-import { 
-  BottomsheetContainer, 
-  BottomsheetHeader, 
-  BottomsheetContent,
-  BottomsheetContainerProps 
-} from '../Bottomsheet';
-import { OrganizationCard, CardSize } from '../Cards';
+import { Organization, ScreenType } from '../../types';
+import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
 
 /**
  * Пропсы для OrganizationScreen
@@ -24,6 +17,8 @@ export interface OrganizationScreenProps {
   organization: Organization;
   /** CSS класс */
   className?: string;
+  /** Состояние скролла предыдущего экрана для восстановления */
+  previousScrollPosition?: number;
   /** Обработчики событий */
   onBack?: () => void;
   onCallClick?: (organization: Organization) => void;
@@ -33,42 +28,26 @@ export interface OrganizationScreenProps {
 }
 
 /**
- * Экран детальной информации об организации
- * Отображает полную информацию с возможностью взаимодействия
+ * Экран организации с точной копией дизайна Figma для не-рекламодателей
+ * Использует bottomsheet с drag-handle и snap points 20/55/90/95%
  */
 export class OrganizationScreen {
   private props: OrganizationScreenProps;
   private element: HTMLElement;
-  
-  // Компоненты
-  private bottomsheetContainer?: BottomsheetContainer;
-  private bottomsheetContent?: BottomsheetContent;
-  private organizationCard?: OrganizationCard;
-  
-  // Контейнеры для компонентов
-  private headerContainer?: HTMLElement;
-  private contentContainer?: HTMLElement;
-  private cardContainer?: HTMLElement;
-  private actionsContainer?: HTMLElement;
-  private infoContainer?: HTMLElement;
-
-  // Состояние
   private isFavorite: boolean = false;
 
   constructor(props: OrganizationScreenProps) {
     this.props = props;
     this.element = props.container;
-    
     this.initialize();
   }
 
   /**
-   * Инициализация экрана
+   * Инициализация экрана организации
    */
   private initialize(): void {
     this.setupElement();
-    this.createBottomsheet();
-    this.createContent();
+    this.createNonAdvertiserLayout();
     this.setupEventListeners();
     this.syncWithServices();
   }
@@ -77,736 +56,962 @@ export class OrganizationScreen {
    * Настройка основного элемента
    */
   private setupElement(): void {
+    this.element.innerHTML = '';
     Object.assign(this.element.style, {
-      display: 'flex',
-      flexDirection: 'column',
+      position: 'relative',
+      width: '100%',
       height: '100%',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      borderRadius: '16px 16px 0 0',
+      overflow: 'hidden',
     });
 
     if (this.props.className) {
       this.element.className = this.props.className;
     }
-
     this.element.classList.add('organization-screen');
   }
 
   /**
-   * Создание шторки
+   * Создание полного макета не-рекламодателя из Figma
    */
-  private createBottomsheet(): void {
-    // Создаем контейнер для шторки
-    const bottomsheetElement = document.createElement('div');
-    bottomsheetElement.style.height = '100%';
-    
-    this.element.appendChild(bottomsheetElement);
-
-    // Создаем шторку с состоянием FULLSCREEN_SCROLL для детальной информации
-    const bottomsheetConfig: BottomsheetContainerProps = {
-      config: {
-        state: this.props.bottomsheetManager.getCurrentState().currentState,
-        snapPoints: [0.2, 0.5, 0.9, 0.95],
-        isDraggable: true,
-        hasScrollableContent: true
-      },
-      events: {
-        onStateChange: (newState) => {
-          // Синхронизируем состояние с менеджером шторки
-          this.props.bottomsheetManager.snapToState(newState);
-          
-          // Синхронизируем с картой если есть сервис
-          if (this.props.mapSyncService && this.bottomsheetContainer) {
-            const currentStateData = this.bottomsheetContainer.getCurrentState();
-            this.props.mapSyncService.adjustMapViewport(currentStateData.height);
-          }
-        }
-      }
-    };
-
-    this.bottomsheetContainer = new BottomsheetContainer(bottomsheetElement, bottomsheetConfig);
-  }
-
-  /**
-   * Создание содержимого шторки
-   */
-  private createContent(): void {
-    if (!this.bottomsheetContainer) return;
-
-    // Создаем заголовок
-    this.createHeader();
-    
-    // Создаем контентную область
-    this.createContentArea();
-  }
-
-  /**
-   * Создание заголовка с кнопкой назад
-   */
-  private createHeader(): void {
-    this.headerContainer = document.createElement('div');
-    
-    Object.assign(this.headerContainer.style, {
-      display: 'flex',
-      alignItems: 'center',
-      padding: '8px 16px 16px 16px',
-      borderBottom: '1px solid #F0F0F0',
+  private createNonAdvertiserLayout(): void {
+    // Основной контейнер шторки
+    const bottomsheetContent = document.createElement('div');
+    Object.assign(bottomsheetContent.style, {
+      position: 'relative',
+      width: '100%',
+      height: '100%',
       backgroundColor: '#ffffff',
-      position: 'sticky',
-      top: '0',
-      zIndex: '10'
+      borderRadius: '16px 16px 0 0',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
     });
 
-    // Создаем драггер
-    this.createDragger();
+    // 1. Создаем заголовок организации (Organization card top)
+    const organizationCardTop = this.createOrganizationCardTop();
+    bottomsheetContent.appendChild(organizationCardTop);
 
-    // Создаем кнопку назад
-    this.createBackButton();
+    // 2. Создаем табы
+    const tabBar = this.createTabBar();
+    bottomsheetContent.appendChild(tabBar);
 
-    // Создаем заголовок
-    this.createTitle();
+    // 3. Создаем прокручиваемое содержимое
+    const scrollableContent = document.createElement('div');
+    Object.assign(scrollableContent.style, {
+      flex: '1',
+      overflowY: 'auto',
+      backgroundColor: '#ffffff',
+    });
 
-    // Создаем кнопки действий
-    this.createHeaderActions();
+    // 4. Создаем основное содержимое (Content-non-RD)
+    const contentContainer = this.createContentContainer();
+    scrollableContent.appendChild(contentContainer);
+
+    bottomsheetContent.appendChild(scrollableContent);
+
+    this.element.appendChild(bottomsheetContent);
   }
 
   /**
-   * Создание драггера
+   * Создание заголовка организации (Organization card top)
    */
-  private createDragger(): void {
-    if (!this.headerContainer) return;
+  private createOrganizationCardTop(): HTMLElement {
+    const cardTop = document.createElement('div');
+    Object.assign(cardTop.style, {
+      backgroundColor: '#ffffff',
+      borderRadius: '16px 16px 0 0',
+      position: 'relative',
+    });
 
+    // Drag handle
     const draggerContainer = document.createElement('div');
     Object.assign(draggerContainer.style, {
-      position: 'absolute',
-      top: '8px',
-      left: '50%',
-      transform: 'translateX(-50%)',
       display: 'flex',
-      justifyContent: 'center',
+      height: '0',
+      paddingBottom: '6px',
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
       alignItems: 'center',
-      width: '100%',
-      height: '24px'
+      alignSelf: 'stretch',
+      position: 'relative',
+      paddingTop: '16px',
     });
 
     const dragger = document.createElement('div');
     Object.assign(dragger.style, {
-      width: '36px',
+      width: '40px',
       height: '4px',
-      backgroundColor: '#E0E0E0',
-      borderRadius: '2px',
-      cursor: 'grab'
-    });
-
-    dragger.addEventListener('mouseenter', () => {
-      dragger.style.backgroundColor = '#BDBDBD';
-    });
-
-    dragger.addEventListener('mouseleave', () => {
-      dragger.style.backgroundColor = '#E0E0E0';
+      flexShrink: '0',
+      borderRadius: '6px',
+      background: 'rgba(137, 137, 137, 0.25)',
+      cursor: 'grab',
     });
 
     draggerContainer.appendChild(dragger);
-    this.headerContainer.appendChild(draggerContainer);
-  }
+    cardTop.appendChild(draggerContainer);
 
-  /**
-   * Создание кнопки назад
-   */
-  private createBackButton(): void {
-    if (!this.headerContainer) return;
-
-    const backButton = document.createElement('button');
-    Object.assign(backButton.style, {
-      width: '40px',
-      height: '40px',
-      border: 'none',
-      borderRadius: '50%',
-      backgroundColor: 'transparent',
-      cursor: 'pointer',
+    // RD контент контейнер
+    const rdContainer = document.createElement('div');
+    Object.assign(rdContainer.style, {
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'background-color 0.2s ease',
-      marginTop: '16px'
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      alignSelf: 'stretch',
+      borderRadius: '16px 16px 0 0',
+      background: '#FFF',
     });
 
-    backButton.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M19 12H5M12 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-
-    // Hover эффект
-    backButton.addEventListener('mouseenter', () => {
-      backButton.style.backgroundColor = '#F5F5F5';
+    // Контент с padding
+    const contentContainer = document.createElement('div');
+    Object.assign(contentContainer.style, {
+      display: 'flex',
+      padding: '0 16px 16px 16px',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      alignSelf: 'stretch',
     });
 
-    backButton.addEventListener('mouseleave', () => {
-      backButton.style.backgroundColor = 'transparent';
+    // Верхняя секция с контентом и кнопкой закрытия
+    const topSection = document.createElement('div');
+    Object.assign(topSection.style, {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '8px',
+      alignSelf: 'stretch',
     });
 
-    // Обработчик клика
-    backButton.addEventListener('click', () => {
-      this.handleBack();
+    // Левая секция с друзьями и заголовком
+    const leftContent = document.createElement('div');
+    Object.assign(leftContent.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      flex: '1 0 0',
     });
 
-    this.headerContainer.appendChild(backButton);
+    // Друзья секция
+    if (!this.props.organization.isAdvertiser) {
+      const friendsSection = this.createFriendsSection();
+      leftContent.appendChild(friendsSection);
+    }
+
+    // Заголовок карточки
+    const cardHeader = this.createCardHeader();
+    leftContent.appendChild(cardHeader);
+
+    topSection.appendChild(leftContent);
+
+    // Кнопка закрытия
+    const closeButton = this.createCloseButton();
+    topSection.appendChild(closeButton);
+
+    contentContainer.appendChild(topSection);
+
+    // Секция с рейтингом и временем поездки
+    const ratingSection = this.createRatingSection();
+    contentContainer.appendChild(ratingSection);
+
+    rdContainer.appendChild(contentContainer);
+    cardTop.appendChild(rdContainer);
+
+    return cardTop;
   }
 
   /**
-   * Создание заголовка
+   * Создание секции друзей
    */
-  private createTitle(): void {
-    if (!this.headerContainer) return;
+  private createFriendsSection(): HTMLElement {
+    const friendsContainer = document.createElement('div');
+    Object.assign(friendsContainer.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      gap: '10px',
+      alignSelf: 'stretch',
+    });
 
+    const friendsRow = document.createElement('div');
+    Object.assign(friendsRow.style, {
+      display: 'flex',
+      width: '72px',
+      padding: '4px 0',
+      alignItems: 'flex-start',
+      gap: '4px',
+    });
+
+    // 4 позиции для друзей
+    for (let i = 0; i < 4; i++) {
+      const position = document.createElement('div');
+      Object.assign(position.style, {
+        width: i === 3 ? '24px' : '12px',
+        height: '24px',
+        position: 'relative',
+      });
+
+      const avatar = document.createElement('div');
+      Object.assign(avatar.style, {
+        width: '24px',
+        height: '24px',
+        borderRadius: '12px',
+        border: '0.5px solid rgba(137, 137, 137, 0.30)',
+        background: '#E0E0E0',
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+      });
+
+      position.appendChild(avatar);
+      friendsRow.appendChild(position);
+    }
+
+    friendsContainer.appendChild(friendsRow);
+    return friendsContainer;
+  }
+
+  /**
+   * Создание заголовка карточки
+   */
+  private createCardHeader(): HTMLElement {
+    const header = document.createElement('div');
+    Object.assign(header.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'flex-start',
+      alignSelf: 'stretch',
+    });
+
+    // Заголовок
     const titleContainer = document.createElement('div');
     Object.assign(titleContainer.style, {
-      flex: '1',
-      marginLeft: '12px',
-      marginRight: '12px',
-      marginTop: '16px'
+      display: 'flex',
+      alignItems: 'flex-start',
     });
 
-    const title = document.createElement('h1');
+    const titleBlock = document.createElement('div');
+    Object.assign(titleBlock.style, {
+      display: 'flex',
+      padding: '7px 0 1px 0',
+      alignItems: 'flex-start',
+    });
+
+    const title = document.createElement('span');
     Object.assign(title.style, {
-      margin: '0',
-      fontSize: '20px',
-      fontWeight: '600',
-      color: '#333333',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      lineHeight: '1.3',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap'
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '19px',
+      fontWeight: '500',
+      lineHeight: '24px',
+      letterSpacing: '-0.437px',
     });
     title.textContent = this.props.organization.name;
 
-    const subtitle = document.createElement('div');
+    titleBlock.appendChild(title);
+    titleContainer.appendChild(titleBlock);
+    header.appendChild(titleContainer);
+
+    // Подзаголовок
+    const subtitleContainer = document.createElement('div');
+    Object.assign(subtitleContainer.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      alignSelf: 'stretch',
+    });
+
+    const subtitleBlock = document.createElement('div');
+    Object.assign(subtitleBlock.style, {
+      display: 'flex',
+      padding: '1px 0 3px 0',
+      alignItems: 'flex-start',
+      alignSelf: 'stretch',
+    });
+
+    const subtitle = document.createElement('span');
     Object.assign(subtitle.style, {
-      fontSize: '14px',
-      color: '#666666',
-      marginTop: '2px',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      height: '20px',
+      flex: '1',
+      overflow: 'hidden',
+      color: '#898989',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      fontWeight: '400',
+      lineHeight: '20px',
+      letterSpacing: '-0.3px',
     });
     subtitle.textContent = this.props.organization.category;
 
-    titleContainer.appendChild(title);
-    titleContainer.appendChild(subtitle);
-    this.headerContainer.appendChild(titleContainer);
+    subtitleBlock.appendChild(subtitle);
+    subtitleContainer.appendChild(subtitleBlock);
+    header.appendChild(subtitleContainer);
+
+    return header;
   }
 
   /**
-   * Создание кнопок действий в заголовке
+   * Создание кнопки закрытия
    */
-  private createHeaderActions(): void {
-    if (!this.headerContainer) return;
-
-    const actionsContainer = document.createElement('div');
-    Object.assign(actionsContainer.style, {
+  private createCloseButton(): HTMLElement {
+    const buttonContainer = document.createElement('div');
+    Object.assign(buttonContainer.style, {
       display: 'flex',
-      gap: '8px',
-      marginTop: '16px'
+      alignItems: 'flex-start',
     });
 
-    // Кнопка избранного
-    const favoriteButton = this.createActionButton(
-      this.isFavorite ? 'favorite-filled' : 'favorite-outline',
-      () => this.handleFavoriteToggle()
-    );
-
-    // Кнопка поделиться
-    const shareButton = this.createActionButton(
-      'share',
-      () => this.handleShare()
-    );
-
-    actionsContainer.appendChild(favoriteButton);
-    actionsContainer.appendChild(shareButton);
-    this.headerContainer.appendChild(actionsContainer);
-  }
-
-  /**
-   * Создание кнопки действия
-   */
-  private createActionButton(iconType: string, onClick: () => void): HTMLElement {
     const button = document.createElement('button');
     Object.assign(button.style, {
-      width: '40px',
-      height: '40px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: '8px',
+      background: 'rgba(20, 20, 20, 0.06)',
       border: 'none',
-      borderRadius: '50%',
-      backgroundColor: 'transparent',
       cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'background-color 0.2s ease'
+      padding: '10px 8px',
     });
 
-    // Иконки
-    const icons = {
-      'favorite-outline': `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      `,
-      'favorite-filled': `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="#FF5722" stroke="#FF5722" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      `,
-      'share': `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/>
-          <circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-          <circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/>
-          <path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98" stroke="currentColor" stroke-width="2"/>
-        </svg>
-      `
-    };
+    const iconWrapper = document.createElement('div');
+    Object.assign(iconWrapper.style, {
+      width: '24px',
+      height: '24px',
+      position: 'relative',
+    });
 
-    button.innerHTML = icons[iconType as keyof typeof icons] || '';
+    const icon = document.createElement('div');
+    Object.assign(icon.style, {
+      position: 'absolute',
+      left: '5px',
+      top: '5px',
+    });
 
-    // Hover эффект
+    icon.innerHTML = `
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+        <path d="M12 1L1 12M1 1l11 11" stroke="#5A5A5A" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    button.addEventListener('click', () => this.handleBack());
     button.addEventListener('mouseenter', () => {
-      button.style.backgroundColor = '#F5F5F5';
+      button.style.background = 'rgba(20, 20, 20, 0.12)';
     });
-
     button.addEventListener('mouseleave', () => {
-      button.style.backgroundColor = 'transparent';
+      button.style.background = 'rgba(20, 20, 20, 0.06)';
     });
 
-    // Обработчик клика
-    button.addEventListener('click', onClick);
+    iconWrapper.appendChild(icon);
+    button.appendChild(iconWrapper);
+    buttonContainer.appendChild(button);
 
-    return button;
+    return buttonContainer;
   }
 
   /**
-   * Создание контентной области
+   * Создание секции рейтинга
    */
-  private createContentArea(): void {
-    this.contentContainer = document.createElement('div');
-    
-    this.bottomsheetContent = new BottomsheetContent(this.contentContainer, {
-      scrollable: true,
-      scrollType: 'vertical',
-      showScrollIndicator: true,
-      padding: {
-        top: 0,
-        right: 0,
-        bottom: 24,
-        left: 0
-      }
-    });
-
-    // Создаем содержимое организации
-    this.createOrganizationContent();
-  }
-
-  /**
-   * Создание содержимого организации
-   */
-  private createOrganizationContent(): void {
-    if (!this.bottomsheetContent) return;
-
-    const mainContainer = document.createElement('div');
-    Object.assign(mainContainer.style, {
+  private createRatingSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, {
       display: 'flex',
-      flexDirection: 'column'
+      alignItems: 'flex-start',
+      alignSelf: 'stretch',
     });
 
-    // Создаем полную карточку организации
-    this.createOrganizationCard();
-
-    // Создаем кнопки основных действий
-    this.createMainActions();
-
-    // Создаем дополнительную информацию
-    this.createAdditionalInfo();
-
-    mainContainer.appendChild(this.cardContainer!);
-    mainContainer.appendChild(this.actionsContainer!);
-    mainContainer.appendChild(this.infoContainer!);
-
-    // Добавляем содержимое
-    this.bottomsheetContent.setContent([mainContainer]);
-  }
-
-  /**
-   * Создание полной карточки организации
-   */
-  private createOrganizationCard(): void {
-    this.cardContainer = document.createElement('div');
-    Object.assign(this.cardContainer.style, {
-      margin: '0 16px 24px 16px'
-    });
-
-    this.organizationCard = new OrganizationCard(this.cardContainer, {
-      organization: this.props.organization,
-      size: CardSize.FULL,
-      showPhoto: true,
-      showRating: true,
-      showDistance: true,
-      showWorkingHours: true,
-      showCategory: true,
-      showDescription: true,
-      onCallClick: (org) => {
-        this.handleCall(org);
-      },
-      onPhotoClick: (org) => {
-        this.handlePhotoClick(org);
-      }
-    });
-  }
-
-  /**
-   * Создание основных кнопок действий
-   */
-  private createMainActions(): void {
-    this.actionsContainer = document.createElement('div');
-    Object.assign(this.actionsContainer.style, {
-      display: 'flex',
-      gap: '12px',
-      margin: '0 16px 24px 16px'
-    });
-
-    // Кнопка звонка
-    if (this.props.organization.phone) {
-      const callButton = this.createMainActionButton(
-        'Позвонить',
-        '#1976D2',
-        `
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.05 15.39c-.4.46-.91.86-1.5 1.18-.59.32-1.24.48-1.95.48-1.26 0-2.58-.39-3.96-1.17-1.38-.78-2.76-1.88-4.14-3.3S3.75 9.52 2.97 8.14C2.19 6.76 1.8 5.44 1.8 4.18c0-.71.16-1.36.48-1.95.32-.59.72-1.1 1.18-1.5.54-.46 1.14-.69 1.8-.69.27 0 .54.06.81.18.27.12.51.3.72.54l2.76 3.69c.21.27.36.51.45.72.09.21.14.42.14.63 0 .27-.09.54-.27.81s-.42.54-.72.81l-.81.81c-.09.09-.14.21-.14.36 0 .09.03.18.09.27.06.09.12.18.18.27.63 1.17 1.41 2.22 2.34 3.15.93.93 1.98 1.71 3.15 2.34.18.09.36.18.54.27s.36.14.54.14c.15 0 .27-.05.36-.14l.81-.81c.27-.27.54-.48.81-.66.27-.18.54-.27.81-.27.21 0 .42.05.63.14.21.09.45.24.72.45l3.69 2.76c.24.21.42.45.54.72.12.27.18.54.18.81 0 .66-.23 1.26-.69 1.8z" fill="currentColor"/>
-          </svg>
-        `,
-        () => this.handleCall(this.props.organization)
-      );
-      this.actionsContainer.appendChild(callButton);
-    }
-
-    // Кнопка маршрута
-    const routeButton = this.createMainActionButton(
-      'Маршрут',
-      '#4CAF50',
-      `
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 0C6.2 0 3 3.2 3 7c0 5.2 7 13 7 13s7-7.8 7-13c0-3.8-3.2-7-7-7Z" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      `,
-      () => this.handleRoute(this.props.organization)
-    );
-    this.actionsContainer.appendChild(routeButton);
-  }
-
-  /**
-   * Создание кнопки основного действия
-   */
-  private createMainActionButton(
-    text: string, 
-    color: string, 
-    iconSvg: string, 
-    onClick: () => void
-  ): HTMLElement {
-    const button = document.createElement('button');
-    Object.assign(button.style, {
-      flex: '1',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '8px',
-      padding: '16px',
-      border: `2px solid ${color}`,
-      borderRadius: '12px',
-      backgroundColor: 'transparent',
-      color: color,
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    });
-
-    const icon = document.createElement('span');
-    icon.innerHTML = iconSvg;
-
-    const label = document.createElement('span');
-    label.textContent = text;
-
-    button.appendChild(icon);
-    button.appendChild(label);
-
-    // Hover эффект
-    button.addEventListener('mouseenter', () => {
-      button.style.backgroundColor = color;
-      button.style.color = '#ffffff';
-    });
-
-    button.addEventListener('mouseleave', () => {
-      button.style.backgroundColor = 'transparent';
-      button.style.color = color;
-    });
-
-    // Обработчик клика
-    button.addEventListener('click', onClick);
-
-    return button;
-  }
-
-  /**
-   * Создание дополнительной информации
-   */
-  private createAdditionalInfo(): void {
-    this.infoContainer = document.createElement('div');
-    Object.assign(this.infoContainer.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '24px'
-    });
-
-    // Создаем секции информации
-    this.createContactInfo();
-    this.createReviewsSection();
-  }
-
-  /**
-   * Создание секции контактов
-   */
-  private createContactInfo(): void {
-    if (!this.infoContainer) return;
-
-    const section = this.createInfoSection('Контакты');
-    const { organization } = this.props;
-
-    // Телефон
-    if (organization.phone) {
-      const phoneItem = this.createInfoItem(
-        `
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.05 15.39c-.4.46-.91.86-1.5 1.18-.59.32-1.24.48-1.95.48-1.26 0-2.58-.39-3.96-1.17-1.38-.78-2.76-1.88-4.14-3.3S3.75 9.52 2.97 8.14C2.19 6.76 1.8 5.44 1.8 4.18c0-.71.16-1.36.48-1.95.32-.59.72-1.1 1.18-1.5.54-.46 1.14-.69 1.8-.69.27 0 .54.06.81.18.27.12.51.3.72.54l2.76 3.69c.21.27.36.51.45.72.09.21.14.42.14.63 0 .27-.09.54-.27.81s-.42.54-.72.81l-.81.81c-.09.09-.14.21-.14.36 0 .09.03.18.09.27.06.09.12.18.18.27.63 1.17 1.41 2.22 2.34 3.15.93.93 1.98 1.71 3.15 2.34.18.09.36.18.54.27s.36.14.54.14c.15 0 .27-.05.36-.14l.81-.81c.27-.27.54-.48.81-.66.27-.18.54-.27.81-.27.21 0 .42.05.63.14.21.09.45.24.72.45l3.69 2.76c.24.21.42.45.54.72.12.27.18.54.18.81 0 .66-.23 1.26-.69 1.8z" fill="currentColor"/>
-          </svg>
-        `,
-        'Телефон',
-        organization.phone,
-        () => this.handleCall(organization)
-      );
-      section.appendChild(phoneItem);
-    }
-
-    // Адрес
-    const addressItem = this.createInfoItem(
-      `
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 0C6.2 0 3 3.2 3 7c0 5.2 7 13 7 13s7-7.8 7-13c0-3.8-3.2-7-7-7Z" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      `,
-      'Адрес',
-      organization.address,
-      () => this.handleRoute(organization)
-    );
-    section.appendChild(addressItem);
-
-    // Время работы
-    if (organization.workingHours) {
-      const hoursItem = this.createInfoItem(
-        `
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M10 5v5l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        `,
-        'Время работы',
-        organization.workingHours
-      );
-      section.appendChild(hoursItem);
-    }
-
-    this.infoContainer.appendChild(section);
-  }
-
-  /**
-   * Создание секции отзывов
-   */
-  private createReviewsSection(): void {
-    if (!this.infoContainer) return;
-
-    const { organization } = this.props;
-    
-    if (!organization.reviewsCount || organization.reviewsCount === 0) return;
-
-    const section = this.createInfoSection('Отзывы');
-
-    // Общий рейтинг
+    // Рейтинг контейнер
     const ratingContainer = document.createElement('div');
     Object.assign(ratingContainer.style, {
       display: 'flex',
+      alignItems: 'flex-start',
+      gap: '8px',
+      flex: '1',
+      alignSelf: 'stretch',
+    });
+
+    const ratingContent = document.createElement('div');
+    Object.assign(ratingContent.style, {
+      display: 'flex',
       alignItems: 'center',
-      gap: '12px',
-      padding: '16px',
-      backgroundColor: '#F8F9FA',
-      borderRadius: '12px',
-      margin: '0 16px'
+      gap: '4px',
+      flex: '1',
     });
 
-    const ratingValue = document.createElement('div');
-    Object.assign(ratingValue.style, {
-      fontSize: '32px',
-      fontWeight: '700',
-      color: '#1976D2'
-    });
-    ratingValue.textContent = organization.rating?.toFixed(1) || '0.0';
+    // Звезды
+    const stars = this.createStars();
+    ratingContent.appendChild(stars);
 
+    // Рейтинг и отзывы
     const ratingInfo = document.createElement('div');
     Object.assign(ratingInfo.style, {
       display: 'flex',
-      flexDirection: 'column'
+      alignItems: 'flex-start',
+      gap: '6px',
+      flex: '1',
     });
 
-    const stars = document.createElement('div');
-    Object.assign(stars.style, {
+    const ratingValue = document.createElement('span');
+    Object.assign(ratingValue.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      fontWeight: '500',
+      lineHeight: '20px',
+      letterSpacing: '-0.3px',
+      padding: '1px 0',
+    });
+    ratingValue.textContent = (this.props.organization.rating || 4.6).toFixed(1);
+
+    const reviewsCount = document.createElement('span');
+    Object.assign(reviewsCount.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      fontWeight: '400',
+      lineHeight: '20px',
+      letterSpacing: '-0.3px',
+      padding: '1px 0',
+    });
+    reviewsCount.textContent = `${this.props.organization.reviewsCount || 120} оценок`;
+
+    ratingInfo.appendChild(ratingValue);
+    ratingInfo.appendChild(reviewsCount);
+    ratingContent.appendChild(ratingInfo);
+    ratingContainer.appendChild(ratingContent);
+
+    // Время поездки
+    const rideTime = this.createRideTime();
+    section.appendChild(ratingContainer);
+    section.appendChild(rideTime);
+
+    return section;
+  }
+
+  /**
+   * Создание звезд рейтинга
+   */
+  private createStars(): HTMLElement {
+    const starsContainer = document.createElement('div');
+    Object.assign(starsContainer.style, {
       display: 'flex',
-      gap: '2px',
-      marginBottom: '4px'
+      alignItems: 'flex-start',
     });
 
-    // Создаем звездочки
+    const rating = this.props.organization.rating || 4.6;
     for (let i = 1; i <= 5; i++) {
       const star = document.createElement('div');
       Object.assign(star.style, {
         width: '16px',
         height: '16px',
-        color: i <= (organization.rating || 0) ? '#FFA726' : '#E0E0E0'
+        position: 'relative',
       });
 
+      // Заполнение звезды зависит от рейтинга
+      const filled = i <= rating;
+      const color = filled ? '#EFA701' : 'rgba(20, 20, 20, 0.09)';
+
       star.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 0l2.06 5.11L16 6.18l-4 3.64L13.82 16 8 13.06 2.18 16 4 9.82 0 6.18l5.94-1.07L8 0Z"/>
-        </svg>
+        <div style="position: absolute; left: 0; top: 0; width: 8px; height: 16px; background: ${color};"></div>
+        <div style="position: absolute; left: 8px; top: 0; width: 8px; height: 16px; background: ${color};"></div>
       `;
 
-      stars.appendChild(star);
+      starsContainer.appendChild(star);
     }
 
-    const reviewsCount = document.createElement('div');
-    Object.assign(reviewsCount.style, {
-      fontSize: '14px',
-      color: '#666666'
-    });
-    reviewsCount.textContent = `${organization.reviewsCount} отзывов`;
-
-    ratingInfo.appendChild(stars);
-    ratingInfo.appendChild(reviewsCount);
-
-    ratingContainer.appendChild(ratingValue);
-    ratingContainer.appendChild(ratingInfo);
-
-    section.appendChild(ratingContainer);
-    this.infoContainer.appendChild(section);
+    return starsContainer;
   }
 
   /**
-   * Создание секции информации
+   * Создание времени поездки
    */
-  private createInfoSection(title: string): HTMLElement {
-    const section = document.createElement('div');
+  private createRideTime(): HTMLElement {
+    const container = document.createElement('div');
+    Object.assign(container.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+    });
 
+    const icon = document.createElement('div');
+    Object.assign(icon.style, {
+      width: '16px',
+      height: '16px',
+      position: 'relative',
+    });
+
+    icon.innerHTML = `
+      <svg width="13" height="10" viewBox="0 0 13 10" style="position: absolute; left: 2px; top: 3px;">
+        <path d="M1 5h8l-3-3m0 6l3-3" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    `;
+
+    const timeText = document.createElement('span');
+    Object.assign(timeText.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      fontWeight: '500',
+      lineHeight: '20px',
+      letterSpacing: '-0.3px',
+      padding: '1px 0',
+    });
+    timeText.textContent = '3 мин';
+
+    container.appendChild(icon);
+    container.appendChild(timeText);
+
+    return container;
+  }
+
+  /**
+   * Создание панели табов
+   */
+  private createTabBar(): HTMLElement {
+    const tabBar = document.createElement('div');
+    Object.assign(tabBar.style, {
+      position: 'relative',
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid rgba(137, 137, 137, 0.15)',
+    });
+
+    // Fade mask
+    const fadeMask = document.createElement('div');
+    Object.assign(fadeMask.style, {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      right: '0',
+      bottom: '0',
+      pointerEvents: 'none',
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.8) 0px, transparent 16px, transparent calc(100% - 16px), rgba(255,255,255,0.8) 100%)',
+    });
+
+    // Табы контейнер
+    const tabsContainer = document.createElement('div');
+    Object.assign(tabsContainer.style, {
+      display: 'flex',
+      overflowX: 'auto',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    });
+
+    // Скрываем scrollbar в webkit
+    const style = document.createElement('style');
+    style.textContent = `
+      .tabs-container::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    document.head.appendChild(style);
+    tabsContainer.classList.add('tabs-container');
+
+    const tabs = [
+      { name: 'Обзор', active: true, count: null },
+      { name: 'Меню', active: false, count: 213 },
+      { name: 'Фото', active: false, count: 432 },
+      { name: 'Отзывы', active: false, count: 232 },
+      { name: 'Инфо', active: false, count: null },
+      { name: 'Акции', active: false, count: null },
+    ];
+
+    tabs.forEach(tab => {
+      const tabElement = this.createTab(tab.name, tab.active, tab.count);
+      tabsContainer.appendChild(tabElement);
+    });
+
+    tabBar.appendChild(fadeMask);
+    tabBar.appendChild(tabsContainer);
+
+    return tabBar;
+  }
+
+  /**
+   * Создание отдельного таба
+   */
+  private createTab(name: string, active: boolean, count: number | null): HTMLElement {
+    const tab = document.createElement('div');
+    Object.assign(tab.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '4px',
+      padding: '12px 16px',
+      cursor: 'pointer',
+      borderBottom: active ? '2px solid #1976D2' : '2px solid transparent',
+      whiteSpace: 'nowrap',
+      transition: 'border-color 0.2s ease',
+    });
+
+    const label = document.createElement('span');
+    Object.assign(label.style, {
+      color: active ? '#1976D2' : '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '500',
+      lineHeight: '18px',
+      letterSpacing: '-0.28px',
+    });
+    label.textContent = name;
+
+    tab.appendChild(label);
+
+    if (count !== null) {
+      const counter = document.createElement('div');
+      Object.assign(counter.style, {
+        minWidth: '19px',
+        height: '19px',
+        padding: '2px 6px',
+        borderRadius: '10px',
+        backgroundColor: 'rgba(20, 20, 20, 0.06)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      });
+
+      const counterText = document.createElement('span');
+      Object.assign(counterText.style, {
+        color: '#898989',
+        fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+        fontSize: '13px',
+        fontWeight: '500',
+        lineHeight: '16px',
+        letterSpacing: '-0.234px',
+      });
+      counterText.textContent = count.toString();
+
+      counter.appendChild(counterText);
+      tab.appendChild(counter);
+    }
+
+    return tab;
+  }
+
+  /**
+   * Создание основного содержимого
+   */
+  private createContentContainer(): HTMLElement {
+    const container = document.createElement('div');
+    Object.assign(container.style, {
+      backgroundColor: '#ffffff',
+      paddingBottom: '80px', // Место для нижней кнопки
+    });
+
+    // Временное уведомление
+    const alert = this.createAlert();
+    container.appendChild(alert);
+
+    // Рекламный баннер
+    const banner = this.createBanner();
+    container.appendChild(banner);
+
+    // Адрес
+    const address = this.createAddressSection();
+    container.appendChild(address);
+
+    // Нижняя кнопка действия
+    const bottomAction = this.createBottomActionBar();
+    container.appendChild(bottomAction);
+
+    return container;
+  }
+
+  /**
+   * Создание уведомления
+   */
+  private createAlert(): HTMLElement {
+    const alert = document.createElement('div');
+    Object.assign(alert.style, {
+      margin: '16px',
+      padding: '16px',
+      backgroundColor: '#FFF8E1',
+      borderRadius: '12px',
+      border: '1px solid #FFE082',
+    });
+
+    const header = document.createElement('div');
+    Object.assign(header.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      marginBottom: '8px',
+    });
+
+    const icon = document.createElement('div');
+    icon.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="#F57C00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    const title = document.createElement('span');
+    Object.assign(title.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '16px',
+      fontWeight: '600',
+      lineHeight: '20px',
+      letterSpacing: '-0.24px',
+    });
+    title.textContent = 'Временно не работает';
+
+    header.appendChild(icon);
+    header.appendChild(title);
+
+    const description = document.createElement('div');
+    Object.assign(description.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '18px',
+      letterSpacing: '-0.28px',
+    });
+    description.textContent = 'Сейчас этот филиал временно закрыт, но вернется к работе через некоторое время. Уточняйте информацию у компании';
+
+    alert.appendChild(header);
+    alert.appendChild(description);
+
+    return alert;
+  }
+
+  /**
+   * Создание рекламного баннера
+   */
+  private createBanner(): HTMLElement {
+    const banner = document.createElement('div');
+    Object.assign(banner.style, {
+      margin: '0 16px 16px 16px',
+      padding: '16px',
+      backgroundColor: '#F8F9FA',
+      borderRadius: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+    });
+
+    const textContent = document.createElement('div');
+    Object.assign(textContent.style, {
+      flex: '1',
+    });
+
+    const bannerText = document.createElement('div');
+    Object.assign(bannerText.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '18px',
+      letterSpacing: '-0.28px',
+      marginBottom: '12px',
+    });
+    bannerText.textContent = 'Смартфоны серии Xiaomi 12 уже в твоем городе!';
+
+    const button = document.createElement('button');
+    Object.assign(button.style, {
+      padding: '8px 16px',
+      backgroundColor: '#1976D2',
+      color: '#ffffff',
+      border: 'none',
+      borderRadius: '8px',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      fontWeight: '600',
+      lineHeight: '20px',
+      letterSpacing: '-0.3px',
+      cursor: 'pointer',
+    });
+    button.textContent = 'Выбрать';
+
+    textContent.appendChild(bannerText);
+    textContent.appendChild(button);
+
+    const image = document.createElement('div');
+    Object.assign(image.style, {
+      width: '88px',
+      height: '88px',
+      borderRadius: '8px',
+      backgroundColor: '#E0E0E0',
+      flexShrink: '0',
+    });
+
+    banner.appendChild(textContent);
+    banner.appendChild(image);
+
+    // Реклама дисклеймер
+    const disclaimer = document.createElement('div');
+    Object.assign(disclaimer.style, {
+      margin: '0 16px 16px 16px',
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '11px',
+      fontWeight: '400',
+      lineHeight: '14px',
+      letterSpacing: '-0.176px',
+    });
+    disclaimer.textContent = 'Реклама • ООО «Сяоми», Москва, ОГРН 12565426546254';
+
+    const container = document.createElement('div');
+    container.appendChild(banner);
+    container.appendChild(disclaimer);
+
+    return container;
+  }
+
+  /**
+   * Создание секции адреса
+   */
+  private createAddressSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, {
+      margin: '0 16px',
+    });
+
+    // Заголовок секции
     const header = document.createElement('h3');
     Object.assign(header.style, {
       margin: '0 0 16px 0',
-      padding: '0 16px',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
       fontSize: '18px',
       fontWeight: '600',
-      color: '#333333',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
     });
-    header.textContent = title;
+    header.textContent = 'Адрес';
+
+    // Адрес
+    const addressContainer = document.createElement('div');
+    Object.assign(addressContainer.style, {
+      marginBottom: '16px',
+    });
+
+    const addressTitle = document.createElement('div');
+    Object.assign(addressTitle.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '16px',
+      fontWeight: '400',
+      lineHeight: '20px',
+      letterSpacing: '-0.24px',
+      marginBottom: '4px',
+    });
+    addressTitle.textContent = this.props.organization.address;
+
+    const addressSubtitle = document.createElement('div');
+    Object.assign(addressSubtitle.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '18px',
+      letterSpacing: '-0.28px',
+    });
+    addressSubtitle.textContent = '630075, Новосибирск, Богдана Хмельницкого м-н, 1 этаж';
+
+    addressContainer.appendChild(addressTitle);
+    addressContainer.appendChild(addressSubtitle);
+
+    // Кнопки действий
+    const buttonsContainer = document.createElement('div');
+    Object.assign(buttonsContainer.style, {
+      display: 'flex',
+      gap: '8px',
+      overflowX: 'auto',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+    });
+
+    const buttons = [
+      'Входы 5',
+      'На такси за 249 ₽'
+    ];
+
+    buttons.forEach(buttonText => {
+      const button = document.createElement('button');
+      Object.assign(button.style, {
+        padding: '8px 12px',
+        backgroundColor: 'rgba(20, 20, 20, 0.06)',
+        border: 'none',
+        borderRadius: '8px',
+        whiteSpace: 'nowrap',
+        color: '#141414',
+        fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+        fontSize: '15px',
+        fontWeight: '500',
+        lineHeight: '20px',
+        letterSpacing: '-0.3px',
+        cursor: 'pointer',
+      });
+      button.textContent = buttonText;
+
+      button.addEventListener('mouseenter', () => {
+        button.style.backgroundColor = 'rgba(20, 20, 20, 0.12)';
+      });
+      button.addEventListener('mouseleave', () => {
+        button.style.backgroundColor = 'rgba(20, 20, 20, 0.06)';
+      });
+
+      buttonsContainer.appendChild(button);
+    });
 
     section.appendChild(header);
+    section.appendChild(addressContainer);
+    section.appendChild(buttonsContainer);
+
     return section;
   }
 
   /**
-   * Создание элемента информации
+   * Создание нижней панели действий
    */
-  private createInfoItem(
-    iconSvg: string, 
-    label: string, 
-    value: string, 
-    onClick?: () => void
-  ): HTMLElement {
-    const item = document.createElement('div');
-    Object.assign(item.style, {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px',
-      padding: '12px 16px',
-      cursor: onClick ? 'pointer' : 'default',
-      transition: 'background-color 0.2s ease'
+  private createBottomActionBar(): HTMLElement {
+    const actionBar = document.createElement('div');
+    Object.assign(actionBar.style, {
+      position: 'fixed',
+      bottom: '0',
+      left: '0',
+      right: '0',
+      padding: '16px',
+      backgroundColor: '#ffffff',
+      borderTop: '1px solid rgba(137, 137, 137, 0.15)',
+      zIndex: '100',
     });
 
-    if (onClick) {
-      item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = '#F5F5F5';
-      });
-
-      item.addEventListener('mouseleave', () => {
-        item.style.backgroundColor = 'transparent';
-      });
-
-      item.addEventListener('click', onClick);
-    }
-
-    const icon = document.createElement('div');
-    Object.assign(icon.style, {
-      width: '20px',
-      height: '20px',
-      color: '#666666',
-      flexShrink: '0'
-    });
-    icon.innerHTML = iconSvg;
-
-    const content = document.createElement('div');
-    Object.assign(content.style, {
-      flex: '1'
-    });
-
-    const labelElement = document.createElement('div');
-    Object.assign(labelElement.style, {
-      fontSize: '14px',
-      color: '#666666',
-      marginBottom: '2px',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    });
-    labelElement.textContent = label;
-
-    const valueElement = document.createElement('div');
-    Object.assign(valueElement.style, {
+    const button = document.createElement('button');
+    Object.assign(button.style, {
+      width: '100%',
+      padding: '16px',
+      backgroundColor: '#1976D2',
+      color: '#ffffff',
+      border: 'none',
+      borderRadius: '12px',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
       fontSize: '16px',
-      color: '#333333',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontWeight: '600',
+      lineHeight: '20px',
+      letterSpacing: '-0.24px',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s ease',
     });
-    valueElement.textContent = value;
+    button.textContent = 'Написать отзыв';
 
-    content.appendChild(labelElement);
-    content.appendChild(valueElement);
+    button.addEventListener('mouseenter', () => {
+      button.style.backgroundColor = '#1565C0';
+    });
+    button.addEventListener('mouseleave', () => {
+      button.style.backgroundColor = '#1976D2';
+    });
 
-    item.appendChild(icon);
-    item.appendChild(content);
+    actionBar.appendChild(button);
 
-    return item;
+    return actionBar;
   }
 
   /**
    * Настройка обработчиков событий
    */
   private setupEventListeners(): void {
-    // Обработчик изменения размера экрана
     window.addEventListener('resize', this.handleResize.bind(this));
-    
-    // Обработчик клавиш
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
@@ -814,16 +1019,14 @@ export class OrganizationScreen {
    * Синхронизация с сервисами
    */
   private syncWithServices(): void {
-    // Устанавливаем текущий экран в менеджере флоу
     this.props.searchFlowManager.currentScreen = ScreenType.ORGANIZATION;
-    
-    // Центрируем карту на организации
+
     if (this.props.mapSyncService) {
       this.props.mapSyncService.syncPinsWithContent('organization', {
-        organization: this.props.organization
+        organization: this.props.organization,
       });
-      
       this.props.mapSyncService.centerOnOrganization(this.props.organization);
+      this.props.mapSyncService.highlightOrganizationPin(this.props.organization.id);
     }
   }
 
@@ -831,58 +1034,17 @@ export class OrganizationScreen {
    * Обработчики событий
    */
   private handleBack(): void {
+    if (this.props.previousScrollPosition !== undefined) {
+      setTimeout(() => {
+        const scrollableElement = document.querySelector('.bottomsheet-content');
+        if (scrollableElement) {
+          scrollableElement.scrollTop = this.props.previousScrollPosition!;
+        }
+      }, 100);
+    }
+
     this.props.searchFlowManager.goBack();
     this.props.onBack?.();
-  }
-
-  private handleCall(organization: Organization): void {
-    if (organization.phone) {
-      window.open(`tel:${organization.phone}`);
-    }
-    this.props.onCallClick?.(organization);
-  }
-
-  private handleRoute(organization: Organization): void {
-    // Открываем навигацию
-    const address = encodeURIComponent(organization.address);
-    window.open(`https://maps.google.com/?q=${address}`);
-    this.props.onRouteClick?.(organization);
-  }
-
-  private handleFavoriteToggle(): void {
-    this.isFavorite = !this.isFavorite;
-    
-    // Обновляем иконку
-    const favoriteButton = this.headerContainer?.querySelector('button:nth-child(4)') as HTMLElement;
-    if (favoriteButton) {
-      const iconType = this.isFavorite ? 'favorite-filled' : 'favorite-outline';
-      favoriteButton.innerHTML = this.createActionButton(iconType, () => {}).innerHTML;
-    }
-    
-    this.props.onFavoriteToggle?.(this.props.organization, this.isFavorite);
-  }
-
-  private handleShare(): void {
-    // Поделиться организацией
-    const shareData = {
-      title: this.props.organization.name,
-      text: `${this.props.organization.name} - ${this.props.organization.category}`,
-      url: window.location.href
-    };
-
-    if (navigator.share) {
-      navigator.share(shareData);
-    } else {
-      // Fallback - копируем в буфер обмена
-      navigator.clipboard.writeText(`${shareData.title} - ${shareData.url}`);
-    }
-
-    this.props.onShareClick?.(this.props.organization);
-  }
-
-  private handlePhotoClick(organization: Organization): void {
-    // Открываем галерею фотографий
-    console.log('Photo gallery for:', organization.name);
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
@@ -892,17 +1054,14 @@ export class OrganizationScreen {
   }
 
   private handleResize(): void {
-    // Адаптируем интерфейс при изменении размера
+    // Адаптация при изменении размера экрана
   }
 
   /**
    * Публичные методы
    */
   public activate(): void {
-    this.element.style.display = 'flex';
-    this.bottomsheetContainer?.snapToState(
-      this.props.bottomsheetManager.getCurrentState().currentState
-    );
+    this.element.style.display = 'block';
     this.syncWithServices();
   }
 
@@ -911,27 +1070,16 @@ export class OrganizationScreen {
   }
 
   public refresh(): void {
-    // Можно обновить данные организации
+    // Обновление данных организации
   }
 
   public updateOrganization(organization: Organization): void {
     this.props.organization = organization;
-    
-    // Обновляем карточку
-    this.organizationCard?.updateOrganization(organization);
-    
-    // Обновляем заголовок
-    const title = this.headerContainer?.querySelector('h1');
+    // Обновляем заголовок и другие элементы
+    const title = this.element.querySelector('span[style*="font-size: 19px"]');
     if (title) {
       title.textContent = organization.name;
     }
-    
-    const subtitle = this.headerContainer?.querySelector('div > div:last-child');
-    if (subtitle) {
-      subtitle.textContent = organization.category;
-    }
-    
-    // Синхронизируем с сервисами
     this.syncWithServices();
   }
 
@@ -940,23 +1088,18 @@ export class OrganizationScreen {
       screen: ScreenType.ORGANIZATION,
       organization: this.props.organization,
       isFavorite: this.isFavorite,
-      bottomsheetState: this.bottomsheetContainer?.getCurrentState()
     };
   }
 
   public destroy(): void {
     window.removeEventListener('resize', this.handleResize.bind(this));
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-    
-    this.bottomsheetContainer?.destroy();
-    this.bottomsheetContent?.destroy();
-    this.organizationCard?.destroy();
-    
-    this.headerContainer = undefined;
-    this.contentContainer = undefined;
-    this.cardContainer = undefined;
-    this.actionsContainer = undefined;
-    this.infoContainer = undefined;
+
+    if (this.props.mapSyncService) {
+      this.props.mapSyncService.clearHighlights();
+    }
+
+    this.element.innerHTML = '';
   }
 }
 
@@ -978,7 +1121,7 @@ export class OrganizationScreenFactory {
       container,
       searchFlowManager,
       bottomsheetManager,
-      organization
+      organization,
     });
   }
-} 
+}

@@ -47,30 +47,30 @@ export class StoriesCarousel {
   private createStoriesCarousel(): void {
     // Stories data based on Figma export
     const stories: StoryItem[] = [
-      { 
-        id: 'story1', 
+      {
+        id: 'story1',
         title: 'Заголовок сторис три строки',
         imageUrl: '/assets/images/stories/img-69ff32d9.png',
-        isViewed: false
+        isViewed: false,
       },
-      { 
-        id: 'story2', 
+      {
+        id: 'story2',
         title: 'Заголовок сторис три строки',
         imageUrl: '/assets/images/stories/img-5549a895.png',
-        isViewed: false
+        isViewed: false,
       },
-      { 
-        id: 'story3', 
+      {
+        id: 'story3',
         title: 'Заголовок сторис три строки',
         imageUrl: '/assets/images/stories/img-62839f12.png',
-        isViewed: false
+        isViewed: false,
       },
-      { 
-        id: 'story4', 
+      {
+        id: 'story4',
         title: 'Заголовок сторис три строки',
         imageUrl: '/assets/images/stories/img-0f61e5de.png',
-        isViewed: false
-      }
+        isViewed: false,
+      },
     ];
 
     // Create the main container with exact Figma styles
@@ -248,4 +248,4 @@ export class StoriesCarousel {
   public destroy(): void {
     // Cleanup if needed
   }
-} 
+}

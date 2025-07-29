@@ -65,10 +65,10 @@ export class MapManager {
     this.mapComponent = new (window as any).mapgl.Map(mapId, {
       center: [37.620393, 55.75396],
       zoom: 12,
-      key: this.options.mapApiKey || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+      key: this.options.mapApiKey || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc',
     });
 
-    await new Promise<void>((resolve) => {
+    await new Promise<void>(resolve => {
       let resolved = false;
       this.mapComponent.on('styleload', () => {
         if (!resolved) {
@@ -129,4 +129,3 @@ export class MapManager {
     }
   }
 }
-

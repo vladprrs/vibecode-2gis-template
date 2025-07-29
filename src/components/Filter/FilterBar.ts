@@ -21,9 +21,9 @@ export class FilterBar {
         { text: '8', hasCounter: true },
         { text: 'Рядом' },
         { text: 'Открыто' },
-        { text: 'Доставка' }
+        { text: 'Доставка' },
       ],
-      ...props
+      ...props,
     };
     this.element = props.container;
     this.render();
@@ -51,7 +51,7 @@ export class FilterBar {
       overflow-x: auto;
     `;
 
-    this.props.filters!.forEach((filter) => {
+    this.props.filters!.forEach(filter => {
       const filterButton = document.createElement('div');
       filterButton.style.cssText = `
         display: flex;

@@ -38,23 +38,17 @@ export class BottomsheetGestureManager {
   /** Setup wheel and touch event listeners */
   setupBottomsheetEventListeners(): void {
     this.element.addEventListener('wheel', this.handleWheel.bind(this), {
-      passive: false
+      passive: false,
     });
-    this.element.addEventListener(
-      'touchstart',
-      this.handleScrollTouchStart.bind(this),
-      { passive: false }
-    );
-    this.element.addEventListener(
-      'touchmove',
-      this.handleScrollTouchMove.bind(this),
-      { passive: false }
-    );
-    this.element.addEventListener(
-      'touchend',
-      this.handleScrollTouchEnd.bind(this),
-      { passive: false }
-    );
+    this.element.addEventListener('touchstart', this.handleScrollTouchStart.bind(this), {
+      passive: false,
+    });
+    this.element.addEventListener('touchmove', this.handleScrollTouchMove.bind(this), {
+      passive: false,
+    });
+    this.element.addEventListener('touchend', this.handleScrollTouchEnd.bind(this), {
+      passive: false,
+    });
   }
 
   private handleWheel(event: WheelEvent): void {
@@ -63,19 +57,14 @@ export class BottomsheetGestureManager {
     const scrollableThreshold = screenHeight * 0.92;
 
     if (currentHeight > scrollableThreshold) {
-      const contentContainer = this.element.querySelector(
-        '.dashboard-content'
-      ) as HTMLElement | null;
+      const contentContainer = this.element.querySelector('.dashboard-content');
       if (contentContainer) {
         const { scrollTop } = contentContainer;
         const isAtTop = scrollTop <= 0;
 
         if (event.deltaY < 0 && isAtTop) {
           event.preventDefault();
-          const newHeight = Math.max(
-            screenHeight * 0.15,
-            currentHeight + event.deltaY * 2
-          );
+          const newHeight = Math.max(screenHeight * 0.15, currentHeight + event.deltaY * 2);
           this.setHeight(newHeight);
           this.startSnapTimeout();
           return;
@@ -117,7 +106,7 @@ export class BottomsheetGestureManager {
       { name: 'small', ratio: 0.2 },
       { name: 'default', ratio: 0.55 },
       { name: 'fullscreen', ratio: 0.9 },
-      { name: 'fullscreen-scroll', ratio: 0.95 }
+      { name: 'fullscreen-scroll', ratio: 0.95 },
     ];
 
     let nearestState = states[0];
@@ -133,11 +122,7 @@ export class BottomsheetGestureManager {
 
     const targetHeight = screenHeight * nearestState.ratio;
     this.onStateChange(nearestState.name);
-    this.animationManager.animateToHeight(
-      currentHeight,
-      targetHeight,
-      this.setHeight.bind(this)
-    );
+    this.animationManager.animateToHeight(currentHeight, targetHeight, this.setHeight.bind(this));
 
     this.bottomsheetManager.snapToState(nearestState.name as BottomsheetState);
   }
@@ -163,19 +148,14 @@ export class BottomsheetGestureManager {
     const scrollableThreshold = screenHeight * 0.92;
 
     if (currentHeight > scrollableThreshold) {
-      const contentContainer = this.element.querySelector(
-        '.dashboard-content'
-      ) as HTMLElement | null;
+      const contentContainer = this.element.querySelector('.dashboard-content');
       if (contentContainer) {
         const { scrollTop } = contentContainer;
         const isAtTop = scrollTop <= 0;
 
         if (momentumDelta < 0 && isAtTop) {
           event.preventDefault();
-          const newHeight = Math.max(
-            screenHeight * 0.15,
-            currentHeight + momentumDelta * 3
-          );
+          const newHeight = Math.max(screenHeight * 0.15, currentHeight + momentumDelta * 3);
           this.setHeight(newHeight);
           this.touchCurrentY = currentY;
           return;

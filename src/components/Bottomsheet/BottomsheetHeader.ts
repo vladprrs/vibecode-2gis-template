@@ -33,7 +33,7 @@ export class BottomsheetHeader {
   constructor(containerElement: HTMLElement, props: BottomsheetHeaderProps = {}) {
     this.element = containerElement;
     this.props = props;
-    
+
     this.initialize();
   }
 
@@ -58,7 +58,7 @@ export class BottomsheetHeader {
       backgroundColor: '#ffffff',
       borderTopLeftRadius: '16px',
       borderTopRightRadius: '16px',
-      flexShrink: '0'
+      flexShrink: '0',
     });
 
     if (this.props.className) {
@@ -86,14 +86,14 @@ export class BottomsheetHeader {
    */
   private createDragger(): void {
     const dragger = document.createElement('div');
-    
+
     Object.assign(dragger.style, {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       height: '24px',
       padding: '8px 0',
-      cursor: 'grab'
+      cursor: 'grab',
     });
 
     // Создаем визуальную полоску драггера
@@ -103,23 +103,23 @@ export class BottomsheetHeader {
       height: '4px',
       backgroundColor: '#E0E0E0',
       borderRadius: '2px',
-      transition: 'background-color 0.2s ease'
+      transition: 'background-color 0.2s ease',
     });
 
     dragger.appendChild(handle);
-    
+
     // Обработчики для изменения цвета при hover
     dragger.addEventListener('mouseenter', () => {
       handle.style.backgroundColor = '#BDBDBD';
     });
-    
+
     dragger.addEventListener('mouseleave', () => {
       handle.style.backgroundColor = '#E0E0E0';
     });
 
     // Добавляем класс для идентификации
     dragger.className = 'bottomsheet-dragger';
-    
+
     this.element.appendChild(dragger);
   }
 
@@ -128,7 +128,7 @@ export class BottomsheetHeader {
    */
   private createSearchBar(): void {
     const searchContainer = document.createElement('div');
-    
+
     Object.assign(searchContainer.style, {
       display: 'flex',
       alignItems: 'center',
@@ -137,7 +137,7 @@ export class BottomsheetHeader {
       backgroundColor: '#F5F5F5',
       borderRadius: '12px',
       border: '1px solid transparent',
-      transition: 'border-color 0.2s ease, background-color 0.2s ease'
+      transition: 'border-color 0.2s ease, background-color 0.2s ease',
     });
 
     // Иконка поиска
@@ -154,9 +154,9 @@ export class BottomsheetHeader {
 
     // Добавляем класс для стилизации
     searchContainer.className = 'search-container';
-    
+
     this.element.appendChild(searchContainer);
-    
+
     // Обновляем состояние
     this.updateSearchState();
   }
@@ -166,13 +166,13 @@ export class BottomsheetHeader {
    */
   private createSearchIcon(): HTMLElement {
     const icon = document.createElement('div');
-    
+
     Object.assign(icon.style, {
       width: '20px',
       height: '20px',
       marginRight: '12px',
       flexShrink: '0',
-      opacity: '0.6'
+      opacity: '0.6',
     });
 
     // SVG иконка поиска
@@ -190,7 +190,7 @@ export class BottomsheetHeader {
    */
   private createSearchInput(): HTMLInputElement {
     const input = document.createElement('input');
-    
+
     Object.assign(input.style, {
       flex: '1',
       border: 'none',
@@ -198,7 +198,7 @@ export class BottomsheetHeader {
       backgroundColor: 'transparent',
       fontSize: '16px',
       color: '#333333',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
     });
 
     input.type = 'text';
@@ -213,7 +213,7 @@ export class BottomsheetHeader {
    */
   private createClearButton(): HTMLElement {
     const button = document.createElement('button');
-    
+
     Object.assign(button.style, {
       width: '20px',
       height: '20px',
@@ -226,7 +226,7 @@ export class BottomsheetHeader {
       alignItems: 'center',
       justifyContent: 'center',
       opacity: '0.6',
-      transition: 'opacity 0.2s ease'
+      transition: 'opacity 0.2s ease',
     });
 
     // SVG иконка крестика
@@ -240,7 +240,7 @@ export class BottomsheetHeader {
     button.addEventListener('mouseenter', () => {
       button.style.opacity = '1';
     });
-    
+
     button.addEventListener('mouseleave', () => {
       button.style.opacity = '0.6';
     });
@@ -263,12 +263,12 @@ export class BottomsheetHeader {
       this.handleSearchBlur();
     });
 
-    this.searchInput.addEventListener('input', (e) => {
+    this.searchInput.addEventListener('input', e => {
       const target = e.target as HTMLInputElement;
       this.handleSearchChange(target.value);
     });
 
-    this.searchInput.addEventListener('keydown', (e) => {
+    this.searchInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         e.preventDefault();
         this.handleSearchSubmit();
@@ -334,7 +334,7 @@ export class BottomsheetHeader {
       this.searchInput.focus();
       this.updateClearButtonVisibility('');
     }
-    
+
     this.props.onClearSearch?.();
   }
 
@@ -407,12 +407,12 @@ export class BottomsheetHeader {
    */
   public updateProps(newProps: Partial<BottomsheetHeaderProps>): void {
     this.props = { ...this.props, ...newProps };
-    
+
     // Обновляем поисковую строку если нужно
     if (newProps.searchQuery !== undefined) {
       this.setSearchQuery(newProps.searchQuery);
     }
-    
+
     if (newProps.placeholder && this.searchInput) {
       this.searchInput.placeholder = newProps.placeholder;
     }
@@ -452,7 +452,7 @@ export class BottomsheetHeaderFactory {
     return new BottomsheetHeader(containerElement, {
       placeholder: 'Поиск в Москве',
       showDragger: true,
-      isSearchActive: false
+      isSearchActive: false,
     });
   }
-} 
+}

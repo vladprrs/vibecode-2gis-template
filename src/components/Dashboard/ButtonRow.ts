@@ -191,7 +191,7 @@ export class ButtonRow {
         position: relative;
       `;
       badge.textContent = '45 мин';
-      
+
       badgeContainer.appendChild(badge);
       buttonContent.appendChild(badgeContainer);
     }
@@ -209,4 +209,4 @@ export class ButtonRow {
   public destroy(): void {
     this.element.innerHTML = '';
   }
-} 
+}

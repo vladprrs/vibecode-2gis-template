@@ -75,7 +75,7 @@ export class MapGLComponent {
   constructor(props: MapGLComponentProps) {
     this.props = props;
     this.container = props.container;
-    
+
     this.initialize();
   }
 
@@ -86,13 +86,12 @@ export class MapGLComponent {
     try {
       // Setup container
       this.setupContainer();
-      
+
       // Load MapGL API
       await this.waitForMapGL();
-      
+
       // Create map instance
       await this.createMap();
-      
     } catch (error) {
       console.error('Failed to initialize MapGL:', error);
       this.props.onError?.(error as Error);
@@ -105,16 +104,16 @@ export class MapGLComponent {
   private setupContainer(): void {
     // Создаем уникальный ID для контейнера карты
     const mapContainerId = `mapgl-container-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     this.container.style.cssText = `
       width: 100%;
       height: 100%;
       position: relative;
       overflow: hidden;
     `;
-    
+
     this.container.id = mapContainerId;
-    
+
     // Add loading indicator
     const loadingDiv = document.createElement('div');
     loadingDiv.id = 'mapgl-loading';
@@ -135,13 +134,13 @@ export class MapGLComponent {
       align-items: center;
       text-align: center;
     `;
-    
+
     loadingDiv.innerHTML = `
       <div style="width: 30px; height: 30px; border: 3px solid #e0e0e0; border-top: 3px solid #1976D2; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
       <div style="font-weight: 600; margin-bottom: 4px;">Загрузка карты 2GIS</div>
       <div style="font-size: 12px; color: #666;">MapGL API v1</div>
     `;
-    
+
     // Добавляем анимацию спиннера
     if (!document.getElementById('mapgl-spinner-style')) {
       const style = document.createElement('style');
@@ -154,7 +153,7 @@ export class MapGLComponent {
       `;
       document.head.appendChild(style);
     }
-    
+
     this.container.appendChild(loadingDiv);
   }
 
@@ -172,18 +171,22 @@ export class MapGLComponent {
 
       const checkMapGL = () => {
         attempts++;
-        
+
         if (window.mapgl && window.mapgl.Map) {
           console.log(`✅ MapGL API v1 загружен (попытка ${attempts})`);
           resolve();
         } else if (attempts >= maxAttempts) {
-          reject(new Error('MapGL API v1 не загрузился за отведенное время. Проверьте подключение к интернету и доступность 2GIS API.'));
+          reject(
+            new Error(
+              'MapGL API v1 не загрузился за отведенное время. Проверьте подключение к интернету и доступность 2GIS API.'
+            )
+          );
         } else {
           console.log(`⏳ Ожидание MapGL API... (попытка ${attempts}/${maxAttempts})`);
           setTimeout(checkMapGL, 200);
         }
       };
-      
+
       checkMapGL();
     });
 
@@ -206,19 +209,19 @@ export class MapGLComponent {
     const mapConfig = {
       center: this.props.center || mergedConfig.defaultCenter,
       zoom: this.props.zoom || mergedConfig.defaultZoom,
-      key: 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc' // API ключ в конфигурации, не в URL
+      key: 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc', // API ключ в конфигурации, не в URL
     };
 
     try {
       console.log('Создание карты с конфигурацией:', mapConfig);
-      
+
       // Создаем карту - используем ID контейнера, не элемент
       this.map = new window.mapgl.Map(this.container.id, mapConfig);
-      
-             // Ждем события загрузки стиля карты согласно документации 2GIS
-       await new Promise<void>((resolve) => {
+
+      // Ждем события загрузки стиля карты согласно документации 2GIS
+      await new Promise<void>(resolve => {
         let resolved = false;
-        
+
         this.map!.on('styleload', () => {
           if (!resolved) {
             resolved = true;
@@ -236,7 +239,7 @@ export class MapGLComponent {
           }
         }, 5000);
       });
-      
+
       // Remove loading indicator
       const loading = this.container.querySelector('#mapgl-loading');
       if (loading) {
@@ -245,15 +248,14 @@ export class MapGLComponent {
 
       // Setup event listeners
       this.setupEventListeners();
-      
+
       // Mark as loaded
       this.isLoaded = true;
-      
+
       // Notify parent
       this.props.onLoad?.(this.map);
-      
+
       console.log('✅ MapGL карта успешно создана');
-      
     } catch (error) {
       console.error('Failed to create map:', error);
       this.showError('Не удалось создать карту 2GIS');
@@ -310,18 +312,18 @@ export class MapGLComponent {
       z-index: 1000;
       max-width: 300px;
     `;
-    
+
     errorDiv.innerHTML = `
       <div style="margin-bottom: 12px; font-weight: 600;">❌ ${message}</div>
       <div style="font-size: 14px; opacity: 0.9;">Проверьте подключение к интернету</div>
     `;
-    
+
     // Remove loading indicator
     const loading = this.container.querySelector('#mapgl-loading');
     if (loading) {
       loading.remove();
     }
-    
+
     this.container.appendChild(errorDiv);
   }
 
@@ -334,8 +336,8 @@ export class MapGLComponent {
     try {
       // Правильное создание маркера согласно API 2GIS
       const marker = new window.mapgl.Marker({
-        coordinates: options.coordinates, // [lng, lat] 
-        color: options.color || '#1976D2'
+        coordinates: options.coordinates, // [lng, lat]
+        color: options.color || '#1976D2',
       });
 
       // Добавляем обработчик клика если нужен
@@ -346,9 +348,8 @@ export class MapGLComponent {
       // Добавляем маркер на карту
       marker.addTo(this.map);
       this.markers.set(id, marker);
-      
+
       console.log(`✅ Маркер "${id}" добавлен`);
-      
     } catch (error) {
       console.error('Failed to add marker:', error);
     }
@@ -446,7 +447,7 @@ export class MapGLComponent {
   public destroy(): void {
     // Remove all markers
     this.clearMarkers();
-    
+
     // Destroy map
     if (this.map) {
       if (this.map.destroy) {
@@ -456,10 +457,10 @@ export class MapGLComponent {
       }
       this.map = undefined;
     }
-    
+
     // Clear container
     this.container.innerHTML = '';
-    
+
     this.isLoaded = false;
   }
 }
@@ -483,15 +484,15 @@ export class MapGLComponentFactory {
       container,
       center: [37.620393, 55.75396], // Moscow
       zoom: 12,
-      onLoad: (map) => {
+      onLoad: map => {
         console.log('Dashboard map loaded:', map);
       },
-      onError: (error) => {
+      onError: error => {
         console.error('Dashboard map error:', error);
-      }
+      },
     });
   }
 }
 
 // Export alias for backward compatibility
-export { MapGLComponent as MapGLService }; 
+export { MapGLComponent as MapGLService };

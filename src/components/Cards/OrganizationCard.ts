@@ -9,7 +9,7 @@ export enum CardSize {
   /** Стандартная карточка - с описанием */
   STANDARD = 'standard',
   /** Полная карточка - со всей информацией */
-  FULL = 'full'
+  FULL = 'full',
 }
 
 /**
@@ -60,9 +60,9 @@ export class OrganizationCard {
       showWorkingHours: true,
       showCategory: true,
       showDescription: true,
-      ...props
+      ...props,
     };
-    
+
     this.initialize();
   }
 
@@ -87,7 +87,7 @@ export class OrganizationCard {
       overflow: 'hidden',
       cursor: 'pointer',
       transition: 'all 0.2s ease',
-      border: '1px solid #F0F0F0'
+      border: '1px solid #F0F0F0',
     });
 
     // Добавляем hover эффект
@@ -130,18 +130,18 @@ export class OrganizationCard {
    */
   protected createPhoto(): void {
     const { organization } = this.props;
-    
+
     this.photoElement = document.createElement('div');
-    
+
     const photoHeight = this.getPhotoHeight();
-    
+
     Object.assign(this.photoElement.style, {
       height: photoHeight,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundRepeat: 'no-repeat',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
     });
 
     // Устанавливаем фото или заглушку
@@ -160,7 +160,7 @@ export class OrganizationCard {
 
     // Добавляем класс для стилизации
     this.photoElement.className = 'org-card-photo';
-    
+
     this.element.appendChild(this.photoElement);
   }
 
@@ -207,7 +207,7 @@ export class OrganizationCard {
     if (!this.photoElement) return;
 
     const badge = document.createElement('div');
-    
+
     Object.assign(badge.style, {
       position: 'absolute',
       top: '8px',
@@ -219,12 +219,12 @@ export class OrganizationCard {
       fontWeight: '600',
       borderRadius: '4px',
       textTransform: 'uppercase',
-      letterSpacing: '0.5px'
+      letterSpacing: '0.5px',
     });
 
     badge.textContent = 'Реклама';
     badge.className = 'advertiser-badge';
-    
+
     this.photoElement.appendChild(badge);
   }
 
@@ -233,14 +233,14 @@ export class OrganizationCard {
    */
   protected createContentContainer(): void {
     this.contentContainer = document.createElement('div');
-    
+
     const padding = this.props.size === CardSize.COMPACT ? '12px' : '16px';
-    
+
     Object.assign(this.contentContainer.style, {
       display: 'flex',
       flexDirection: 'column',
       padding,
-      flex: '1'
+      flex: '1',
     });
 
     this.contentContainer.className = 'org-card-content';
@@ -292,7 +292,7 @@ export class OrganizationCard {
     if (!this.contentContainer) return;
 
     const title = document.createElement('h3');
-    
+
     Object.assign(title.style, {
       margin: '0 0 4px 0',
       fontSize: this.props.size === CardSize.COMPACT ? '16px' : '18px',
@@ -302,12 +302,12 @@ export class OrganizationCard {
       display: '-webkit-box',
       WebkitLineClamp: this.props.size === CardSize.COMPACT ? '1' : '2',
       WebkitBoxOrient: 'vertical',
-      overflow: 'hidden'
+      overflow: 'hidden',
     });
 
     title.textContent = this.props.organization.name;
     title.className = 'org-card-title';
-    
+
     this.contentContainer.appendChild(title);
   }
 
@@ -318,16 +318,16 @@ export class OrganizationCard {
     if (!this.contentContainer) return;
 
     const category = document.createElement('div');
-    
+
     Object.assign(category.style, {
       fontSize: '14px',
       color: '#666666',
-      marginBottom: '8px'
+      marginBottom: '8px',
     });
 
     category.textContent = this.props.organization.category;
     category.className = 'org-card-category';
-    
+
     this.contentContainer.appendChild(category);
   }
 
@@ -338,16 +338,16 @@ export class OrganizationCard {
     if (!this.contentContainer) return;
 
     const { organization } = this.props;
-    
+
     if (!organization.rating && !organization.reviewsCount) return;
 
     const ratingContainer = document.createElement('div');
-    
+
     Object.assign(ratingContainer.style, {
       display: 'flex',
       alignItems: 'center',
       marginBottom: '8px',
-      gap: '8px'
+      gap: '8px',
     });
 
     // Рейтинг
@@ -356,7 +356,7 @@ export class OrganizationCard {
       Object.assign(rating.style, {
         display: 'flex',
         alignItems: 'center',
-        gap: '4px'
+        gap: '4px',
       });
 
       // Звездочки
@@ -368,7 +368,7 @@ export class OrganizationCard {
       Object.assign(ratingText.style, {
         fontSize: '14px',
         fontWeight: '500',
-        color: '#333333'
+        color: '#333333',
       });
       ratingText.textContent = organization.rating.toFixed(1);
       rating.appendChild(ratingText);
@@ -381,7 +381,7 @@ export class OrganizationCard {
       const reviews = document.createElement('span');
       Object.assign(reviews.style, {
         fontSize: '14px',
-        color: '#666666'
+        color: '#666666',
       });
       reviews.textContent = `${organization.reviewsCount} отзывов`;
       ratingContainer.appendChild(reviews);
@@ -398,7 +398,7 @@ export class OrganizationCard {
     const starsContainer = document.createElement('div');
     Object.assign(starsContainer.style, {
       display: 'flex',
-      gap: '2px'
+      gap: '2px',
     });
 
     for (let i = 1; i <= 5; i++) {
@@ -406,7 +406,7 @@ export class OrganizationCard {
       Object.assign(star.style, {
         width: '12px',
         height: '12px',
-        color: i <= rating ? '#FFA726' : '#E0E0E0'
+        color: i <= rating ? '#FFA726' : '#E0E0E0',
       });
 
       star.innerHTML = `
@@ -432,7 +432,7 @@ export class OrganizationCard {
       display: 'flex',
       alignItems: 'flex-start',
       gap: '8px',
-      marginBottom: '8px'
+      marginBottom: '8px',
     });
 
     // Иконка локации
@@ -442,7 +442,7 @@ export class OrganizationCard {
       height: '16px',
       marginTop: '2px',
       flexShrink: '0',
-      color: '#666666'
+      color: '#666666',
     });
 
     locationIcon.innerHTML = `
@@ -458,7 +458,7 @@ export class OrganizationCard {
       flex: '1',
       fontSize: '14px',
       color: '#666666',
-      lineHeight: '1.4'
+      lineHeight: '1.4',
     });
 
     const { organization } = this.props;
@@ -466,9 +466,10 @@ export class OrganizationCard {
 
     // Добавляем расстояние если есть
     if (this.props.showDistance && organization.distance) {
-      const distanceText = organization.distance < 1000 
-        ? `${organization.distance} м`
-        : `${(organization.distance / 1000).toFixed(1)} км`;
+      const distanceText =
+        organization.distance < 1000
+          ? `${organization.distance} м`
+          : `${(organization.distance / 1000).toFixed(1)} км`;
       addressContent += ` • ${distanceText}`;
     }
 
@@ -488,11 +489,11 @@ export class OrganizationCard {
     if (!this.contentContainer) return;
 
     const { organization } = this.props;
-    
+
     if (!organization.description) return;
 
     const description = document.createElement('div');
-    
+
     Object.assign(description.style, {
       fontSize: '14px',
       color: '#666666',
@@ -501,12 +502,12 @@ export class OrganizationCard {
       display: '-webkit-box',
       WebkitLineClamp: this.props.size === CardSize.FULL ? '3' : '2',
       WebkitBoxOrient: 'vertical',
-      overflow: 'hidden'
+      overflow: 'hidden',
     });
 
     description.textContent = organization.description;
     description.className = 'org-card-description';
-    
+
     this.contentContainer.appendChild(description);
   }
 
@@ -517,16 +518,16 @@ export class OrganizationCard {
     if (!this.contentContainer) return;
 
     const { organization } = this.props;
-    
+
     if (!organization.workingHours) return;
 
     const workingHours = document.createElement('div');
-    
+
     Object.assign(workingHours.style, {
       display: 'flex',
       alignItems: 'center',
       gap: '6px',
-      marginBottom: '12px'
+      marginBottom: '12px',
     });
 
     // Иконка часов
@@ -534,7 +535,7 @@ export class OrganizationCard {
     Object.assign(clockIcon.style, {
       width: '16px',
       height: '16px',
-      color: '#666666'
+      color: '#666666',
     });
 
     clockIcon.innerHTML = `
@@ -548,7 +549,7 @@ export class OrganizationCard {
     const hoursText = document.createElement('span');
     Object.assign(hoursText.style, {
       fontSize: '14px',
-      color: '#666666'
+      color: '#666666',
     });
     hoursText.textContent = organization.workingHours;
 
@@ -566,14 +567,14 @@ export class OrganizationCard {
     if (!this.contentContainer) return;
 
     const { organization } = this.props;
-    
+
     if (!organization.phone) return;
 
     const actionsContainer = document.createElement('div');
     Object.assign(actionsContainer.style, {
       display: 'flex',
       gap: '8px',
-      marginTop: 'auto'
+      marginTop: 'auto',
     });
 
     // Кнопка звонка
@@ -591,7 +592,7 @@ export class OrganizationCard {
       fontWeight: '500',
       cursor: 'pointer',
       transition: 'all 0.2s ease',
-      fontFamily: 'inherit'
+      fontFamily: 'inherit',
     });
 
     callButton.innerHTML = `
@@ -613,7 +614,7 @@ export class OrganizationCard {
     });
 
     // Обработчик клика
-    callButton.addEventListener('click', (e) => {
+    callButton.addEventListener('click', e => {
       e.stopPropagation();
       this.props.onCallClick?.(organization);
     });
@@ -636,7 +637,7 @@ export class OrganizationCard {
 
     // Клик по фото (если есть)
     if (this.photoElement) {
-      this.photoElement.addEventListener('click', (e) => {
+      this.photoElement.addEventListener('click', e => {
         e.stopPropagation();
         this.props.onPhotoClick?.(this.props.organization);
       });
@@ -648,7 +649,7 @@ export class OrganizationCard {
    */
   public updateOrganization(organization: Organization): void {
     this.props.organization = organization;
-    
+
     // Перерендериваем карточку
     this.element.innerHTML = '';
     this.createCard();
@@ -666,9 +667,9 @@ export class OrganizationCard {
    */
   public updateProps(newProps: Partial<OrganizationCardProps>): void {
     this.props = { ...this.props, ...newProps };
-    
+
     // Перерендериваем если изменились критичные пропсы
-    const shouldRerender = 
+    const shouldRerender =
       newProps.size !== undefined ||
       newProps.showPhoto !== undefined ||
       newProps.organization !== undefined;
@@ -696,10 +697,7 @@ export class OrganizationCardFactory {
   /**
    * Создание карточки организации
    */
-  static create(
-    containerElement: HTMLElement,
-    props: OrganizationCardProps
-  ): OrganizationCard {
+  static create(containerElement: HTMLElement, props: OrganizationCardProps): OrganizationCard {
     return new OrganizationCard(containerElement, props);
   }
 
@@ -715,7 +713,7 @@ export class OrganizationCardFactory {
       size: CardSize.COMPACT,
       showPhoto: false,
       showDescription: false,
-      showWorkingHours: false
+      showWorkingHours: false,
     });
   }
 
@@ -731,23 +729,20 @@ export class OrganizationCardFactory {
       size: CardSize.STANDARD,
       showPhoto: true,
       showDescription: true,
-      showWorkingHours: false
+      showWorkingHours: false,
     });
   }
 
   /**
    * Создание полной карточки
    */
-  static createFull(
-    containerElement: HTMLElement,
-    organization: Organization
-  ): OrganizationCard {
+  static createFull(containerElement: HTMLElement, organization: Organization): OrganizationCard {
     return new OrganizationCard(containerElement, {
       organization,
       size: CardSize.FULL,
       showPhoto: true,
       showDescription: true,
-      showWorkingHours: true
+      showWorkingHours: true,
     });
   }
-} 
+}

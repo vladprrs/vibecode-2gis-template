@@ -1051,4 +1051,4 @@ export class AdviceGrid {
       this.element.parentNode.removeChild(this.element);
     }
   }
-} 
+}

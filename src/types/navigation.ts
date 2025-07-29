@@ -5,11 +5,11 @@ export enum ScreenType {
   /** Главный экран с дашбордом */
   DASHBOARD = 'dashboard',
   /** Экран подсказок поиска */
-  SUGGEST = 'suggest', 
+  SUGGEST = 'suggest',
   /** Экран результатов поиска */
   SEARCH_RESULT = 'search_result',
   /** Карточка организации */
-  ORGANIZATION = 'organization'
+  ORGANIZATION = 'organization',
 }
 
 /**
@@ -114,14 +114,14 @@ export interface SearchFlowManager {
   searchContext: SearchContext;
   /** История навигации */
   navigationHistory: ScreenType[];
-  
+
   /** Методы навигации */
   goToSuggest: () => void;
   goToSearchResults: (query: string, filters?: SearchFilters) => void;
   goToOrganization: (organization: Organization) => void;
   goBack: () => void;
   goToDashboard: () => void;
-  
+
   /** Методы для работы с поисковым контекстом */
   updateQuery: (query: string) => void;
   updateFilters: (filters: Partial<SearchFilters>) => void;
@@ -138,4 +138,4 @@ export interface NavigationEvents {
   onSuggestionSelected: (suggestion: SearchSuggestion, position: number) => void;
   onFilterApplied: (filters: SearchFilters) => void;
   onOrganizationSelected: (organization: Organization, position: number) => void;
-} 
+}

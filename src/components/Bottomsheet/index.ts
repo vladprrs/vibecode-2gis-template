@@ -1,20 +1,20 @@
 // Экспорт основного контейнера шторки
-export { 
-  BottomsheetContainer, 
+export {
+  BottomsheetContainer,
   BottomsheetContainerFactory,
-  type BottomsheetContainerProps 
+  type BottomsheetContainerProps,
 } from './BottomsheetContainer';
 
 // Экспорт заголовка шторки с поисковой строкой
-export { 
-  BottomsheetHeader, 
+export {
+  BottomsheetHeader,
   BottomsheetHeaderFactory,
-  type BottomsheetHeaderProps 
+  type BottomsheetHeaderProps,
 } from './BottomsheetHeader';
 
 // Экспорт контентной области шторки
-export { 
-  BottomsheetContent, 
+export {
+  BottomsheetContent,
   BottomsheetContentFactory,
-  type BottomsheetContentProps 
-} from './BottomsheetContent'; 
+  type BottomsheetContentProps,
+} from './BottomsheetContent';

@@ -7,7 +7,7 @@ export enum SearchBarState {
   /** Активная - белый фон, фокус, клавиатура */
   ACTIVE = 'active',
   /** Заполненная - с текстом и кнопкой очистки */
-  FILLED = 'filled'
+  FILLED = 'filled',
 }
 
 /**
@@ -59,9 +59,9 @@ export class SearchBar {
       showClearButton: true,
       autoFocus: false,
       debounceMs: 300,
-      ...props
+      ...props,
     };
-    
+
     this.initialize();
   }
 
@@ -82,7 +82,7 @@ export class SearchBar {
     Object.assign(this.element.style, {
       display: 'flex',
       alignItems: 'center',
-      width: '100%'
+      width: '100%',
     });
 
     if (this.props.className) {
@@ -95,7 +95,7 @@ export class SearchBar {
    */
   private createSearchBar(): void {
     this.container = document.createElement('div');
-    
+
     Object.assign(this.container.style, {
       display: 'flex',
       alignItems: 'center',
@@ -104,7 +104,7 @@ export class SearchBar {
       padding: '12px 16px',
       borderRadius: '12px',
       transition: 'all 0.2s ease',
-      border: '1px solid transparent'
+      border: '1px solid transparent',
     });
 
     // Создаем содержимое
@@ -114,7 +114,7 @@ export class SearchBar {
 
     // Добавляем класс для стилизации
     this.container.className = 'search-bar-container';
-    
+
     this.element.appendChild(this.container);
   }
 
@@ -125,7 +125,7 @@ export class SearchBar {
     if (!this.props.showSearchIcon || !this.container) return;
 
     const icon = document.createElement('div');
-    
+
     Object.assign(icon.style, {
       width: '20px',
       height: '20px',
@@ -135,7 +135,7 @@ export class SearchBar {
       alignItems: 'center',
       justifyContent: 'center',
       opacity: '0.6',
-      transition: 'opacity 0.2s ease'
+      transition: 'opacity 0.2s ease',
     });
 
     // SVG иконка поиска
@@ -157,7 +157,7 @@ export class SearchBar {
     if (!this.container) return;
 
     this.input = document.createElement('input');
-    
+
     Object.assign(this.input.style, {
       flex: '1',
       border: 'none',
@@ -166,7 +166,7 @@ export class SearchBar {
       fontSize: '16px',
       color: '#333333',
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      minWidth: '0' // Для корректного сжатия в flex
+      minWidth: '0', // Для корректного сжатия в flex
     });
 
     this.input.type = 'text';
@@ -190,7 +190,7 @@ export class SearchBar {
     if (!this.props.showClearButton || !this.container) return;
 
     this.clearButton = document.createElement('button');
-    
+
     Object.assign(this.clearButton.style, {
       width: '24px',
       height: '24px',
@@ -204,7 +204,7 @@ export class SearchBar {
       justifyContent: 'center',
       opacity: '0.6',
       transition: 'opacity 0.2s ease, transform 0.1s ease',
-      flexShrink: '0'
+      flexShrink: '0',
     });
 
     // SVG иконка крестика
@@ -219,7 +219,7 @@ export class SearchBar {
       this.clearButton!.style.opacity = '1';
       this.clearButton!.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
     });
-    
+
     this.clearButton.addEventListener('mouseleave', () => {
       this.clearButton!.style.opacity = '0.6';
       this.clearButton!.style.backgroundColor = 'transparent';
@@ -252,24 +252,24 @@ export class SearchBar {
       this.handleBlur();
     });
 
-    this.input.addEventListener('input', (e) => {
+    this.input.addEventListener('input', e => {
       const target = e.target as HTMLInputElement;
       this.handleChange(target.value);
     });
 
-    this.input.addEventListener('keydown', (e) => {
+    this.input.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
         e.preventDefault();
         this.handleSubmit();
       }
-      
+
       if (e.key === 'Escape') {
         this.input?.blur();
       }
     });
 
     // Обработчик для кнопки очистки
-    this.clearButton?.addEventListener('click', (e) => {
+    this.clearButton?.addEventListener('click', e => {
       e.preventDefault();
       e.stopPropagation();
       this.handleClear();
@@ -299,7 +299,7 @@ export class SearchBar {
   private handleChange(value: string): void {
     // Обновляем видимость кнопки очистки
     this.updateClearButtonVisibility(value);
-    
+
     // Определяем состояние
     const newState = value.length > 0 ? SearchBarState.FILLED : SearchBarState.ACTIVE;
     this.updateVisualState(newState);
@@ -319,10 +319,10 @@ export class SearchBar {
    */
   private handleSubmit(): void {
     const value = this.input?.value || '';
-    
+
     // Убираем фокус с поля
     this.input?.blur();
-    
+
     this.props.onSubmit?.(value);
   }
 
@@ -334,15 +334,15 @@ export class SearchBar {
       this.input.value = '';
       this.input.focus();
     }
-    
+
     this.updateClearButtonVisibility('');
     this.updateVisualState(SearchBarState.ACTIVE);
-    
+
     // Отменяем debounce и сразу вызываем onChange
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer);
     }
-    
+
     this.props.onChange?.('');
     this.props.onClear?.();
   }
@@ -354,7 +354,7 @@ export class SearchBar {
     if (newState) {
       this.props.state = newState;
     }
-    
+
     this.updateVisualState(this.props.state!);
     this.updateClearButtonVisibility(this.input?.value || '');
   }
@@ -367,19 +367,19 @@ export class SearchBar {
 
     // Удаляем все классы состояний
     this.container.classList.remove('search-inactive', 'search-active', 'search-filled');
-    
+
     switch (state) {
       case SearchBarState.INACTIVE:
         this.container.style.backgroundColor = '#F5F5F5';
         this.container.style.borderColor = 'transparent';
         this.container.classList.add('search-inactive');
         break;
-        
+
       case SearchBarState.ACTIVE:
         this.container.style.backgroundColor = '#ffffff';
         this.container.style.borderColor = '#1976D2';
         this.container.classList.add('search-active');
-        
+
         // Делаем иконку поиска более заметной
         const searchIcon = this.container.querySelector('.search-icon') as HTMLElement;
         if (searchIcon) {
@@ -387,12 +387,12 @@ export class SearchBar {
           searchIcon.style.color = '#1976D2';
         }
         break;
-        
+
       case SearchBarState.FILLED:
         this.container.style.backgroundColor = '#ffffff';
         this.container.style.borderColor = 'transparent';
         this.container.classList.add('search-filled');
-        
+
         // Возвращаем нормальную иконку
         const filledIcon = this.container.querySelector('.search-icon') as HTMLElement;
         if (filledIcon) {
@@ -422,11 +422,15 @@ export class SearchBar {
   public setValue(value: string): void {
     if (this.input) {
       this.input.value = value;
-      
+
       // Определяем новое состояние
-      const newState = value.length > 0 ? SearchBarState.FILLED : 
-                      (document.activeElement === this.input ? SearchBarState.ACTIVE : SearchBarState.INACTIVE);
-      
+      const newState =
+        value.length > 0
+          ? SearchBarState.FILLED
+          : document.activeElement === this.input
+            ? SearchBarState.ACTIVE
+            : SearchBarState.INACTIVE;
+
       this.updateState(newState);
     }
   }
@@ -478,12 +482,12 @@ export class SearchBar {
    */
   public updateProps(newProps: Partial<SearchBarProps>): void {
     this.props = { ...this.props, ...newProps };
-    
+
     // Обновляем поле ввода если нужно
     if (newProps.value !== undefined) {
       this.setValue(newProps.value);
     }
-    
+
     if (newProps.placeholder && this.input) {
       this.input.placeholder = newProps.placeholder;
     }
@@ -516,10 +520,7 @@ export class SearchBarFactory {
   /**
    * Создание поисковой строки
    */
-  static create(
-    containerElement: HTMLElement,
-    props: SearchBarProps = {}
-  ): SearchBar {
+  static create(containerElement: HTMLElement, props: SearchBarProps = {}): SearchBar {
     return new SearchBar(containerElement, props);
   }
 
@@ -532,7 +533,7 @@ export class SearchBarFactory {
       state: SearchBarState.INACTIVE,
       showSearchIcon: true,
       showClearButton: false,
-      autoFocus: false
+      autoFocus: false,
     });
   }
 
@@ -546,7 +547,7 @@ export class SearchBarFactory {
       showSearchIcon: true,
       showClearButton: true,
       autoFocus: true,
-      debounceMs: 300
+      debounceMs: 300,
     });
   }
-} 
+}

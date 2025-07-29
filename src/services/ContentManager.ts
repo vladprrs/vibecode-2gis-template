@@ -1,4 +1,4 @@
-import { SearchContext, SearchFlowManager } from '../types';
+import { Organization, SearchContext, SearchFlowManager } from '../types';
 
 export class ContentManager {
   private searchFlowManager: SearchFlowManager;
@@ -27,18 +27,84 @@ export class ContentManager {
     `;
 
     const suggestions = [
-      { type: 'home', title: 'Дом', subtitle: ['Красный проспект, 49', '5 км'], hasSubtitle: true, icon: 'home' },
+      {
+        type: 'home',
+        title: 'Дом',
+        subtitle: ['Красный проспект, 49', '5 км'],
+        hasSubtitle: true,
+        icon: 'home',
+      },
       { type: 'search', title: 'Мебель', subtitle: [], hasSubtitle: false, icon: 'search' },
-      { type: 'branch', title: 'МЕСТО, инвест-апарты', subtitle: ['Красный проспект, 49'], hasSubtitle: true, icon: 'building' },
-      { type: 'category', title: 'Мечети', subtitle: ['6 филиалов', 'Место для намаза'], hasSubtitle: true, icon: 'category' },
-      { type: 'category', title: 'Боулинг', subtitle: ['6 филиалов', 'Места отдыха'], hasSubtitle: true, icon: 'category' },
-      { type: 'category', title: 'Аквапарки/Водные аттракционы', subtitle: ['6 филиалов', 'Места отдыха'], hasSubtitle: true, icon: 'category' },
-      { type: 'category', title: 'Газпромнефть азс', subtitle: [], hasSubtitle: false, icon: 'category' },
-      { type: 'category', title: 'Гостиницы', subtitle: ['222 филиала'], hasSubtitle: true, icon: 'category' },
-      { type: 'category', title: 'Грильница, сеть ресторанов вкусной…', subtitle: ['22 филиала'], hasSubtitle: true, icon: 'category' },
-      { type: 'transport', title: '12, автобус', subtitle: ['Александра Чистякова — Дюканова'], hasSubtitle: true, icon: 'bus' },
-      { type: 'transport', title: 'Площадь Калинина, остановка', subtitle: ['Новосибирск'], hasSubtitle: true, icon: 'bus' },
-      { type: 'metro', title: 'Октябрьская', subtitle: ['Ленинская линия', '5 км'], hasSubtitle: true, icon: 'metro' }
+      {
+        type: 'branch',
+        title: 'МЕСТО, инвест-апарты',
+        subtitle: ['Красный проспект, 49'],
+        hasSubtitle: true,
+        icon: 'building',
+      },
+      {
+        type: 'category',
+        title: 'Мечети',
+        subtitle: ['6 филиалов', 'Место для намаза'],
+        hasSubtitle: true,
+        icon: 'category',
+      },
+      {
+        type: 'category',
+        title: 'Боулинг',
+        subtitle: ['6 филиалов', 'Места отдыха'],
+        hasSubtitle: true,
+        icon: 'category',
+      },
+      {
+        type: 'category',
+        title: 'Аквапарки/Водные аттракционы',
+        subtitle: ['6 филиалов', 'Места отдыха'],
+        hasSubtitle: true,
+        icon: 'category',
+      },
+      {
+        type: 'category',
+        title: 'Газпромнефть азс',
+        subtitle: [],
+        hasSubtitle: false,
+        icon: 'category',
+      },
+      {
+        type: 'category',
+        title: 'Гостиницы',
+        subtitle: ['222 филиала'],
+        hasSubtitle: true,
+        icon: 'category',
+      },
+      {
+        type: 'category',
+        title: 'Грильница, сеть ресторанов вкусной…',
+        subtitle: ['22 филиала'],
+        hasSubtitle: true,
+        icon: 'category',
+      },
+      {
+        type: 'transport',
+        title: '12, автобус',
+        subtitle: ['Александра Чистякова — Дюканова'],
+        hasSubtitle: true,
+        icon: 'bus',
+      },
+      {
+        type: 'transport',
+        title: 'Площадь Калинина, остановка',
+        subtitle: ['Новосибирск'],
+        hasSubtitle: true,
+        icon: 'bus',
+      },
+      {
+        type: 'metro',
+        title: 'Октябрьская',
+        subtitle: ['Ленинская линия', '5 км'],
+        hasSubtitle: true,
+        icon: 'metro',
+      },
     ];
 
     suggestions.forEach((suggestion, index) => {
@@ -272,6 +338,7 @@ export class ContentManager {
 
     const results = [
       {
+        id: 'advertiser-1',
         type: 'advertiser',
         title: 'Реактор',
         subtitle: 'Региональная сеть автокомплексов для японских автомобилей',
@@ -281,32 +348,78 @@ export class ContentManager {
         address: 'Тверская 32/12, 1 этаж, Москва',
         adText: 'Скажи кодовое слово «2ГИС» и получи карточку лояльности!',
         buttonText: 'Записаться на прием',
-        hasCrown: true
+        hasCrown: true,
+        isAdvertiser: true,
+        organization: {
+          id: 'advertiser-1',
+          name: 'Реактор',
+          address: 'Тверская 32/12, 1 этаж, Москва',
+          coordinates: [37.6173, 55.7558] as [number, number],
+          isAdvertiser: true,
+          rating: 4.6,
+          reviewsCount: 120,
+          category: 'Автосервис',
+          description:
+            'Региональная сеть автокомплексов для японских автомобилей с полным спектром услуг.',
+          phone: '+7 (495) 123-45-67',
+          workingHours: 'Пн-Пт: 09:00-21:00, Сб-Вс: 10:00-18:00',
+        },
       },
       {
-        type: 'advertiser',
-        title: 'Реактор',
-        subtitle: 'Региональная сеть автокомплексов для японских автомобилей',
-        rating: '4.6',
-        reviews: '120 оценок',
-        distance: '3 мин',
-        address: 'Тверская 32/12, 1 этаж, Москва',
-        adText: 'Скажи кодовое слово «2ГИС» и получи карточку лояльности!',
-        buttonText: 'Записаться на прием',
-        hasCrown: true
-      },
-      {
+        id: 'non-advertiser-1',
         type: 'non-advertiser',
         title: 'Шиномонтаж',
-        subtitle: 'Региональная сеть автокомплексов для японских автомобилей',
-        rating: '4.6',
-        reviews: '120 оценок',
-        distance: '3 мин',
-        address: 'Тверская 32/12, 1 этаж, Москва',
+        subtitle: 'Шиномонтажные услуги и продажа автошин',
+        rating: '4.2',
+        reviews: '85 оценок',
+        distance: '5 мин',
+        address: 'ул. Садовая, 45, Москва',
         parking: '500 мест • Цена в час 50 ₽ • Теплая',
         buttonText: 'Заказать доставку',
-        hasFriends: true
-      }
+        hasFriends: true,
+        isAdvertiser: false,
+        organization: {
+          id: 'non-advertiser-1',
+          name: 'Шиномонтаж',
+          address: 'ул. Садовая, 45, Москва',
+          coordinates: [37.6203, 55.7489] as [number, number],
+          isAdvertiser: false,
+          rating: 4.2,
+          reviewsCount: 85,
+          category: 'Шиномонтаж',
+          description: 'Профессиональный шиномонтаж с большим опытом работы.',
+          phone: '+7 (495) 987-65-43',
+          workingHours: 'Пн-Вс: 08:00-20:00',
+        },
+      },
+      {
+        id: 'advertiser-2',
+        type: 'advertiser',
+        title: 'AutoCenter Plus',
+        subtitle: 'Премиальный автосервис с гарантией качества',
+        rating: '4.8',
+        reviews: '245 оценок',
+        distance: '7 мин',
+        address: 'Ленинский проспект, 123, Москва',
+        adText: 'Диагностика бесплатно при любом ремонте!',
+        buttonText: 'Записаться онлайн',
+        hasCrown: true,
+        isAdvertiser: true,
+        organization: {
+          id: 'advertiser-2',
+          name: 'AutoCenter Plus',
+          address: 'Ленинский проспект, 123, Москва',
+          coordinates: [37.5847, 55.7342] as [number, number],
+          isAdvertiser: true,
+          rating: 4.8,
+          reviewsCount: 245,
+          category: 'Автосервис',
+          description:
+            'Премиальный автосервис с современным оборудованием и высококвалифицированными мастерами.',
+          phone: '+7 (495) 555-77-99',
+          workingHours: 'Круглосуточно',
+        },
+      },
     ];
 
     results.forEach((result, index) => {
@@ -533,8 +646,369 @@ export class ContentManager {
 
     card.addEventListener('click', () => {
       console.log('Result card clicked:', result.title);
+      // Переходим к карточке организации
+      if (result.organization) {
+        this.searchFlowManager.goToOrganization(result.organization);
+      }
     });
 
     return card;
+  }
+
+  updateContentForOrganization(contentContainer: HTMLElement, organization: Organization): void {
+    if (!contentContainer) return;
+    if (!this.dashboardContent) {
+      this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
+    }
+    contentContainer.innerHTML = '';
+    contentContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      background: #FFF;
+      position: relative;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+    `;
+    this.createOrganizationContent(contentContainer, organization);
+  }
+
+  private createOrganizationContent(container: HTMLElement, organization: Organization): void {
+    const orgContainer = document.createElement('div');
+    orgContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      background: #FFF;
+      position: relative;
+      padding-bottom: 80px;
+    `;
+
+    // Создаем основную карточку организации
+    const mainCard = this.createOrganizationMainCard(organization);
+    orgContainer.appendChild(mainCard);
+
+    // Создаем табы (если рекламодатель - больше табов)
+    const tabsSection = this.createOrganizationTabs(organization);
+    orgContainer.appendChild(tabsSection);
+
+    // Создаем секцию контактов
+    const contactsSection = this.createOrganizationContacts(organization);
+    orgContainer.appendChild(contactsSection);
+
+    // Создаем секцию с дополнительной информацией
+    if (organization.isAdvertiser) {
+      const extraSection = this.createAdvertiserExtraContent(organization);
+      orgContainer.appendChild(extraSection);
+    }
+
+    container.appendChild(orgContainer);
+  }
+
+  private createOrganizationMainCard(organization: Organization): HTMLElement {
+    const card = document.createElement('div');
+    card.style.cssText = `
+      display: flex;
+      padding: 16px;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      border-bottom: 8px solid #F5F5F5;
+    `;
+
+    // Создаем фото организации (заглушка)
+    const photo = document.createElement('div');
+    photo.style.cssText = `
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+      font-family: 'system-ui, -apple-system, sans-serif';
+    `;
+    photo.textContent = organization.name;
+
+    // Создаем информацию о рейтинге
+    const ratingInfo = document.createElement('div');
+    ratingInfo.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    `;
+
+    const stars = document.createElement('div');
+    stars.innerHTML = '★★★★★';
+    stars.style.cssText = `
+      color: #FFD700;
+      font-size: 16px;
+    `;
+
+    const ratingText = document.createElement('span');
+    ratingText.textContent = `${organization.rating || 4.5} • ${organization.reviewsCount || 120} отзывов`;
+    ratingText.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+    `;
+
+    const distance = document.createElement('span');
+    distance.textContent = '3 мин';
+    distance.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+    `;
+
+    ratingInfo.appendChild(stars);
+    ratingInfo.appendChild(ratingText);
+    ratingInfo.appendChild(distance);
+
+    // Создаем описание если есть
+    if (organization.description) {
+      const description = document.createElement('p');
+      description.textContent = organization.description;
+      description.style.cssText = `
+        color: #898989;
+        font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 18px;
+        margin: 0;
+      `;
+      card.appendChild(description);
+    }
+
+    card.appendChild(photo);
+    card.appendChild(ratingInfo);
+
+    return card;
+  }
+
+  private createOrganizationTabs(organization: Organization): HTMLElement {
+    const tabsContainer = document.createElement('div');
+    tabsContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
+      border-bottom: 8px solid #F5F5F5;
+    `;
+
+    // Создаем табы
+    const tabsHeader = document.createElement('div');
+    tabsHeader.style.cssText = `
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      border-bottom: 1px solid #F0F0F0;
+    `;
+
+    const baseTabs = ['О заведении', 'Контакты'];
+    const advertiserTabs = organization.isAdvertiser
+      ? ['О заведении', 'Меню', 'Услуги', 'Акции', 'Контакты']
+      : baseTabs;
+
+    advertiserTabs.forEach((tabName, index) => {
+      const tab = document.createElement('button');
+      tab.style.cssText = `
+        padding: 12px 16px;
+        border: none;
+        background: transparent;
+        color: ${index === 0 ? '#1BA136' : '#898989'};
+        font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        border-bottom: ${index === 0 ? '2px solid #1BA136' : '2px solid transparent'};
+      `;
+      tab.textContent = tabName;
+      tabsHeader.appendChild(tab);
+    });
+
+    // Контент таба (заглушка для демо)
+    const tabContent = document.createElement('div');
+    tabContent.style.cssText = `
+      padding: 16px;
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 20px;
+    `;
+    tabContent.textContent = organization.isAdvertiser
+      ? 'Подробная информация о заведении, услугах и предложениях для рекламодателей.'
+      : 'Основная информация о заведении.';
+
+    tabsContainer.appendChild(tabsHeader);
+    tabsContainer.appendChild(tabContent);
+
+    return tabsContainer;
+  }
+
+  private createOrganizationContacts(organization: Organization): HTMLElement {
+    const contactsSection = document.createElement('div');
+    contactsSection.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      padding: 16px;
+      border-bottom: 8px solid #F5F5F5;
+    `;
+
+    const title = document.createElement('h3');
+    title.textContent = 'Контакты';
+    title.style.cssText = `
+      margin: 0 0 16px 0;
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+    `;
+
+    const contactsList = document.createElement('div');
+    contactsList.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-self: stretch;
+    `;
+
+    // Адрес
+    const addressItem = this.createContactItem('📍', 'Адрес', organization.address);
+    contactsList.appendChild(addressItem);
+
+    // Телефон
+    if (organization.phone) {
+      const phoneItem = this.createContactItem('📞', 'Телефон', organization.phone);
+      contactsList.appendChild(phoneItem);
+    }
+
+    // Время работы
+    if (organization.workingHours) {
+      const hoursItem = this.createContactItem('🕒', 'Время работы', organization.workingHours);
+      contactsList.appendChild(hoursItem);
+    }
+
+    contactsSection.appendChild(title);
+    contactsSection.appendChild(contactsList);
+
+    return contactsSection;
+  }
+
+  private createContactItem(emoji: string, label: string, value: string): HTMLElement {
+    const item = document.createElement('div');
+    item.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    `;
+
+    const icon = document.createElement('div');
+    icon.textContent = emoji;
+    icon.style.cssText = `
+      font-size: 16px;
+      margin-top: 2px;
+    `;
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+      flex: 1;
+    `;
+
+    const labelElement = document.createElement('div');
+    labelElement.textContent = label;
+    labelElement.style.cssText = `
+      color: #898989;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-size: 12px;
+      margin-bottom: 2px;
+    `;
+
+    const valueElement = document.createElement('div');
+    valueElement.textContent = value;
+    valueElement.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+    `;
+
+    content.appendChild(labelElement);
+    content.appendChild(valueElement);
+    item.appendChild(icon);
+    item.appendChild(content);
+
+    return item;
+  }
+
+  private createAdvertiserExtraContent(organization: Organization): HTMLElement {
+    const extraSection = document.createElement('div');
+    extraSection.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      padding: 16px;
+    `;
+
+    const title = document.createElement('h3');
+    title.textContent = 'Специальные предложения';
+    title.style.cssText = `
+      margin: 0 0 16px 0;
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 600;
+      font-size: 18px;
+    `;
+
+    // Создаем карточку предложения
+    const offerCard = document.createElement('div');
+    offerCard.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
+      padding: 16px;
+      background: rgba(27, 161, 54, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(27, 161, 54, 0.1);
+      gap: 12px;
+    `;
+
+    const offerTitle = document.createElement('div');
+    offerTitle.textContent = '🎉 Акция до конца месяца!';
+    offerTitle.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+    `;
+
+    const offerText = document.createElement('div');
+    offerText.textContent = 'Скидка 20% на все услуги при предъявлении промокода "2GIS"';
+    offerText.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 20px;
+    `;
+
+    offerCard.appendChild(offerTitle);
+    offerCard.appendChild(offerText);
+
+    extraSection.appendChild(title);
+    extraSection.appendChild(offerCard);
+
+    return extraSection;
   }
 }

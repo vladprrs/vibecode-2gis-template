@@ -6,11 +6,11 @@ export enum BottomsheetState {
   /** Минимальная высота ~20% экрана - только поисковая строка и основные элементы */
   SMALL = 'small',
   /** Средняя высота ~50% экрана - баланс между картой и контентом */
-  DEFAULT = 'default', 
+  DEFAULT = 'default',
   /** Полная высота ~90% экрана - фокус на контенте */
   FULLSCREEN = 'fullscreen',
   /** Полная высота с внутренней прокруткой - максимум контента */
-  FULLSCREEN_SCROLL = 'fullscreen_scroll'
+  FULLSCREEN_SCROLL = 'fullscreen_scroll',
 }
 
 /**
@@ -55,7 +55,7 @@ export const BOTTOMSHEET_HEIGHTS = {
   [BottomsheetState.SMALL]: 0.2,
   [BottomsheetState.DEFAULT]: 0.5,
   [BottomsheetState.FULLSCREEN]: 0.9,
-  [BottomsheetState.FULLSCREEN_SCROLL]: 0.95
+  [BottomsheetState.FULLSCREEN_SCROLL]: 0.95,
 } as const;
 
 /**
@@ -69,7 +69,7 @@ export const BOTTOMSHEET_ANIMATION_CONFIG = {
   /** Минимальная скорость для snap */
   snapVelocityThreshold: 500,
   /** Минимальное расстояние для срабатывания snap */
-  snapDistanceThreshold: 50
+  snapDistanceThreshold: 50,
 } as const;
 
 /**
@@ -80,4 +80,4 @@ export interface BottomsheetEvents {
   onDragStart: (currentHeight: number) => void;
   onDragEnd: (startHeight: number, endHeight: number) => void;
   onSnapToState: (targetState: BottomsheetState) => void;
-} 
+}

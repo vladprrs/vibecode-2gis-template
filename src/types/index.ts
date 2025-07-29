@@ -5,4 +5,4 @@ export * from './bottomsheet';
 export * from './navigation';
 
 // Экспорт типов для карты
-export * from './map'; 
+export * from './map';

@@ -9,4 +9,4 @@ export { OrganizationScreen } from './OrganizationScreen';
 export { SearchResultScreen } from './SearchResultScreen';
 
 // Suggest Screen
-export { SuggestScreen } from './SuggestScreen'; 
+export { SuggestScreen } from './SuggestScreen';

@@ -1,9 +1,9 @@
-import { 
-  BottomsheetState, 
-  BottomsheetConfig, 
-  BottomsheetStateData,
+import {
+  BOTTOMSHEET_HEIGHTS,
+  BottomsheetConfig,
   BottomsheetEvents,
-  BOTTOMSHEET_HEIGHTS 
+  BottomsheetState,
+  BottomsheetStateData,
 } from '../../types';
 import { BottomsheetManager, BottomsheetScrollManager } from '../../services';
 
@@ -40,7 +40,7 @@ export class BottomsheetContainer {
   constructor(containerElement: HTMLElement, props: BottomsheetContainerProps) {
     this.element = containerElement;
     this.props = props;
-    
+
     // Инициализируем менеджер состояний
     this.manager = new BottomsheetManager(
       props.config,
@@ -79,7 +79,7 @@ export class BottomsheetContainer {
       boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.15)',
       transition: 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
       zIndex: '1000',
-      overflow: 'hidden'
+      overflow: 'hidden',
     });
 
     if (this.props.className) {
@@ -97,7 +97,7 @@ export class BottomsheetContainer {
     // Создаем основной контейнер контента
     this.contentContainer = document.createElement('div');
     this.contentContainer.className = 'dashboard-content';
-    
+
     // Стили для контентной области
     Object.assign(this.contentContainer.style, {
       display: 'flex',
@@ -106,9 +106,9 @@ export class BottomsheetContainer {
       alignSelf: 'stretch',
       position: 'relative',
       flex: '1',
-      minHeight: '0'
+      minHeight: '0',
     });
-    
+
     this.element.appendChild(this.contentContainer);
   }
 
@@ -117,7 +117,7 @@ export class BottomsheetContainer {
    */
   private setupScrollManager(): void {
     if (!this.contentContainer) return;
-    
+
     this.scrollManager = new BottomsheetScrollManager(
       this.element,
       this.contentContainer,
@@ -130,7 +130,9 @@ export class BottomsheetContainer {
    */
   private setupEventListeners(): void {
     // Обработчики touch событий для мобильных устройств
-    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+    this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), {
+      passive: false,
+    });
     this.element.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
     this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
 
@@ -141,11 +143,15 @@ export class BottomsheetContainer {
     this.element.addEventListener('mouseleave', this.handleMouseEnd.bind(this));
 
     // Предотвращаем скролл страницы при перетаскивании
-    this.element.addEventListener('touchmove', (e) => {
-      if (this.isDragging) {
-        e.preventDefault();
-      }
-    }, { passive: false });
+    this.element.addEventListener(
+      'touchmove',
+      e => {
+        if (this.isDragging) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
   }
 
   /**
@@ -158,7 +164,7 @@ export class BottomsheetContainer {
         this.manager.updateScreenHeight(newHeight);
         this.updateHeight();
       });
-      
+
       this.resizeObserver.observe(document.body);
     }
   }
@@ -168,7 +174,7 @@ export class BottomsheetContainer {
    */
   private handleTouchStart(event: TouchEvent): void {
     if (!this.manager.isDraggable()) return;
-    
+
     const touch = event.touches[0];
     this.startDrag(touch.clientY);
   }
@@ -178,7 +184,7 @@ export class BottomsheetContainer {
    */
   private handleTouchMove(event: TouchEvent): void {
     if (!this.isDragging) return;
-    
+
     const touch = event.touches[0];
     this.handleDrag(touch.clientY);
   }
@@ -188,7 +194,7 @@ export class BottomsheetContainer {
    */
   private handleTouchEnd(event: TouchEvent): void {
     if (!this.isDragging) return;
-    
+
     const touch = event.changedTouches[0];
     this.endDrag(touch.clientY);
   }
@@ -198,11 +204,11 @@ export class BottomsheetContainer {
    */
   private handleMouseDown(event: MouseEvent): void {
     if (!this.manager.isDraggable()) return;
-    
+
     // Проверяем, что клик произошел по драггеру (первый ребенок)
     const target = event.target as HTMLElement;
     const dragger = this.element.firstElementChild as HTMLElement;
-    
+
     if (dragger && (target === dragger || dragger.contains(target))) {
       this.startDrag(event.clientY);
     }
@@ -213,7 +219,7 @@ export class BottomsheetContainer {
    */
   private handleMouseMove(event: MouseEvent): void {
     if (!this.isDragging) return;
-    
+
     this.handleDrag(event.clientY);
   }
 
@@ -222,7 +228,7 @@ export class BottomsheetContainer {
    */
   private handleMouseEnd(event: MouseEvent): void {
     if (!this.isDragging) return;
-    
+
     this.endDrag(event.clientY);
   }
 
@@ -233,7 +239,7 @@ export class BottomsheetContainer {
     this.dragStartY = clientY;
     this.isDragging = true;
     this.manager.startDrag(clientY);
-    
+
     // Отключаем transition во время перетаскивания
     this.element.style.transition = 'none';
   }
@@ -244,7 +250,7 @@ export class BottomsheetContainer {
   private handleDrag(clientY: number): void {
     const deltaY = clientY - this.dragStartY;
     this.manager.handleDrag(deltaY);
-    
+
     // Обновляем позицию шторки в реальном времени
     const currentState = this.manager.getCurrentState();
     const baseHeight = this.manager.getHeightForState(currentState.currentState);
@@ -255,7 +261,7 @@ export class BottomsheetContainer {
         baseHeight - deltaY
       )
     );
-    
+
     this.element.style.height = `${newHeight}px`;
   }
 
@@ -265,15 +271,17 @@ export class BottomsheetContainer {
   private endDrag(clientY: number): void {
     const deltaY = clientY - this.dragStartY;
     const velocity = 0; // В реальной реализации нужно вычислить скорость
-    
+
     this.isDragging = false;
-    
+
     // Включаем transition обратно
     this.element.style.transition = 'transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)';
-    
+
     // Определяем конечное состояние
-    const currentHeight = parseInt(this.element.style.height) || this.manager.getHeightForState(this.manager.getCurrentState().currentState);
-    
+    const currentHeight =
+      parseInt(this.element.style.height) ||
+      this.manager.getHeightForState(this.manager.getCurrentState().currentState);
+
     this.manager.endDrag(velocity, currentHeight).then(() => {
       this.updateDisplay();
     });
@@ -295,9 +303,9 @@ export class BottomsheetContainer {
   private updateHeight(): void {
     const state = this.manager.getCurrentState();
     const height = state.height;
-    
+
     this.element.style.height = `${height}px`;
-    
+
     // Обновляем transform для анимации
     if (state.isAnimating) {
       this.element.style.transform = 'translateY(0)';
@@ -309,9 +317,14 @@ export class BottomsheetContainer {
    */
   private updateVisualState(state: BottomsheetStateData): void {
     // Добавляем CSS классы для разных состояний
-    this.element.classList.remove('bs-small', 'bs-default', 'bs-fullscreen', 'bs-fullscreen-scroll');
+    this.element.classList.remove(
+      'bs-small',
+      'bs-default',
+      'bs-fullscreen',
+      'bs-fullscreen-scroll'
+    );
     this.element.classList.add(`bs-${state.currentState}`);
-    
+
     // Добавляем класс для состояния перетаскивания
     if (state.isDragging) {
       this.element.classList.add('bs-dragging');
@@ -377,15 +390,15 @@ export class BottomsheetContainer {
    */
   public setContent(content: HTMLElement[]): void {
     if (!this.contentContainer) return;
-    
+
     // Очищаем текущее содержимое контейнера
     this.contentContainer.innerHTML = '';
-    
+
     // Добавляем новое содержимое в контейнер контента
     content.forEach(child => {
       this.contentContainer!.appendChild(child);
     });
-    
+
     // Обновляем поведение скролла
     this.scrollManager?.updateScrollBehavior();
   }
@@ -396,7 +409,7 @@ export class BottomsheetContainer {
   public destroy(): void {
     // Очищаем менеджер скролла
     this.scrollManager?.destroy();
-    
+
     // Удаляем обработчики событий
     this.element.removeEventListener('touchstart', this.handleTouchStart.bind(this));
     this.element.removeEventListener('touchmove', this.handleTouchMove.bind(this));
@@ -435,9 +448,9 @@ export class BottomsheetContainerFactory {
       state: BottomsheetState.DEFAULT,
       snapPoints: [0.2, 0.5, 0.9, 0.95],
       isDraggable: true,
-      hasScrollableContent: false
+      hasScrollableContent: false,
     };
 
     return new BottomsheetContainer(containerElement, { config: defaultConfig });
   }
-} 
+}

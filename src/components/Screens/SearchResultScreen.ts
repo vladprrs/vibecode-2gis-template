@@ -1,13 +1,13 @@
-import { ScreenType, Organization, SearchFilters as ISearchFilters } from '../../types';
-import { SearchFlowManager, BottomsheetManager, MapSyncService } from '../../services';
-import { 
-  BottomsheetContainer, 
-  BottomsheetHeader, 
+import { SearchFilters as ISearchFilters, Organization, ScreenType } from '../../types';
+import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
+import {
+  BottomsheetContainer,
+  BottomsheetContainerProps,
   BottomsheetContent,
-  BottomsheetContainerProps 
+  BottomsheetHeader,
 } from '../Bottomsheet';
-import { SearchBar, SearchBarState, SearchFilters, FilterItem } from '../Search';
-import { OrganizationCard, CardSize } from '../Cards';
+import { FilterItem, SearchBar, SearchBarState, SearchFilters } from '../Search';
+import { CardSize, OrganizationCard } from '../Cards';
 
 /**
  * Пропсы для SearchResultScreen
@@ -41,7 +41,7 @@ enum LoadingState {
   LOADING = 'loading',
   SUCCESS = 'success',
   ERROR = 'error',
-  EMPTY = 'empty'
+  EMPTY = 'empty',
 }
 
 /**
@@ -51,14 +51,14 @@ enum LoadingState {
 export class SearchResultScreen {
   private props: SearchResultScreenProps;
   private element: HTMLElement;
-  
+
   // Компоненты
   private bottomsheetContainer?: BottomsheetContainer;
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
   private searchFilters?: SearchFilters;
-  
+
   // Контейнеры для компонентов
   private headerContainer?: HTMLElement;
   private contentContainer?: HTMLElement;
@@ -78,7 +78,7 @@ export class SearchResultScreen {
     this.element = props.container;
     this.currentQuery = props.searchQuery;
     this.currentFilters = props.searchFilters || {};
-    
+
     this.initialize();
   }
 
@@ -102,7 +102,7 @@ export class SearchResultScreen {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
     });
 
     if (this.props.className) {
@@ -119,7 +119,7 @@ export class SearchResultScreen {
     // Создаем контейнер для шторки
     const bottomsheetElement = document.createElement('div');
     bottomsheetElement.style.height = '100%';
-    
+
     this.element.appendChild(bottomsheetElement);
 
     // Создаем шторку с состоянием FULLSCREEN_SCROLL для результатов
@@ -128,20 +128,20 @@ export class SearchResultScreen {
         state: this.props.bottomsheetManager.getCurrentState().currentState,
         snapPoints: [0.2, 0.5, 0.9, 0.95],
         isDraggable: true,
-        hasScrollableContent: true
+        hasScrollableContent: true,
       },
       events: {
-        onStateChange: (newState) => {
+        onStateChange: newState => {
           // Синхронизируем состояние с менеджером шторки
           this.props.bottomsheetManager.snapToState(newState);
-          
+
           // Синхронизируем с картой если есть сервис
           if (this.props.mapSyncService && this.bottomsheetContainer) {
             const currentStateData = this.bottomsheetContainer.getCurrentState();
             this.props.mapSyncService.adjustMapViewport(currentStateData.height);
           }
-        }
-      }
+        },
+      },
     };
 
     this.bottomsheetContainer = new BottomsheetContainer(bottomsheetElement, bottomsheetConfig);
@@ -155,7 +155,7 @@ export class SearchResultScreen {
 
     // Создаем заголовок
     this.createHeader();
-    
+
     // Создаем контентную область
     this.createContentArea();
   }
@@ -165,10 +165,10 @@ export class SearchResultScreen {
    */
   private createHeader(): void {
     const headerWrapper = document.createElement('div');
-    
+
     // Создаем заголовок шторки
     this.headerContainer = document.createElement('div');
-    
+
     this.bottomsheetHeader = new BottomsheetHeader(this.headerContainer, {
       placeholder: 'Поиск в Москве',
       showDragger: true,
@@ -177,15 +177,15 @@ export class SearchResultScreen {
       onSearchFocus: () => {
         this.handleSearchFocus();
       },
-      onSearchChange: (query) => {
+      onSearchChange: query => {
         this.handleQueryChange(query);
       },
-      onSearchSubmit: (query) => {
+      onSearchSubmit: query => {
         this.handleQuerySubmit(query);
       },
       onClearSearch: () => {
         this.handleClearSearch();
-      }
+      },
     });
 
     // Настраиваем поисковую строку
@@ -220,10 +220,10 @@ export class SearchResultScreen {
       showClearButton: true,
       autoFocus: false,
       debounceMs: 500,
-      onChange: (query) => {
+      onChange: query => {
         this.handleQueryChange(query);
       },
-      onSubmit: (query) => {
+      onSubmit: query => {
         this.handleQuerySubmit(query);
       },
       onClear: () => {
@@ -231,7 +231,7 @@ export class SearchResultScreen {
       },
       onFocus: () => {
         this.handleSearchFocus();
-      }
+      },
     });
   }
 
@@ -240,19 +240,19 @@ export class SearchResultScreen {
    */
   private createFiltersPanel(): void {
     this.filtersContainer = document.createElement('div');
-    
+
     // Создаем доступные фильтры
     const availableFilters = this.generateAvailableFilters();
-    
+
     this.searchFilters = new SearchFilters(this.filtersContainer, {
       activeFilters: this.currentFilters,
       availableFilters,
       showActiveCount: true,
       showClearAll: true,
-      onFilterToggle: (filter) => {
+      onFilterToggle: filter => {
         this.handleFilterToggle(filter);
       },
-      onFiltersChange: (filters) => {
+      onFiltersChange: filters => {
         this.handleFiltersChange(filters);
       },
       onClearAll: () => {
@@ -261,7 +261,7 @@ export class SearchResultScreen {
       onFilterModal: () => {
         // Можно открыть полноэкранный модал с фильтрами
         console.log('Open filters modal');
-      }
+      },
     });
   }
 
@@ -276,7 +276,7 @@ export class SearchResultScreen {
         active: this.currentFilters.openNow || false,
         value: true,
         type: 'feature',
-        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.7) : undefined
+        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.7) : undefined,
       },
       {
         id: 'withReviews',
@@ -284,7 +284,7 @@ export class SearchResultScreen {
         active: this.currentFilters.withReviews || false,
         value: true,
         type: 'feature',
-        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.8) : undefined
+        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.8) : undefined,
       },
       {
         id: 'rating4',
@@ -292,7 +292,7 @@ export class SearchResultScreen {
         active: this.currentFilters.ratingFrom === 4,
         value: 4,
         type: 'rating',
-        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.6) : undefined
+        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.6) : undefined,
       },
       {
         id: 'distance1km',
@@ -300,7 +300,7 @@ export class SearchResultScreen {
         active: this.currentFilters.distance === 1000,
         value: 1000,
         type: 'distance',
-        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.4) : undefined
+        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.4) : undefined,
       },
       {
         id: 'distance5km',
@@ -308,7 +308,7 @@ export class SearchResultScreen {
         active: this.currentFilters.distance === 5000,
         value: 5000,
         type: 'distance',
-        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.8) : undefined
+        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.8) : undefined,
       },
       {
         id: 'advertiser',
@@ -316,8 +316,8 @@ export class SearchResultScreen {
         active: this.currentFilters.advertisersOnly || false,
         value: true,
         type: 'feature',
-        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.3) : undefined
-      }
+        count: this.resultsCount > 0 ? Math.floor(this.resultsCount * 0.3) : undefined,
+      },
     ];
   }
 
@@ -326,7 +326,7 @@ export class SearchResultScreen {
    */
   private createContentArea(): void {
     this.contentContainer = document.createElement('div');
-    
+
     this.bottomsheetContent = new BottomsheetContent(this.contentContainer, {
       scrollable: true,
       scrollType: 'vertical',
@@ -335,8 +335,8 @@ export class SearchResultScreen {
         top: 0,
         right: 0,
         bottom: 16,
-        left: 0
-      }
+        left: 0,
+      },
     });
 
     // Создаем содержимое с результатами
@@ -353,7 +353,7 @@ export class SearchResultScreen {
     this.resultsContainer = document.createElement('div');
     Object.assign(this.resultsContainer.style, {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     });
 
     // Отображаем состояние в зависимости от загрузки
@@ -402,7 +402,7 @@ export class SearchResultScreen {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '40px 16px',
-      textAlign: 'center'
+      textAlign: 'center',
     });
 
     loadingElement.innerHTML = `
@@ -462,7 +462,7 @@ export class SearchResultScreen {
     const header = document.createElement('div');
     Object.assign(header.style, {
       padding: '16px',
-      borderBottom: '1px solid #F0F0F0'
+      borderBottom: '1px solid #F0F0F0',
     });
 
     const title = document.createElement('div');
@@ -471,19 +471,19 @@ export class SearchResultScreen {
       fontWeight: '600',
       color: '#333333',
       marginBottom: '4px',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
     });
 
-    const resultsText = this.resultsCount === 1 ? 'результат' : 
-                      (this.resultsCount < 5 ? 'результата' : 'результатов');
-    
+    const resultsText =
+      this.resultsCount === 1 ? 'результат' : this.resultsCount < 5 ? 'результата' : 'результатов';
+
     title.textContent = `${this.resultsCount} ${resultsText}`;
 
     const subtitle = document.createElement('div');
     Object.assign(subtitle.style, {
       fontSize: '14px',
       color: '#666666',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
     });
     subtitle.textContent = `По запросу "${this.currentQuery}"`;
 
@@ -504,7 +504,7 @@ export class SearchResultScreen {
       display: 'flex',
       flexDirection: 'column',
       gap: '1px', // Минимальный отступ между карточками
-      backgroundColor: '#F5F5F5'
+      backgroundColor: '#F5F5F5',
     });
 
     // Создаем карточки организаций
@@ -521,15 +521,15 @@ export class SearchResultScreen {
         showWorkingHours: false,
         showCategory: true,
         showDescription: true,
-        onClick: (org) => {
+        onClick: org => {
           this.handleOrganizationClick(org);
         },
-        onCallClick: (org) => {
+        onCallClick: org => {
           this.handleCallClick(org);
         },
-        onPhotoClick: (org) => {
+        onPhotoClick: org => {
           this.handlePhotoClick(org);
-        }
+        },
       });
 
       // Добавляем hover эффект для всего контейнера
@@ -561,7 +561,7 @@ export class SearchResultScreen {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '60px 16px',
-      textAlign: 'center'
+      textAlign: 'center',
     });
 
     emptyElement.innerHTML = `
@@ -649,7 +649,7 @@ export class SearchResultScreen {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '60px 16px',
-      textAlign: 'center'
+      textAlign: 'center',
     });
 
     errorElement.innerHTML = `
@@ -768,9 +768,10 @@ export class SearchResultScreen {
         phone: '+7 (812) 123-45-67',
         workingHours: '8:00 - 22:00',
         isAdvertiser: true,
-        photoUrl: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=300&h=200&fit=crop',
+        photoUrl:
+          'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=300&h=200&fit=crop',
         description: 'Уютная кофейня в центре города с большим выбором кофе и десертов.',
-        coordinates: [59.9311, 30.3609]
+        coordinates: [59.9311, 30.3609],
       },
       {
         id: '2',
@@ -785,7 +786,7 @@ export class SearchResultScreen {
         isAdvertiser: false,
         photoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&h=200&fit=crop',
         description: 'Популярная сеть ресторанов быстрого питания.',
-        coordinates: [59.9321, 30.3619]
+        coordinates: [59.9321, 30.3619],
       },
       {
         id: '3',
@@ -798,10 +799,11 @@ export class SearchResultScreen {
         phone: '+7 (812) 345-67-89',
         workingHours: '12:00 - 00:00',
         isAdvertiser: true,
-        photoUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=200&fit=crop',
+        photoUrl:
+          'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=200&fit=crop',
         description: 'Изысканный ресторан русской кухни с элегантным интерьером.',
-        coordinates: [59.9331, 30.3629]
-      }
+        coordinates: [59.9331, 30.3629],
+      },
     ];
 
     // Фильтруем результаты по активным фильтрам
@@ -815,11 +817,19 @@ export class SearchResultScreen {
         return false;
       }
 
-      if (this.currentFilters.ratingFrom && org.rating && org.rating < this.currentFilters.ratingFrom) {
+      if (
+        this.currentFilters.ratingFrom &&
+        org.rating &&
+        org.rating < this.currentFilters.ratingFrom
+      ) {
         return false;
       }
 
-      if (this.currentFilters.distance && org.distance && org.distance > this.currentFilters.distance) {
+      if (
+        this.currentFilters.distance &&
+        org.distance &&
+        org.distance > this.currentFilters.distance
+      ) {
         return false;
       }
 
@@ -839,7 +849,7 @@ export class SearchResultScreen {
       this.props.mapSyncService.syncPinsWithContent('search_results', {
         query: this.currentQuery,
         organizations: this.organizations,
-        filters: this.currentFilters
+        filters: this.currentFilters,
       });
 
       // Подгоняем карту под результаты
@@ -855,7 +865,7 @@ export class SearchResultScreen {
   private setupEventListeners(): void {
     // Обработчик изменения размера экрана
     window.addEventListener('resize', this.handleResize.bind(this));
-    
+
     // Обработчик клавиш
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
@@ -866,7 +876,7 @@ export class SearchResultScreen {
   private syncWithServices(): void {
     // Устанавливаем текущий экран в менеджере флоу
     this.props.searchFlowManager.currentScreen = ScreenType.SEARCH_RESULT;
-    
+
     // Обновляем контекст поиска
     this.props.searchFlowManager.updateQuery(this.currentQuery);
     this.props.searchFlowManager.searchContext.filters = this.currentFilters;
@@ -946,7 +956,7 @@ export class SearchResultScreen {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
-    
+
     this.searchTimeout = window.setTimeout(() => {
       this.loadResults();
     }, 800);
@@ -990,7 +1000,7 @@ export class SearchResultScreen {
       filters: this.currentFilters,
       resultsCount: this.resultsCount,
       loadingState: this.loadingState,
-      bottomsheetState: this.bottomsheetContainer?.getCurrentState()
+      bottomsheetState: this.bottomsheetContainer?.getCurrentState(),
     };
   }
 
@@ -1001,16 +1011,16 @@ export class SearchResultScreen {
 
     window.removeEventListener('resize', this.handleResize.bind(this));
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
-    
+
     this.bottomsheetContainer?.destroy();
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
     this.searchFilters?.destroy();
-    
+
     this.organizationCards.forEach(card => card.destroy());
     this.organizationCards = [];
-    
+
     this.headerContainer = undefined;
     this.contentContainer = undefined;
     this.filtersContainer = undefined;
@@ -1038,7 +1048,7 @@ export class SearchResultScreenFactory {
       searchFlowManager,
       bottomsheetManager,
       searchQuery,
-      searchFilters
+      searchFilters,
     });
   }
-} 
+}

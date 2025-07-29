@@ -40,9 +40,9 @@ export class BottomsheetContent {
       scrollable: true,
       scrollType: 'vertical',
       showScrollIndicator: true,
-      ...props
+      ...props,
     };
-    
+
     this.initialize();
   }
 
@@ -65,7 +65,7 @@ export class BottomsheetContent {
       flexDirection: 'column',
       flex: '1',
       minHeight: '0',
-      overflow: 'hidden'
+      overflow: 'hidden',
     });
 
     if (this.props.className) {
@@ -78,10 +78,10 @@ export class BottomsheetContent {
    */
   private createScrollContainer(): void {
     this.scrollContainer = document.createElement('div');
-    
+
     const scrollStyle: Partial<CSSStyleDeclaration> = {
       flex: '1',
-      minHeight: '0'
+      minHeight: '0',
     };
 
     // Настройка прокрутки
@@ -122,10 +122,10 @@ export class BottomsheetContent {
     }
 
     Object.assign(this.scrollContainer.style, scrollStyle);
-    
+
     // Добавляем класс для идентификации
     this.scrollContainer.className = 'bottomsheet-scroll-container';
-    
+
     this.element.appendChild(this.scrollContainer);
   }
 
@@ -135,7 +135,7 @@ export class BottomsheetContent {
   private addCustomScrollbarStyles(): void {
     // Создаем стили для кастомного скроллбара
     const styleId = 'bottomsheet-scrollbar-styles';
-    
+
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
       style.id = styleId;
@@ -163,7 +163,7 @@ export class BottomsheetContent {
           scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
         }
       `;
-      
+
       document.head.appendChild(style);
     }
   }
@@ -176,11 +176,11 @@ export class BottomsheetContent {
 
     // Обработчик прокрутки
     this.scrollContainer.addEventListener('scroll', this.handleScroll.bind(this));
-    
+
     // Обработчики для определения начала и конца прокрутки
     this.scrollContainer.addEventListener('touchstart', this.handleScrollStart.bind(this));
     this.scrollContainer.addEventListener('touchend', this.handlePotentialScrollEnd.bind(this));
-    
+
     // Для поддержки mouse events
     this.scrollContainer.addEventListener('mousedown', this.handleScrollStart.bind(this));
     this.scrollContainer.addEventListener('mouseup', this.handlePotentialScrollEnd.bind(this));
@@ -220,7 +220,7 @@ export class BottomsheetContent {
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer);
     }
-    
+
     this.scrollTimer = window.setTimeout(() => {
       if (this.isScrolling) {
         this.isScrolling = false;
@@ -236,7 +236,7 @@ export class BottomsheetContent {
     if (this.scrollTimer) {
       clearTimeout(this.scrollTimer);
     }
-    
+
     this.scrollTimer = window.setTimeout(() => {
       if (this.isScrolling) {
         this.isScrolling = false;
@@ -291,7 +291,7 @@ export class BottomsheetContent {
     this.scrollContainer.scrollTo({
       top,
       left,
-      behavior: smooth ? 'smooth' : 'auto'
+      behavior: smooth ? 'smooth' : 'auto',
     });
   }
 
@@ -323,9 +323,9 @@ export class BottomsheetContent {
 
     const containerRect = this.scrollContainer.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
-    
+
     const relativeTop = elementRect.top - containerRect.top + this.scrollContainer.scrollTop;
-    
+
     this.scrollTo(relativeTop, 0, smooth);
   }
 
@@ -339,18 +339,18 @@ export class BottomsheetContent {
 
     return {
       top: this.scrollContainer.scrollTop,
-      left: this.scrollContainer.scrollLeft
+      left: this.scrollContainer.scrollLeft,
     };
   }
 
   /**
    * Получение размеров контейнера прокрутки
    */
-  public getScrollDimensions(): { 
-    scrollHeight: number; 
-    scrollWidth: number; 
-    clientHeight: number; 
-    clientWidth: number 
+  public getScrollDimensions(): {
+    scrollHeight: number;
+    scrollWidth: number;
+    clientHeight: number;
+    clientWidth: number;
   } {
     if (!this.scrollContainer) {
       return { scrollHeight: 0, scrollWidth: 0, clientHeight: 0, clientWidth: 0 };
@@ -360,7 +360,7 @@ export class BottomsheetContent {
       scrollHeight: this.scrollContainer.scrollHeight,
       scrollWidth: this.scrollContainer.scrollWidth,
       clientHeight: this.scrollContainer.clientHeight,
-      clientWidth: this.scrollContainer.clientWidth
+      clientWidth: this.scrollContainer.clientWidth,
     };
   }
 
@@ -386,12 +386,12 @@ export class BottomsheetContent {
    */
   public updateScrollSettings(newProps: Partial<BottomsheetContentProps>): void {
     this.props = { ...this.props, ...newProps };
-    
+
     if (this.scrollContainer) {
       // Обновляем стили прокрутки
       if (newProps.scrollable !== undefined || newProps.scrollType !== undefined) {
         const scrollType = this.props.scrollType;
-        
+
         if (this.props.scrollable) {
           switch (scrollType) {
             case 'vertical':
@@ -433,7 +433,10 @@ export class BottomsheetContent {
     if (this.scrollContainer) {
       this.scrollContainer.removeEventListener('scroll', this.handleScroll.bind(this));
       this.scrollContainer.removeEventListener('touchstart', this.handleScrollStart.bind(this));
-      this.scrollContainer.removeEventListener('touchend', this.handlePotentialScrollEnd.bind(this));
+      this.scrollContainer.removeEventListener(
+        'touchend',
+        this.handlePotentialScrollEnd.bind(this)
+      );
       this.scrollContainer.removeEventListener('mousedown', this.handleScrollStart.bind(this));
       this.scrollContainer.removeEventListener('mouseup', this.handlePotentialScrollEnd.bind(this));
     }
@@ -468,8 +471,8 @@ export class BottomsheetContentFactory {
         top: 0,
         right: 16,
         bottom: 16,
-        left: 16
-      }
+        left: 16,
+      },
     });
   }
 
@@ -485,8 +488,8 @@ export class BottomsheetContentFactory {
         top: 0,
         right: 16,
         bottom: 0,
-        left: 16
-      }
+        left: 16,
+      },
     });
   }
-} 
+}

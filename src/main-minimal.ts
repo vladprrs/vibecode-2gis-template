@@ -3,7 +3,6 @@ console.log('🔧 Loading minimal main.ts module...');
 import './styles/base.css';
 import './styles/dashboard.css';
 
-
 console.log('🎨 Styles loaded');
 
 /**
@@ -16,7 +15,7 @@ export const APP_VERSION = '1.0.0';
  */
 export async function initializeApp(container: HTMLElement): Promise<void> {
   console.log(`🚀 2GIS Dashboard v${APP_VERSION} starting...`);
-  
+
   container.innerHTML = `
     <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
       <h1>🎯 2GIS Dashboard Test</h1>
@@ -32,7 +31,7 @@ export async function initializeApp(container: HTMLElement): Promise<void> {
       </div>
     </div>
   `;
-  
+
   console.log('✅ Minimal app initialized successfully');
 }
 
@@ -53,4 +52,4 @@ if (document.readyState === 'loading') {
   }
 }
 
-console.log('🚀 Minimal main.ts module loaded completely'); 
+console.log('🚀 Minimal main.ts module loaded completely');

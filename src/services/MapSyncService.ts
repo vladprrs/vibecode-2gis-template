@@ -1,8 +1,15 @@
-import { MapRef, MapBottomsheetSync, MapContentType, MapState, Organization, MapPin } from '../types';
+import {
+  MapBottomsheetSync,
+  MapContentType,
+  MapPin,
+  MapRef,
+  MapState,
+  Organization,
+} from '../types';
 import { MAPGL_API_KEY } from '../config/mapgl';
 
 // Тип для RefObject без зависимости от React
-type RefObject<T> = { current: T | null; };
+type RefObject<T> = { current: T | null };
 
 /**
  * Обновленный сервис синхронизации карты с реальным MapGL
@@ -16,7 +23,7 @@ export class MapSyncService implements MapBottomsheetSync {
   constructor(mapRef: RefObject<MapRef>, config: any = {}) {
     this.mapRef = mapRef;
     this.config = config;
-    
+
     // Инициализируем базовое состояние
     this.mapState = {
       center: [37.620393, 55.75396], // Москва по умолчанию
@@ -26,8 +33,8 @@ export class MapSyncService implements MapBottomsheetSync {
         top: 0,
         right: 0,
         bottom: 0,
-        left: 0
-      }
+        left: 0,
+      },
     };
   }
 
@@ -36,22 +43,22 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   syncPinsWithContent(contentType: MapContentType, data: any): void {
     console.log('MapSyncService: Syncing pins for', contentType, data);
-    
+
     let newPins: MapPin[] = [];
 
     switch (contentType) {
       case 'dashboard':
         newPins = this.generateDashboardPins(data);
         break;
-        
+
       case 'suggestions':
         newPins = this.generateSuggestionPins(data);
         break;
-        
+
       case 'search_results':
         newPins = this.generateSearchResultPins(data);
         break;
-        
+
       case 'organization':
         newPins = this.generateOrganizationPins(data);
         break;
@@ -77,25 +84,25 @@ export class MapSyncService implements MapBottomsheetSync {
           subtitle: 'Популярное место',
           isHighlighted: false,
           type: 'search_result',
-          clusterable: false
+          clusterable: false,
         },
         {
-          id: 'popular_2', 
+          id: 'popular_2',
           coordinates: [37.618423, 55.751244], // ГУМ
           title: 'ГУМ',
           subtitle: 'Торговый центр',
           isHighlighted: false,
           type: 'organization',
-          clusterable: true
+          clusterable: true,
         },
         {
           id: 'popular_3',
           coordinates: [37.617734, 55.752023], // Собор Василия Блаженного
-          title: 'Собор Василия Блаженного', 
+          title: 'Собор Василия Блаженного',
           subtitle: 'Достопримечательность',
           isHighlighted: false,
           type: 'organization',
-          clusterable: false
+          clusterable: false,
         }
       );
     }
@@ -103,19 +110,19 @@ export class MapSyncService implements MapBottomsheetSync {
     // Добавляем местоположение пользователя
     if (data?.showUserLocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        position => {
           const userPin: MapPin = {
             id: 'user_location',
             coordinates: [position.coords.longitude, position.coords.latitude],
             title: 'Ваше местоположение',
             isHighlighted: true,
             type: 'user_location',
-            clusterable: false
+            clusterable: false,
           };
           this.currentPins.push(userPin);
           this.updateMapPins(this.currentPins);
         },
-        (error) => {
+        error => {
           console.warn('Не удалось получить геолокацию:', error);
         }
       );
@@ -135,15 +142,15 @@ export class MapSyncService implements MapBottomsheetSync {
       // Мок места на основе запроса
       const mockPlaces = [
         {
-          coordinates: [37.621311, 55.754380] as [number, number],
+          coordinates: [37.621311, 55.75438] as [number, number],
           title: `${data.query} - место 1`,
-          subtitle: 'Найдено по запросу'
+          subtitle: 'Найдено по запросу',
         },
         {
-          coordinates: [37.619472, 55.753960] as [number, number], 
+          coordinates: [37.619472, 55.75396] as [number, number],
           title: `${data.query} - место 2`,
-          subtitle: 'Найдено по запросу'
-        }
+          subtitle: 'Найдено по запросу',
+        },
       ];
 
       mockPlaces.forEach((place, index) => {
@@ -154,7 +161,7 @@ export class MapSyncService implements MapBottomsheetSync {
           subtitle: place.subtitle,
           isHighlighted: false,
           type: 'search_result',
-          clusterable: true
+          clusterable: true,
         });
       });
     }
@@ -174,7 +181,7 @@ export class MapSyncService implements MapBottomsheetSync {
         const baseCoords = [37.620393, 55.75396];
         const coords: [number, number] = [
           baseCoords[0] + (Math.random() - 0.5) * 0.02, // Случайное смещение для демо
-          baseCoords[1] + (Math.random() - 0.5) * 0.02
+          baseCoords[1] + (Math.random() - 0.5) * 0.02,
         ];
 
         pins.push({
@@ -186,7 +193,7 @@ export class MapSyncService implements MapBottomsheetSync {
           type: 'organization',
           organizationId: org.id,
           isAdvertiser: org.isAdvertiser,
-          clusterable: true
+          clusterable: true,
         });
       });
     }
@@ -201,21 +208,26 @@ export class MapSyncService implements MapBottomsheetSync {
     if (!data?.organization) return [];
 
     const org = data.organization as Organization;
-    
-    // Генерируем координаты для организации
-    const coords: [number, number] = [37.620393 + Math.random() * 0.01, 55.75396 + Math.random() * 0.01];
 
-    return [{
-      id: `selected_org_${org.id}`,
-      coordinates: coords,
-      title: org.name,
-      subtitle: org.address,
-      isHighlighted: true,
-      type: 'selected',
-      organizationId: org.id,
-      isAdvertiser: org.isAdvertiser,
-      clusterable: false
-    }];
+    // Генерируем координаты для организации
+    const coords: [number, number] = [
+      37.620393 + Math.random() * 0.01,
+      55.75396 + Math.random() * 0.01,
+    ];
+
+    return [
+      {
+        id: `selected_org_${org.id}`,
+        coordinates: coords,
+        title: org.name,
+        subtitle: org.address,
+        isHighlighted: true,
+        type: 'selected',
+        organizationId: org.id,
+        isAdvertiser: org.isAdvertiser,
+        clusterable: false,
+      },
+    ];
   }
 
   /**
@@ -233,16 +245,16 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   highlightOrganizationPin(organizationId: string): void {
     console.log('MapSyncService: Highlighting organization pin', organizationId);
-    
+
     // Обновляем состояние пинов
     this.currentPins = this.currentPins.map(pin => ({
       ...pin,
-      isHighlighted: pin.organizationId === organizationId
+      isHighlighted: pin.organizationId === organizationId,
     }));
 
     // Обновляем карту
     this.updateMapPins(this.currentPins);
-    
+
     // Выделяем пин через MapRef
     if (this.mapRef.current) {
       const targetPin = this.currentPins.find(pin => pin.organizationId === organizationId);
@@ -257,10 +269,10 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   clearHighlights(): void {
     console.log('MapSyncService: Clearing all highlights');
-    
+
     this.currentPins = this.currentPins.map(pin => ({
       ...pin,
-      isHighlighted: false
+      isHighlighted: false,
     }));
 
     this.updateMapPins(this.currentPins);
@@ -271,18 +283,18 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   adjustMapViewport(bottomsheetHeight: number): void {
     console.log('MapSyncService: Adjusting viewport for bottomsheet height', bottomsheetHeight);
-    
+
     if (!this.mapRef.current) return;
 
     // Вычисляем отступы на основе высоты шторки
     const screenHeight = window.innerHeight;
     const bottomPadding = bottomsheetHeight;
-    
+
     const padding = {
       top: 20,
       right: 20,
       bottom: Math.max(bottomPadding, 100), // Минимум 100px отступ снизу
-      left: 20
+      left: 20,
     };
 
     this.mapRef.current.adjustPadding(padding);
@@ -294,15 +306,18 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   centerOnOrganization(organization: Organization): void {
     console.log('MapSyncService: Centering on organization', organization.name);
-    
+
     if (!this.mapRef.current) return;
 
     // Генерируем координаты для организации (в реальном приложении будет геокодинг)
-    const coords: [number, number] = [37.620393 + Math.random() * 0.01, 55.75396 + Math.random() * 0.01];
-    
+    const coords: [number, number] = [
+      37.620393 + Math.random() * 0.01,
+      55.75396 + Math.random() * 0.01,
+    ];
+
     this.mapRef.current.setCenter(coords, true);
     this.mapRef.current.setZoom(16, true);
-    
+
     this.mapState.center = coords;
     this.mapState.zoom = 16;
   }
@@ -312,24 +327,24 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   fitToSearchResults(organizations: Organization[]): void {
     console.log('MapSyncService: Fitting to search results', organizations.length);
-    
+
     if (!this.mapRef.current || organizations.length === 0) return;
 
     // Генерируем координаты для всех организаций
     const points: [number, number][] = organizations.map(() => [
       37.620393 + (Math.random() - 0.5) * 0.02,
-      55.75396 + (Math.random() - 0.5) * 0.02
+      55.75396 + (Math.random() - 0.5) * 0.02,
     ]);
 
-         if (points.length === 1) {
-       // Если одна организация, центрируем на ней
-       this.mapRef.current.setCenter(points[0], true);
-       this.mapRef.current.setZoom(15, true);
-     } else {
-       // Если несколько, вычисляем bounds и подгоняем карту
-       const bounds = this.calculateBoundsFromPoints(points);
-       this.mapRef.current.fitBounds(bounds);
-     }
+    if (points.length === 1) {
+      // Если одна организация, центрируем на ней
+      this.mapRef.current.setCenter(points[0], true);
+      this.mapRef.current.setZoom(15, true);
+    } else {
+      // Если несколько, вычисляем bounds и подгоняем карту
+      const bounds = this.calculateBoundsFromPoints(points);
+      this.mapRef.current.fitBounds(bounds);
+    }
   }
 
   /**
@@ -337,10 +352,10 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   updateUserLocation(coordinates: [number, number]): void {
     console.log('MapSyncService: Updating user location', coordinates);
-    
+
     // Удаляем старый пин пользователя
     this.currentPins = this.currentPins.filter(pin => pin.type !== 'user_location');
-    
+
     // Добавляем новый пин пользователя
     const userPin: MapPin = {
       id: 'user_location',
@@ -348,7 +363,7 @@ export class MapSyncService implements MapBottomsheetSync {
       title: 'Ваше местоположение',
       isHighlighted: true,
       type: 'user_location',
-      clusterable: false
+      clusterable: false,
     };
 
     this.currentPins.push(userPin);
@@ -360,10 +375,10 @@ export class MapSyncService implements MapBottomsheetSync {
    */
   getVisibleOrganizations(): Organization[] {
     console.log('MapSyncService: Getting visible organizations');
-    
+
     // Фильтруем пины организаций из текущих пинов
-    const organizationPins = this.currentPins.filter(pin => 
-      pin.type === 'organization' && pin.organizationId
+    const organizationPins = this.currentPins.filter(
+      pin => pin.type === 'organization' && pin.organizationId
     );
 
     // Преобразуем пины в организации (упрощенная версия)
@@ -378,7 +393,7 @@ export class MapSyncService implements MapBottomsheetSync {
       distance: 0,
       phone: '',
       workingHours: '',
-      isAdvertiser: pin.isAdvertiser || false
+      isAdvertiser: pin.isAdvertiser || false,
     }));
   }
 
@@ -389,7 +404,7 @@ export class MapSyncService implements MapBottomsheetSync {
     if (points.length === 0) {
       return {
         northEast: [0, 0],
-        southWest: [0, 0]
+        southWest: [0, 0],
       };
     }
 
@@ -407,10 +422,10 @@ export class MapSyncService implements MapBottomsheetSync {
 
     // Добавляем небольшой отступ
     const padding = 0.01;
-    
+
     return {
       northEast: [maxLng + padding, maxLat + padding],
-      southWest: [minLng - padding, minLat - padding]
+      southWest: [minLng - padding, minLat - padding],
     };
   }
 
@@ -450,7 +465,7 @@ export class MapSyncServiceFactory {
     return new MapSyncService(mapRef, {
       apiKey: MAPGL_API_KEY,
       enableGeolocation: true,
-      enableClustering: true
+      enableClustering: true,
     });
   }
-} 
+}

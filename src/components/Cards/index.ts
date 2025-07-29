@@ -1,7 +1,7 @@
 // Экспорт базовой карточки организации
-export { 
-  OrganizationCard, 
+export {
+  OrganizationCard,
   OrganizationCardFactory,
   CardSize,
-  type OrganizationCardProps 
-} from './OrganizationCard'; 
+  type OrganizationCardProps,
+} from './OrganizationCard';

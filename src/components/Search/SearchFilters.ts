@@ -56,9 +56,9 @@ export class SearchFilters {
     this.props = {
       showActiveCount: true,
       showClearAll: true,
-      ...props
+      ...props,
     };
-    
+
     this.initialize();
   }
 
@@ -78,7 +78,7 @@ export class SearchFilters {
     Object.assign(this.element.style, {
       display: 'flex',
       flexDirection: 'column',
-      width: '100%'
+      width: '100%',
     });
 
     if (this.props.className) {
@@ -91,7 +91,7 @@ export class SearchFilters {
    */
   private createFiltersContainer(): void {
     this.scrollContainer = document.createElement('div');
-    
+
     Object.assign(this.scrollContainer.style, {
       display: 'flex',
       alignItems: 'center',
@@ -100,7 +100,7 @@ export class SearchFilters {
       padding: '12px 16px',
       gap: '8px',
       scrollbarWidth: 'none', // Firefox
-      msOverflowStyle: 'none' // IE
+      msOverflowStyle: 'none', // IE
     });
 
     // Скрываем скроллбар для WebKit браузеров
@@ -158,9 +158,9 @@ export class SearchFilters {
     if (!this.scrollContainer) return;
 
     const activeCount = this.getActiveFiltersCount();
-    
+
     const button = document.createElement('button');
-    
+
     Object.assign(button.style, {
       display: 'flex',
       alignItems: 'center',
@@ -175,7 +175,7 @@ export class SearchFilters {
       whiteSpace: 'nowrap',
       flexShrink: '0',
       transition: 'all 0.2s ease',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
     });
 
     // Создаем содержимое кнопки
@@ -202,7 +202,7 @@ export class SearchFilters {
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
         borderRadius: '10px',
         fontSize: '12px',
-        fontWeight: '600'
+        fontWeight: '600',
       });
       this.activeCountBadge.textContent = String(activeCount);
       button.appendChild(this.activeCountBadge);
@@ -235,7 +235,7 @@ export class SearchFilters {
    */
   private createFilterElement(filter: FilterItem, isActive: boolean): HTMLElement {
     const element = document.createElement('button');
-    
+
     Object.assign(element.style, {
       display: 'flex',
       alignItems: 'center',
@@ -250,7 +250,7 @@ export class SearchFilters {
       whiteSpace: 'nowrap',
       flexShrink: '0',
       transition: 'all 0.2s ease',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
     });
 
     // Создаем содержимое фильтра
@@ -271,7 +271,7 @@ export class SearchFilters {
       Object.assign(count.style, {
         marginLeft: '6px',
         fontSize: '12px',
-        opacity: '0.8'
+        opacity: '0.8',
       });
       count.textContent = `(${filter.count})`;
       element.appendChild(count);
@@ -298,7 +298,7 @@ export class SearchFilters {
     });
 
     element.className = `filter-item filter-${filter.type} ${isActive ? 'active' : 'inactive'}`;
-    
+
     return element;
   }
 
@@ -309,7 +309,7 @@ export class SearchFilters {
     if (!this.scrollContainer) return;
 
     const button = document.createElement('button');
-    
+
     Object.assign(button.style, {
       display: 'flex',
       alignItems: 'center',
@@ -324,7 +324,7 @@ export class SearchFilters {
       whiteSpace: 'nowrap',
       flexShrink: '0',
       transition: 'all 0.2s ease',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
     });
 
     // Иконка и текст
@@ -368,14 +368,14 @@ export class SearchFilters {
   private handleFilterToggle(filter: FilterItem): void {
     // Обновляем состояние фильтра
     filter.active = !filter.active;
-    
+
     // Создаем новые активные фильтры
     const newFilters = this.buildActiveFilters();
-    
+
     // Уведомляем о изменениях
     this.props.onFilterToggle?.(filter);
     this.props.onFiltersChange?.(newFilters);
-    
+
     // Перерендериваем
     this.renderFilters();
   }
@@ -388,14 +388,14 @@ export class SearchFilters {
     this.props.availableFilters.forEach(filter => {
       filter.active = false;
     });
-    
+
     // Создаем пустые фильтры
     const emptyFilters: ISearchFilters = {};
-    
+
     // Уведомляем о изменениях
     this.props.onClearAll?.();
     this.props.onFiltersChange?.(emptyFilters);
-    
+
     // Перерендериваем
     this.renderFilters();
   }
@@ -405,7 +405,7 @@ export class SearchFilters {
    */
   private buildActiveFilters(): ISearchFilters {
     const filters: ISearchFilters = {};
-    
+
     this.props.availableFilters
       .filter(filter => filter.active)
       .forEach(filter => {
@@ -430,7 +430,7 @@ export class SearchFilters {
             break;
         }
       });
-    
+
     return filters;
   }
 
@@ -492,7 +492,8 @@ export class SearchFilters {
         case 'feature':
           if (filter.id === 'openNow') filter.active = activeFilters.openNow || false;
           if (filter.id === 'withReviews') filter.active = activeFilters.withReviews || false;
-          if (filter.id === 'advertisersOnly') filter.active = activeFilters.advertisersOnly || false;
+          if (filter.id === 'advertisersOnly')
+            filter.active = activeFilters.advertisersOnly || false;
           break;
         case 'sort':
           filter.active = activeFilters.sortBy === filter.value;
@@ -536,10 +537,7 @@ export class SearchFiltersFactory {
   /**
    * Создание панели фильтров
    */
-  static create(
-    containerElement: HTMLElement,
-    props: SearchFiltersProps
-  ): SearchFilters {
+  static create(containerElement: HTMLElement, props: SearchFiltersProps): SearchFilters {
     return new SearchFilters(containerElement, props);
   }
 
@@ -556,36 +554,36 @@ export class SearchFiltersFactory {
         label: 'Открыто сейчас',
         active: activeFilters.openNow || false,
         value: true,
-        type: 'feature'
+        type: 'feature',
       },
       {
         id: 'withReviews',
         label: 'С отзывами',
         active: activeFilters.withReviews || false,
         value: true,
-        type: 'feature'
+        type: 'feature',
       },
       {
         id: 'rating4',
         label: 'Рейтинг 4+',
         active: activeFilters.ratingFrom === 4,
         value: 4,
-        type: 'rating'
+        type: 'rating',
       },
       {
         id: 'distance1km',
         label: 'До 1 км',
         active: activeFilters.distance === 1000,
         value: 1000,
-        type: 'distance'
-      }
+        type: 'distance',
+      },
     ];
 
     return new SearchFilters(containerElement, {
       activeFilters,
       availableFilters: basicFilters,
       showActiveCount: true,
-      showClearAll: true
+      showClearAll: true,
     });
   }
-} 
+}

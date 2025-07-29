@@ -1,10 +1,10 @@
-import { 
-  BottomsheetState, 
-  BottomsheetConfig, 
-  BottomsheetStateData, 
+import {
+  BOTTOMSHEET_ANIMATION_CONFIG,
+  BOTTOMSHEET_HEIGHTS,
+  BottomsheetConfig,
   BottomsheetEvents,
-  BOTTOMSHEET_HEIGHTS, 
-  BOTTOMSHEET_ANIMATION_CONFIG 
+  BottomsheetState,
+  BottomsheetStateData,
 } from '../types';
 
 /**
@@ -39,7 +39,7 @@ export class BottomsheetManager {
       height: this.getHeightForState(this.currentState),
       isDragging: this.isDragging,
       isAnimating: this.isAnimating,
-      openProgress: this.getOpenProgress()
+      openProgress: this.getOpenProgress(),
     };
   }
 
@@ -47,9 +47,9 @@ export class BottomsheetManager {
    * Изменить состояние шторки с анимацией
    */
   snapToState(targetState: BottomsheetState): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const fromState = this.currentState;
-      
+
       if (fromState === targetState) {
         resolve();
         return;
@@ -82,7 +82,7 @@ export class BottomsheetManager {
    */
   handleDrag(deltaY: number): void {
     if (!this.isDragging) return;
-    
+
     // Здесь будет логика обновления высоты шторки во время перетаскивания
     // В реальной реализации нужно обновить CSS transform или высоту
   }
@@ -95,11 +95,11 @@ export class BottomsheetManager {
 
     const startHeight = this.getHeightForState(this.currentState);
     this.isDragging = false;
-    
+
     const targetState = this.findNearestSnapPoint(currentHeight, velocity);
-    
+
     this.events.onDragEnd?.(startHeight, this.getHeightForState(targetState));
-    
+
     return this.snapToState(targetState);
   }
 
@@ -118,7 +118,7 @@ export class BottomsheetManager {
     const currentHeight = this.getHeightForState(this.currentState);
     const maxHeight = this.getHeightForState(BottomsheetState.FULLSCREEN_SCROLL);
     const minHeight = this.getHeightForState(BottomsheetState.SMALL);
-    
+
     return (currentHeight - minHeight) / (maxHeight - minHeight);
   }
 
@@ -128,10 +128,10 @@ export class BottomsheetManager {
   private findNearestSnapPoint(currentHeight: number, velocity: number): BottomsheetState {
     const states = Object.values(BottomsheetState);
     const snapPoints = this.config.snapPoints;
-    
+
     // Учитываем скорость для определения направления
     const velocityThreshold = BOTTOMSHEET_ANIMATION_CONFIG.snapVelocityThreshold;
-    
+
     if (Math.abs(velocity) > velocityThreshold) {
       // Быстрое движение - двигаемся в направлении скорости
       if (velocity > 0) {
@@ -150,7 +150,7 @@ export class BottomsheetManager {
     for (const state of states) {
       const stateHeight = this.getHeightForState(state);
       const distance = Math.abs(currentHeight - stateHeight);
-      
+
       if (distance < minDistance) {
         minDistance = distance;
         nearestState = state;
@@ -168,9 +168,9 @@ export class BottomsheetManager {
       BottomsheetState.SMALL,
       BottomsheetState.DEFAULT,
       BottomsheetState.FULLSCREEN,
-      BottomsheetState.FULLSCREEN_SCROLL
+      BottomsheetState.FULLSCREEN_SCROLL,
     ];
-    
+
     const currentIndex = states.indexOf(currentState);
     return currentIndex > 0 ? states[currentIndex - 1] : states[0];
   }
@@ -183,9 +183,9 @@ export class BottomsheetManager {
       BottomsheetState.SMALL,
       BottomsheetState.DEFAULT,
       BottomsheetState.FULLSCREEN,
-      BottomsheetState.FULLSCREEN_SCROLL
+      BottomsheetState.FULLSCREEN_SCROLL,
     ];
-    
+
     const currentIndex = states.indexOf(currentState);
     return currentIndex < states.length - 1 ? states[currentIndex + 1] : states[states.length - 1];
   }
@@ -217,4 +217,4 @@ export class BottomsheetManager {
   getSnapPoints(): number[] {
     return this.config.snapPoints.map(point => point * this.screenHeight);
   }
-} 
+}
