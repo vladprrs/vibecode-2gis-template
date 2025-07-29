@@ -152,13 +152,13 @@ export class DashboardScreen {
     this.element.appendChild(mapContainer);
 
     try {
-      this.updateMapStatus?.('Ожидание MapGL API...', 'loading');
+      
       await this.waitForMapGL();
       await this.createRealMap(mapContainer);
-      this.updateMapStatus?.('✅ Карта 2GIS загружена', 'success');
+      
     } catch (error) {
       console.error('Map loading error:', error);
-      this.updateMapStatus?.('❌ Ошибка загрузки карты', 'error');
+      
       this.createFallbackMap(mapContainer);
     }
   }
@@ -216,7 +216,7 @@ export class DashboardScreen {
     });
 
     this.mapComponent.on('click', (event: any) => {
-      this.updateMapStatus?.(`Клик: ${event.lngLat.lng.toFixed(4)}, ${event.lngLat.lat.toFixed(4)}`, 'info');
+      
       this.addTemporaryMarker([event.lngLat.lng, event.lngLat.lat]);
     });
   }
@@ -284,7 +284,21 @@ export class DashboardScreen {
     
     this.updateBottomsheetHeight();
     this.createFigmaHeader();
-    this.createFigmaContent();
+    
+    // Create content container
+    const content = document.createElement('div');
+    content.className = 'dashboard-content';
+    content.style.cssText = `
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+      padding-top: 16px;
+    `;
+    
+    // Add the new dashboard content
+    this.createDashboardContent(content);
+    
+    this.bottomsheetElement.appendChild(content);
     this.element.appendChild(this.bottomsheetElement);
   }
 
@@ -307,7 +321,6 @@ export class DashboardScreen {
       padding: var(--space-16) 16px 60px 16px;
       flex-direction: column;
       align-items: flex-start;
-      gap: 16px;
       align-self: stretch;
       background: var(--color-surface-section);
       position: relative;
@@ -320,20 +333,8 @@ export class DashboardScreen {
     // 4. "Советы к месту" heading
     this.createSectionHeading(greySectionContainer, 'Советы к месту');
     
-    // 5. Content masonry grid
+    // 5. Content masonry grid (AdviceGrid component) and promo banner
     this.createContentMasonryGrid(greySectionContainer);
-    
-    // 6. "Популярные категории" heading
-    this.createSectionHeading(greySectionContainer, 'Популярные категории');
-    
-    // 7. Categories grid  
-    this.createCategoriesGrid(greySectionContainer);
-    
-    // 8. Banner
-    this.createPromoBanner(greySectionContainer);
-    
-    // 9. Bottom spacing for scroll
-    this.createBottomSpacing(greySectionContainer);
     
     // Add the grey section to the main container
     container.appendChild(greySectionContainer);
@@ -412,6 +413,7 @@ export class DashboardScreen {
     const heading = document.createElement('div');
     heading.className = 'section-header';
     heading.style.cssText = `
+      margin-top: var(--space-12);
       padding-bottom: 12px;
       justify-content: center;
       align-items: flex-start;
@@ -440,195 +442,37 @@ export class DashboardScreen {
    * Создание масонри сетки контента  
    */
   private createContentMasonryGrid(container: HTMLElement): void {
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'content-masonry-grid';
-    gridContainer.style.cssText = `
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-self: stretch;
-      position: relative;
-    `;
-
-    // Left column (tall image card spanning 2 rows)
-    const leftColumn = document.createElement('div');
-    leftColumn.style.cssText = `
-      display: grid;
-      gap: 12px;
-    `;
-
-    // Large cover card (spans 2 rows)
-    const largeCoverCard = document.createElement('div');
-    largeCoverCard.className = 'cover-card cover-card-big';
-    largeCoverCard.style.cssText = `
-      height: 142px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: linear-gradient(135deg, #1BA136 0%, #4CAF50 100%);
-      position: relative;
-      display: flex;
-      align-items: flex-end;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-    `;
-
-    const coverOverlay = document.createElement('div');
-    coverOverlay.className = 'cover-overlay';
-    coverOverlay.style.cssText = `
-      padding: 16px;
-      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
-      width: 100%;
-    `;
-
-    const coverTitle = document.createElement('div');
-    coverTitle.className = 'cover-title';
-    coverTitle.style.cssText = `
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 18px;
-      margin-bottom: 4px;
-    `;
-    coverTitle.textContent = 'Маленькие экскурсии: гуляем с "Даблби" и…';
-
-    const coverSubtitle = document.createElement('div');
-    coverSubtitle.className = 'cover-subtitle';
-    coverSubtitle.style.cssText = `
-      font-size: 12px;
-      opacity: 0.8;
-    `;
-    coverSubtitle.textContent = '59 мест';
-
-    coverOverlay.appendChild(coverTitle);
-    coverOverlay.appendChild(coverSubtitle);
-    largeCoverCard.appendChild(coverOverlay);
-    leftColumn.appendChild(largeCoverCard);
-
-    // Right column (two smaller cards)
-    const rightColumn = document.createElement('div');
-    rightColumn.style.cssText = `
-      display: grid;
-      gap: 12px;
-    `;
-
-    // Meta item 1
-    const metaItem1 = document.createElement('div');
-    metaItem1.className = 'meta-item';
-    metaItem1.style.cssText = `
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-      height: 65px;
-    `;
-
-    const metaContent1 = document.createElement('div');
-    metaContent1.innerHTML = `
-      <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px;">Вкусно позавтракать</div>
-      <div style="font-size: 14px; color: #666;">Тот самый момент</div>
-    `;
-
-    const metaIcon1 = document.createElement('div');
-    metaIcon1.style.cssText = `font-size: 24px;`;
-    metaIcon1.textContent = '🍴';
-
-    metaItem1.appendChild(metaContent1);
-    metaItem1.appendChild(metaIcon1);
-    rightColumn.appendChild(metaItem1);
-
-    // Meta item 2  
-    const metaItem2 = document.createElement('div');
-    metaItem2.className = 'meta-item';
-    metaItem2.style.cssText = `
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-      height: 65px;
-    `;
-
-    const metaContent2 = document.createElement('div');
-    metaContent2.innerHTML = `
-      <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px;">Банкоматы</div>
-      <div style="font-size: 14px; color: #666;">Number</div>
-    `;
-
-    const metaIcon2 = document.createElement('div');
-    metaIcon2.style.cssText = `font-size: 24px;`;
-    metaIcon2.textContent = '🏧';
-
-    metaItem2.appendChild(metaContent2);
-    metaItem2.appendChild(metaIcon2);
-    rightColumn.appendChild(metaItem2);
-
-    gridContainer.appendChild(leftColumn);
-    gridContainer.appendChild(rightColumn);
-    container.appendChild(gridContainer);
-  }
-
-  /**
-   * Создание сетки категорий
-   */
-  private createCategoriesGrid(container: HTMLElement): void {
-    const grid = document.createElement('div');
-    grid.className = 'categories-grid';
-    grid.style.cssText = `
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-self: stretch;
-      position: relative;
-    `;
-
-    const categories = [
-      { icon: '🍕', title: 'Пицца', subtitle: '156 заведений' },
-      { icon: '☕', title: 'Кофе', subtitle: '234 кофейни' },
-      { icon: '🏪', title: 'Магазины', subtitle: '1,243 места' },
-      { icon: '⛽', title: 'АЗС', subtitle: '89 станций' },
-      { icon: '🏥', title: 'Медицина', subtitle: '567 клиник' },
-      { icon: '🎓', title: 'Образование', subtitle: '123 учреждения' }
-    ];
-
-    categories.forEach(cat => {
-      const categoryCard = document.createElement('div');
-      categoryCard.className = 'meta-item';
-      categoryCard.style.cssText = `
-        background: white;
-        border-radius: 16px;
-        padding: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-        height: 65px;
+    // Use the new AdviceGrid component directly
+    import('./../Dashboard/AdviceGrid').then(({ AdviceGrid }) => {
+      new AdviceGrid({
+        container,
+        onItemClick: (itemId: string) => {
+          console.log('Advice item clicked:', itemId);
+          this.props.onMetaItemClick?.(itemId);
+        }
+      });
+      
+      // Create promo banner after advice grid is loaded
+      this.createPromoBanner(container);
+    }).catch(error => {
+      console.error('Failed to load AdviceGrid component:', error);
+      // Create a simple placeholder if component fails to load
+      const placeholder = document.createElement('div');
+      placeholder.style.cssText = `
+        padding: 20px;
+        text-align: center;
+        color: #666;
+        font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
       `;
-
-      const categoryContent = document.createElement('div');
-      categoryContent.innerHTML = `
-        <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px;">${cat.title}</div>
-        <div style="font-size: 14px; color: #666;">${cat.subtitle}</div>
-      `;
-
-      const categoryIcon = document.createElement('div');
-      categoryIcon.style.cssText = `font-size: 24px;`;
-      categoryIcon.textContent = cat.icon;
-
-      categoryCard.appendChild(categoryContent);
-      categoryCard.appendChild(categoryIcon);
-      grid.appendChild(categoryCard);
+      placeholder.textContent = 'Советы к месту - компонент загружается...';
+      container.appendChild(placeholder);
+      
+      // Create promo banner after placeholder
+      this.createPromoBanner(container);
     });
-
-    container.appendChild(grid);
   }
+
+  // createCategoriesGrid method removed - not part of the Figma design
 
   /**
    * Создание промо баннера
@@ -637,161 +481,199 @@ export class DashboardScreen {
     const banner = document.createElement('div');
     banner.className = 'promo-banner';
     banner.style.cssText = `
+      margin-top: var(--space-16);
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+      height: 160px;
+    `;
+
+    // Content container
+    const content = document.createElement('div');
+    content.style.cssText = `
+      height: 136px;
       align-self: stretch;
       border-radius: 12px;
       border: 0.5px solid rgba(137, 137, 137, 0.30);
-      background: var(--color-surface-white);
       position: relative;
+    `;
+
+    // Banner small container
+    const bannerSmall = document.createElement('div');
+    bannerSmall.style.cssText = `
+      display: flex;
+      width: 100%;
+      align-items: flex-start;
+      border-radius: 12px;
+      background: #FFF;
+      position: absolute;
+      left: 0px;
+      top: 0px;
       height: 136px;
     `;
 
-    const bannerLogo = document.createElement('div');
-    bannerLogo.style.cssText = `
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(45deg, #FF9800, #FFC107);
-      border-radius: 12px;
+    // Logo container
+    const logoContainer = document.createElement('div');
+    logoContainer.style.cssText = `
       display: flex;
-      align-items: center;
+      height: 136px;
+      padding: 12px 0 12px 16px;
       justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    `;
-    bannerLogo.textContent = '🍣';
-
-    const bannerContent = document.createElement('div');
-    bannerContent.style.cssText = `flex: 1;`;
-    bannerContent.innerHTML = `
-      <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px;">Суши Маке</div>
-      <div style="font-size: 14px; color: #666; line-height: 18px; margin-bottom: 8px;">Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»</div>
-      <button style="background: #1BA136; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">Получить подарок</button>
+      align-items: flex-start;
+      gap: 10px;
+      position: relative;
     `;
 
-    banner.appendChild(bannerLogo);
-    banner.appendChild(bannerContent);
+    const logo = document.createElement('div');
+    logo.style.cssText = `
+      width: 64px;
+      height: 64px;
+      border-radius: 32px;
+      border: 0.5px solid rgba(137, 137, 137, 0.30);
+      background: url('/figma_export/dashboard/components/banner/assets/images/img-c6496740.jpg') lightgray 50% / cover no-repeat;
+      position: relative;
+    `;
+
+    // Text content
+    const textContent = document.createElement('div');
+    textContent.style.cssText = `
+      display: flex;
+      padding: 0 16px 0 12px;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1 0 0;
+      position: relative;
+    `;
+
+    // Title
+    const title = document.createElement('div');
+    title.style.cssText = `
+      display: flex;
+      padding: 14px 0 4px 0;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+
+    const titleText = document.createElement('div');
+    titleText.style.cssText = `
+      flex: 1 0 0;
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 20px;
+      letter-spacing: -0.24px;
+    `;
+    titleText.textContent = 'Суши Маке';
+
+    // Subtitle
+    const subtitle = document.createElement('div');
+    subtitle.style.cssText = `
+      display: flex;
+      padding-bottom: 4px;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+
+    const subtitleText = document.createElement('div');
+    subtitleText.style.cssText = `
+      flex: 1 0 0;
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+    `;
+    subtitleText.textContent = 'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
+
+    // CTA button
+    const ctaButton = document.createElement('div');
+    ctaButton.style.cssText = `
+      display: flex;
+      padding: 6px 0 16px 0;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+
+    const ctaText = document.createElement('div');
+    ctaText.style.cssText = `
+      color: #5A5A5A;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+    `;
+    ctaText.textContent = 'Получить подарок';
+
+
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.style.cssText = `
+      display: flex;
+      padding: 0 4px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      align-self: stretch;
+      position: relative;
+    `;
+
+    const footerText = document.createElement('div');
+    footerText.style.cssText = `
+      display: flex;
+      padding: 7px 0 1px 0;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+
+    const footerTextContent = document.createElement('div');
+    footerTextContent.style.cssText = `
+      height: 16px;
+      flex: 1 0 0;
+      overflow: hidden;
+      color: #B8B8B8;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 11px;
+      line-height: 14px;
+      letter-spacing: -0.176px;
+    `;
+    footerTextContent.textContent = 'Реклама • Условия проведения акции смотрите на sushi-make.ru';
+
+    // Assemble the banner
+    title.appendChild(titleText);
+    subtitle.appendChild(subtitleText);
+    ctaButton.appendChild(ctaText);
+    textContent.appendChild(title);
+    textContent.appendChild(subtitle);
+    textContent.appendChild(ctaButton);
+    logoContainer.appendChild(logo);
+    bannerSmall.appendChild(logoContainer);
+    bannerSmall.appendChild(textContent);
+    content.appendChild(bannerSmall);
+    footerText.appendChild(footerTextContent);
+    footer.appendChild(footerText);
+    banner.appendChild(content);
+    banner.appendChild(footer);
     container.appendChild(banner);
   }
 
-  /**
-   * Создание нижнего отступа
-   */
-  private createBottomSpacing(container: HTMLElement): void {
-    const spacing = document.createElement('div');
-    spacing.style.cssText = `
-      height: 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 14px;
-      text-align: center;
-    `;
-    spacing.innerHTML = `
-      <div>
-        <div style="margin-bottom: 8px;">🎯</div>
-        <div>Тестируйте скролл в разных состояниях шторки</div>
-      </div>
-    `;
-    container.appendChild(spacing);
-  }
+  // createBottomSpacing method removed - no longer needed
 
-  /**
-   * Создание секции историй (deprecated)
-   */
-  private createStories(container: HTMLElement): void {
-    const stories: StoryItem[] = [
-      { id: '1', title: 'История 1', imageUrl: '/figma_export/dashboard/components/stories/assets/images/img_1.png', isViewed: false },
-      { id: '2', title: 'История 2', imageUrl: '/figma_export/dashboard/components/stories/assets/images/img_2.png', isViewed: false },
-      { id: '3', title: 'История 3', imageUrl: '/figma_export/dashboard/components/stories/assets/images/img_3.png', isViewed: true }
-    ];
+  // createStories and createStoryElement methods removed - using StoriesCarousel component instead
 
-    const storiesContainer = document.createElement('div');
-    storiesContainer.className = 'figma-stories';
-    storiesContainer.style.cssText = `
-      padding: 16px;
-      padding-top: 0;
-    `;
-
-    const storiesRow = document.createElement('div');
-    storiesRow.style.cssText = `
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 8px;
-    `;
-
-    stories.forEach(story => {
-      const storyEl = this.createStoryElement(story);
-      storiesRow.appendChild(storyEl);
-    });
-
-    storiesContainer.appendChild(storiesRow);
-    container.appendChild(storiesContainer);
-  }
-
-  /**
-   * Создание элемента истории
-   */
-  private createStoryElement(story: StoryItem): HTMLElement {
-    const storyEl = document.createElement('div');
-    storyEl.className = 'figma-story';
-    storyEl.style.cssText = `
-      flex-shrink: 0;
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: ${story.isViewed ? '#E0E0E0' : 'linear-gradient(45deg, #FF6B6B, #4ECDC4)'};
-      padding: 2px;
-      cursor: pointer;
-    `;
-
-    const storyInner = document.createElement('div');
-    storyInner.style.cssText = `
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background-image: url(${story.imageUrl});
-      background-size: cover;
-      background-position: center;
-      border: 2px solid white;
-    `;
-
-    storyEl.appendChild(storyInner);
-    
-    storyEl.addEventListener('click', () => {
-      this.props.onStoryClick?.(story.id);
-    });
-
-    return storyEl;
-  }
-
-  /**
-   * Создание сетки контента
-   */
-  private createContentGrid(container: HTMLElement): void {
-    const metaItems: MetaItem[] = [
-      { id: 'item1', title: 'Кафе', subtitle: 'Рядом с вами', iconType: 'emoji', iconSrc: '☕' },
-      { id: 'item2', title: 'АЗС', subtitle: 'Найти ближайшую', iconType: 'emoji', iconSrc: '⛽' },
-      { id: 'item3', title: 'Банкоматы', subtitle: 'Снять наличные', iconType: 'emoji', iconSrc: '🏧', isAd: true }
-    ];
-
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'figma-content-grid';
-    gridContainer.style.cssText = `
-      padding: 16px;
-      padding-top: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    `;
-
-    metaItems.forEach(item => {
-      const itemEl = this.createMetaItemElement(item);
-      gridContainer.appendChild(itemEl);
-    });
-
-    container.appendChild(gridContainer);
-  }
+  // createContentGrid method removed - replaced by AdviceGrid component
 
   /**
    * Создание элемента meta-item
@@ -889,14 +771,7 @@ export class DashboardScreen {
     }, 3000);
   }
 
-  private updateMapStatus?(message: string, type: 'loading' | 'success' | 'error' | 'info'): void {
-    // Обновление статуса карты (если есть элемент статуса)
-    const statusElement = document.querySelector('.map-status');
-    if (statusElement) {
-      statusElement.textContent = message;
-      statusElement.className = `map-status ${type}`;
-    }
-  }
+
 
   /**
    * Публичные методы для управления экраном
@@ -1231,23 +1106,7 @@ export class DashboardScreen {
     this.bottomsheetElement.appendChild(header);
   }
 
-  private createFigmaContent(): void {
-    if (!this.bottomsheetElement) return;
-
-    const content = document.createElement('div');
-    content.className = 'dashboard-content';
-    content.style.cssText = `
-      flex: 1;
-      width: 100%;
-      overflow-y: auto;
-      padding-top: 16px;
-    `;
-    
-    // Add all the original content elements
-    this.createDashboardContent(content);
-    
-    this.bottomsheetElement.appendChild(content);
-  }
+  // createFigmaContent method removed - now using createDashboardContent directly
 }
 
 /**

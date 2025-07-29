@@ -6,7 +6,7 @@
 import './styles/_variables.css';
 import './styles/base.css';
 import './styles/dashboard.css';
-import './styles/demo-controls.css';
+
 
 import { ScreenType } from './types/navigation';
 import { BottomsheetState, BottomsheetConfig } from './types/bottomsheet';
@@ -82,8 +82,6 @@ class App {
       {
         onStateChange: (fromState, toState) => {
           console.log(`📋 Bottomsheet: ${fromState} → ${toState}`);
-          // Sync map viewport when bottomsheet state changes
-          this.mapSyncService?.adjustMapViewport(this.getHeightForState(toState));
         },
         onDragStart: (height) => {
           console.log(`🖱️ Drag start: ${height}px`);
@@ -118,78 +116,12 @@ class App {
     // Activate the screen
     this.dashboardScreen.activate();
 
-    // Set up global controls if they exist
-    this.setupGlobalControls();
+
   }
 
-  /**
-   * Set up global control handlers (debug panel, etc.)
-   */
-  private setupGlobalControls(): void {
-    // Refresh button
-    document.getElementById('btn-refresh')?.addEventListener('click', () => {
-      location.reload();
-    });
 
-    // Debug toggle
-    document.getElementById('btn-toggle-debug')?.addEventListener('click', () => {
-      const debugInfo = document.getElementById('debug-info');
-      if (debugInfo) {
-        debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
-      }
-    });
 
-    // Center Moscow button
-    document.getElementById('btn-center-moscow')?.addEventListener('click', () => {
-      this.dashboardScreen?.centerMoscow();
-    });
 
-    // Test markers button
-    document.getElementById('btn-test-markers')?.addEventListener('click', () => {
-      this.dashboardScreen?.testRandomMarkers();
-    });
-
-    // Bottomsheet state buttons
-    document.querySelectorAll('[data-state]').forEach(button => {
-      button.addEventListener('click', () => {
-        const state = (button as HTMLElement).dataset.state;
-        if (state && this.dashboardScreen) {
-          const bottomsheetState = this.mapStateToBottomsheetState(state);
-          this.dashboardScreen.snapToState(bottomsheetState);
-          
-          // Update active button
-          document.querySelectorAll('[data-state]').forEach(btn => btn.classList.remove('active'));
-          button.classList.add('active');
-        }
-      });
-    });
-  }
-
-  /**
-   * Map string state to BottomsheetState enum
-   */
-  private mapStateToBottomsheetState(state: string): BottomsheetState {
-    switch (state.toLowerCase().replace('-', '_')) {
-      case 'small': return BottomsheetState.SMALL;
-      case 'default': return BottomsheetState.DEFAULT;
-      case 'fullscreen': return BottomsheetState.FULLSCREEN;
-      case 'fullscreen_scroll': return BottomsheetState.FULLSCREEN_SCROLL;
-      default: return BottomsheetState.DEFAULT;
-    }
-  }
-
-  /**
-   * Get height percentage for bottomsheet state
-   */
-  private getHeightForState(state: BottomsheetState): number {
-    switch (state) {
-      case BottomsheetState.SMALL: return 0.2;
-      case BottomsheetState.DEFAULT: return 0.55;
-      case BottomsheetState.FULLSCREEN: return 0.9;
-      case BottomsheetState.FULLSCREEN_SCROLL: return 0.95;
-      default: return 0.55;
-    }
-  }
 
   /**
    * Show error in UI

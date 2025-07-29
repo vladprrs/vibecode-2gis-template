@@ -15,40 +15,12 @@
     <!-- Styles for Figma Dashboard -->
     <link rel="stylesheet" href="./src/styles/dashboard.css">
     <link rel="stylesheet" href="./src/styles/figma-components.css">
-    <link rel="stylesheet" href="./src/styles/demo-controls.css">
     <link rel="stylesheet" href="./src/styles/base.css">
 </head>
 <body>
     <div id="app"></div>
     
-    <!-- Demo Controls -->
-    <div class="demo-controls">
-        <h4>Dashboard States</h4>
-        <button id="btn-small" data-state="small">Small (20%)</button>
-        <button id="btn-default" data-state="default" class="active">Default (55%)</button>
-        <button id="btn-fullscreen" data-state="fullscreen">Fullscreen (90%)</button>
-        <button id="btn-fullscreen-scroll" data-state="fullscreen-scroll">Full + Scroll (95%)</button>
-        
-        <h4>Actions</h4>
-        <button id="btn-refresh">Refresh</button>
-        <button id="btn-toggle-debug">Toggle Debug</button>
-        <button id="btn-center-moscow">Center Moscow</button>
-        <button id="btn-test-markers">Test Markers</button>
-    </div>
 
-    <!-- Map Status -->
-    <div class="map-status loading" id="map-status">
-        Инициализация MapGL...
-    </div>
-    
-    <!-- Debug Info -->
-    <div class="debug-info" id="debug-info" style="display: none;">
-        <div>State: <span id="debug-state">default</span></div>
-        <div>Height: <span id="debug-height">55%</span></div>
-        <div>Map: <span id="debug-map">loading</span></div>
-        <div>Center: <span id="debug-center">-</span></div>
-        <div>Zoom: <span id="debug-zoom">-</span></div>
-    </div>
 
     <!-- 2GIS MapGL API v1 -->
     <script src="https://mapgl.2gis.com/api/js/v1"></script>

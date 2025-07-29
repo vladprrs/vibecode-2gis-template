@@ -2,7 +2,7 @@ console.log('🔧 Loading minimal main.ts module...');
 
 import './styles/base.css';
 import './styles/dashboard.css';
-import './styles/demo-controls.css';
+
 
 console.log('🎨 Styles loaded');
 
