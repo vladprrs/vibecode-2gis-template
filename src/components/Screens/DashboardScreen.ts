@@ -538,7 +538,7 @@ export class DashboardScreen {
       height: 64px;
       border-radius: 32px;
       border: 0.5px solid rgba(137, 137, 137, 0.30);
-      background: url('/figma_export/dashboard/components/banner/assets/images/img-c6496740.jpg') lightgray 50% / cover no-repeat;
+              background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
       position: relative;
     `;
 
@@ -2007,7 +2007,7 @@ export class DashboardScreen {
     
     // Salut icon (voice assistant)
     const salutIcon = document.createElement('div');
-    salutIcon.innerHTML = `<img src="/figma_export/search_result/components/bottomsheet_header/assets/images/img-4346f8f5.png" alt="Salut" style="width: 24px; height: 24px;" />`;
+          salutIcon.innerHTML = `<div style="width: 24px; height: 24px; background: #F5353C; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">S</div>`;
     salutIcon.style.cssText = `
       width: 24px;
       height: 24px;
@@ -2550,7 +2550,7 @@ export class DashboardScreen {
     imageContainer.style.cssText = `
       width: 80px;
       height: 80px;
-      background: url('/figma_export/search_result/components/results/assets/images/img-bf9ff8a7.png') center/cover;
+              background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
       flex-shrink: 0;
     `;
     
