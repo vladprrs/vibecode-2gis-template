@@ -63,6 +63,8 @@ class App {
     this.searchFlowManager = new SearchFlowManager(ScreenType.DASHBOARD, {
       onScreenChange: (from, to, context) => {
         console.log(`📱 Navigation: ${from} → ${to}`, context);
+        // Delegate screen changes to the DashboardScreen
+        this.dashboardScreen?.handleScreenChange(from, to, context);
       },
       onSearchInitiated: (query, source) => {
         console.log(`🔍 Search initiated: "${query}" from ${source}`);
@@ -115,8 +117,6 @@ class App {
 
     // Activate the screen
     this.dashboardScreen.activate();
-
-
   }
 
 
