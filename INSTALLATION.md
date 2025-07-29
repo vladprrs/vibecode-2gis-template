@@ -1,161 +1,310 @@
-# Установка и запуск VibeCode 2GIS Template
+# Installation Guide
 
-## 📋 Требования
+## 📋 System Requirements
 
 - **Node.js** >= 18.0.0
 - **npm** >= 9.0.0
-- **Git** для клонирования репозитория
+- **Git** for version control
+- Modern web browser (Chrome 90+, Firefox 88+, Safari 14+)
 
-## 🚀 Быстрая установка
+## 🚀 Quick Installation
 
-### 1. Клонирование репозитория
-
+### 1. Clone Repository
 ```bash
 git clone https://github.com/vladprrs/vibecode-2gis-template.git
 cd vibecode-2gis-template
 ```
 
-### 2. Установка зависимостей
-
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Запуск проекта
-
+### 3. Start Development Server
 ```bash
-npm start
+npm run dev
 ```
 
-### 4. Открытие в браузере
+### 4. Open in Browser
+Navigate to: `http://localhost:8080`
 
-Перейдите по адресу: `http://localhost:8080`
+## 🔧 Detailed Setup
 
-## 🔧 Детальная настройка
+### Prerequisites Verification
+Check your system meets the requirements:
 
-### Настройка 2GIS API
+```bash
+# Check Node.js version
+node --version
+# Should output: v18.x.x or higher
 
-1. Получите API ключ на [2GIS Developer Portal](https://dev.2gis.com/)
-2. Создайте файл `.env` в корне проекта:
+# Check npm version
+npm --version
+# Should output: 9.x.x or higher
+
+# Check Git installation
+git --version
+```
+
+### Environment Configuration
+
+#### 2GIS MapGL API Key
+1. Visit [2GIS Developer Portal](https://dev.2gis.com/)
+2. Register or sign in to your account
+3. Create a new project
+4. Generate an API key
+5. Create `.env` file in project root:
 
 ```env
+# 2GIS MapGL API Key
 VITE_MAPGL_KEY=your-2gis-api-key-here
+
+# Development settings (optional)
+NODE_ENV=development
 ```
 
-### Настройка Git
+**Note:** The application includes a demo API key for testing, but you should use your own key for production.
 
-```bash
-git config --global user.name "Ваше имя"
-git config --global user.email "ваш.email@example.com"
-```
-
-## 📦 Доступные команды
-
-```bash
-# Разработка
-npm run dev          # Запуск dev сервера
-npm start           # Алиас для dev
-
-# Сборка
-npm run build       # Production сборка
-npm run preview     # Предварительный просмотр сборки
-
-# Качество кода
-npm run type-check  # Проверка TypeScript типов
-npm run lint        # Проверка и исправление ESLint
-npm run format      # Форматирование кода с Prettier
-
-# Очистка
-npm run clean       # Удаление build артефактов
-```
-
-## 🛠 Структура проекта
-
+### Project Structure After Installation
 ```
 vibecode-2gis-template/
-├── src/
-│   ├── components/          # React компоненты
-│   │   ├── Dashboard/      # Компоненты дашборда
-│   │   ├── Search/         # Поисковые компоненты
-│   │   ├── Cards/          # Карточки контента
-│   │   ├── Map/           # Картографические компоненты
-│   │   └── Screens/       # Основные экраны
-│   ├── services/           # Бизнес-логика
-│   ├── types/             # TypeScript типы
-│   ├── styles/            # CSS стили
-│   └── config/            # Конфигурация
-├── test/                   # Тестовые файлы
-├── figma_export/          # Экспорт дизайна из Figma
-└── package.json           # Зависимости и скрипты
+├── src/                     # Source code
+│   ├── components/          # UI components
+│   ├── services/           # Business logic
+│   ├── types/              # TypeScript definitions
+│   ├── config/             # Configuration
+│   ├── styles/             # Global styles
+│   └── main.ts             # Entry point
+├── test/                   # Test files and demos
+├── figma_export/           # Design assets
+├── node_modules/           # Dependencies (generated)
+├── dist/                   # Build output (generated)
+├── package.json            # Project configuration
+├── tsconfig.json           # TypeScript config
+├── vite.config.ts          # Vite build config
+└── .env                    # Environment variables (you create this)
 ```
 
-## 🎯 Основные функции
+## 🛠️ Development Commands
 
-- **Единая точка входа** - Архитектура без дублирования
-- **Плавный скролл** - Интегрированный скроллинг
-- **Полнофункциональный поиск** - Интеграция с 2GIS API
-- **Модульная архитектура** - Компоненты: SuggestScreen, SearchFlowManager, BottomsheetManager
-- **Современный UI** - Дизайн в стиле Figma
-
-## 🔍 Отладка
-
-### Просмотр логов
-
+### Primary Commands
 ```bash
-# В режиме разработки
+# Start development server with hot reload
 npm run dev
 
-# В консоли браузера
-console.log('Debug info');
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run TypeScript type checking
+npm run type-check
+
+# Lint code with ESLint
+npm run lint
+
+# Format code with Prettier
+npm run format
+
+# Clean build artifacts
+npm run clean
 ```
 
-### Проверка типов
-
+### Advanced Commands
 ```bash
+# Lint and auto-fix issues
+npm run lint
+
+# Check code formatting
+npm run format:check
+
+# Run all quality checks
+npm run type-check && npm run lint && npm run build
+```
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+#### Port Already in Use
+If port 8080 is occupied:
+```bash
+# Kill process using port 8080 (macOS/Linux)
+lsof -ti:8080 | xargs kill -9
+
+# Or use different port
+npm run dev -- --port 3000
+```
+
+#### Node.js Version Issues
+If you're using an older Node.js version:
+```bash
+# Using nvm (recommended)
+nvm install 18
+nvm use 18
+
+# Or update Node.js manually
+# Visit: https://nodejs.org/
+```
+
+#### TypeScript Errors
+```bash
+# Clear TypeScript cache
+rm -rf node_modules/.cache
+
+# Reinstall dependencies
+rm -rf node_modules package-lock.json
+npm install
+
+# Run type checking
 npm run type-check
 ```
 
-### Проверка качества кода
-
+#### Build Failures
 ```bash
-npm run lint
-npm run format:check
-```
-
-## 🚀 Деплой
-
-### Сборка для продакшена
-
-```bash
+# Clean and rebuild
+npm run clean
+npm install
 npm run build
 ```
 
-### Статический хостинг
+#### MapGL Not Loading
+1. Check API key in `.env` file
+2. Verify internet connection
+3. Check browser console for errors
+4. Ensure API key has proper permissions
 
-Собранные файлы в папке `dist/` можно загрузить на:
-- Netlify
-- Vercel
-- GitHub Pages
-- Любой статический хостинг
+### Development Environment Setup
 
-## 📞 Поддержка
+#### VS Code Extensions (Recommended)
+- **TypeScript Hero** - TypeScript support
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+- **Vite** - Build tool support
+- **Auto Rename Tag** - HTML/JSX editing
 
-При возникновении проблем:
+#### VS Code Settings
+Create `.vscode/settings.json`:
+```json
+{
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
+```
 
-1. Проверьте версии Node.js и npm
-2. Убедитесь, что все зависимости установлены
-3. Проверьте конфигурацию 2GIS API ключа
-4. Создайте Issue в репозитории
+## 🧪 Verification
 
-## 🔄 Обновления
+### Test Installation
+After installation, verify everything works:
+
+1. **Development server starts:**
+   ```bash
+   npm run dev
+   ```
+   Should output: `Local: http://localhost:8080`
+
+2. **Application loads:**
+   - Open browser to `http://localhost:8080`
+   - Should see 2GIS map with bottomsheet
+   - No console errors
+
+3. **Build system works:**
+   ```bash
+   npm run build
+   ```
+   Should create `dist/` folder without errors
+
+4. **Code quality tools work:**
+   ```bash
+   npm run type-check && npm run lint
+   ```
+   Should pass without errors
+
+### Feature Testing
+Test key features:
+- **Map interaction** - Click on map to add markers
+- **Bottomsheet gestures** - Drag bottomsheet up/down
+- **Search bar** - Click search to navigate (demo functionality)
+- **Responsive design** - Resize browser window
+
+## 📱 Mobile Development
+
+### Local Network Access
+To test on mobile devices:
 
 ```bash
-# Получение последних изменений
-git pull origin main
+# Start server with network access
+npm run dev
 
-# Обновление зависимостей
-npm install
+# Find your local IP
+ipconfig getifaddr en0  # macOS
+hostname -I             # Linux
+ipconfig               # Windows
+```
 
-# Перезапуск проекта
-npm start
-``` 
+Access from mobile: `http://YOUR_IP:8080`
+
+### Mobile Browser Testing
+Recommended browsers for testing:
+- **iOS Safari** (latest)
+- **Chrome Mobile** (latest)
+- **Firefox Mobile** (latest)
+
+## 🚀 Production Setup
+
+### Build for Production
+```bash
+# Create optimized build
+npm run build
+
+# Test production build locally
+npm run preview
+```
+
+### Environment Variables for Production
+Create production `.env`:
+```env
+VITE_MAPGL_KEY=your-production-api-key
+NODE_ENV=production
+```
+
+### Deploy to Static Hosting
+The `dist/` folder contains static files ready for deployment to:
+- **Netlify** - Drag & drop deployment
+- **Vercel** - Git-connected deployment
+- **GitHub Pages** - Free hosting
+- **Any static web server**
+
+## 📞 Support
+
+### Getting Help
+1. **Check documentation** - Read README.md thoroughly
+2. **Search issues** - Check GitHub issues for similar problems
+3. **Create issue** - Provide detailed information:
+   - Node.js version (`node --version`)
+   - npm version (`npm --version`)
+   - Operating system
+   - Error messages
+   - Steps to reproduce
+
+### Debug Information
+When reporting issues, include:
+```bash
+# System information
+node --version
+npm --version
+npm list --depth=0
+
+# Console errors from browser
+# Network tab information
+# Any relevant log files
+```
+
+---
+
+📝 **Note:** This installation guide covers the standard setup. For advanced configurations, Docker deployment, or CI/CD integration, refer to the main README.md file.

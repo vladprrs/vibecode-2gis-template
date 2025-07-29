@@ -1,38 +1,31 @@
-# 2GIS Web Clickable Prototype
+# VibeCode 2GIS Template
 
 ## 🎯 Overview
 
-Modern **TypeScript/Node.js** implementation of a clickable web prototype of the 2GIS app for:
-
-* 🔬 **UX research** as an interactive prototype
-* ⚡ **Rapid UI iteration** without server teams involved  
-* 🧪 **Fast hypothesis validation** about screen structure, flows, and content priority
-
-The prototype focuses on realistic layout and UI behavior (gestures, animations, states) while using **mock data**. No production search/routing algorithms are implemented.
-
----
+Modern **TypeScript** template for creating interactive 2GIS-based map applications with modular architecture. Built for rapid prototyping and UX research with real 2GIS MapGL integration.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-
-* **Node.js** >= 18.0.0
-* **npm** >= 9.0.0
+- **Node.js** >= 18.0.0
+- **npm** >= 9.0.0
 
 ### Installation & Development
-
 ```bash
+# Clone repository
+git clone https://github.com/vladprrs/vibecode-2gis-template.git
+cd vibecode-2gis-template
+
 # Install dependencies
 npm install
 
-# Start development server with hot reload
+# Start development server
 npm run dev
 
 # Open browser at http://localhost:8080
 ```
 
 ### Production Build
-
 ```bash
 # Build for production
 npm run build
@@ -41,269 +34,318 @@ npm run build
 npm run preview
 ```
 
-### Code Quality
+## 📦 Tech Stack
 
-```bash
-# Run TypeScript type checking
-npm run type-check
-
-# Lint code
-npm run lint
-
-# Format code
-npm run format
-
-# Check formatting
-npm run format:check
-```
-
----
-
-## 📦 Modern Tech Stack
-
-* **TypeScript 5.3+** — Type-safe development
-* **Vite 5.0** — Lightning-fast build tool with HMR
-* **ESLint + Prettier** — Code quality and formatting
-* **@2gis/mapgl** — Interactive map rendering
-* **ES2022 Modules** — Modern JavaScript features
-* **CSS Modules** — Scoped styling architecture
-
-### Build System Features
-
-* ⚡ **Hot Module Replacement (HMR)** for instant updates
-* 🎯 **Path aliases** (`@/components`, `@/services`, etc.)
-* 📦 **Tree shaking** for optimal bundle size
-* 🗜️ **Asset optimization** with modern formats
-* 🔍 **Source maps** for debugging
-* 📊 **Bundle analysis** and performance metrics
-
----
+- **TypeScript 5.3+** — Type-safe development
+- **Vite 5.0** — Lightning-fast build tool with HMR
+- **@2gis/mapgl** — Real 2GIS map integration
+- **ESLint + Prettier** — Code quality and formatting
+- **CSS3** — Modern styling with custom properties
 
 ## 🏗️ Architecture
 
 ### Project Structure
-
 ```
-2gis_template/
-├── src/
-│   ├── components/          # UI Components
-│   │   ├── Screens/         # Main screens (Dashboard, Search, etc.)
-│   │   ├── Bottomsheet/     # Bottomsheet components
-│   │   ├── Search/          # Search-related components
-│   │   └── Cards/           # Card components
-│   ├── services/            # Business logic services
-│   ├── types/               # TypeScript type definitions
-│   ├── config/              # Configuration files
-│   ├── styles/              # Global and component styles
-│   ├── demo/                # Demo implementations
-│   └── main.ts              # Main application entry point
-├── test/                    # Demo HTML files
-├── figma_export/            # Figma design exports
-├── dist/                    # Build output (generated)
-└── node_modules/            # Dependencies (generated)
+src/
+├── components/          # UI Components
+│   ├── Screens/         # Main application screens
+│   │   ├── DashboardScreen.ts    # Main dashboard with map
+│   │   ├── SearchResultScreen.ts # Search results display
+│   │   ├── SuggestScreen.ts     # Search suggestions
+│   │   └── OrganizationScreen.ts # Organization details
+│   ├── Bottomsheet/     # Bottomsheet components
+│   │   ├── BottomsheetContainer.ts
+│   │   ├── BottomsheetHeader.ts
+│   │   └── BottomsheetContent.ts
+│   ├── Search/          # Search-related components
+│   │   ├── SearchBar.ts
+│   │   ├── SearchFilters.ts
+│   │   └── SearchSuggestions.ts
+│   ├── Cards/           # Card components
+│   │   └── OrganizationCard.ts
+│   ├── Dashboard/       # Dashboard-specific components
+│   └── Map/            # Map components
+├── services/           # Business logic services
+│   ├── SearchFlowManager.ts     # Navigation & search flow
+│   ├── BottomsheetManager.ts    # Bottomsheet state management
+│   ├── BottomsheetScrollManager.ts # Scroll behavior
+│   └── MapSyncService.ts        # Map synchronization
+├── types/              # TypeScript type definitions
+│   ├── bottomsheet.ts  # Bottomsheet types
+│   ├── navigation.ts   # Navigation types
+│   └── map.ts         # Map types
+├── config/            # Configuration files
+│   └── mapgl.ts       # 2GIS MapGL configuration
+├── styles/            # Global styles
+└── main.ts           # Application entry point
 ```
 
-### Key Components
+### Core Components
 
-1. **DashboardScreen** — Unified main screen with 2GIS MapGL integration
-2. **SearchFlowManager** — Navigation state management
-3. **BottomsheetManager** — Bottomsheet state and gestures
-4. **MapSyncService** — Map and UI synchronization
+#### 1. DashboardScreen (`src/components/Screens/DashboardScreen.ts`)
+- Main application screen with 2GIS map integration
+- Bottomsheet with multiple snap states (small/default/fullscreen/scroll)
+- Modular component architecture
+- Interactive map with marker support
 
----
+#### 2. SearchFlowManager (`src/services/SearchFlowManager.ts`)
+- Navigation between screens (Dashboard → Suggest → SearchResult → Organization)
+- Search context management
+- History tracking
+- Event handling for search interactions
 
-## 🎪 Demo Screens
+#### 3. BottomsheetManager (`src/services/BottomsheetManager.ts`)
+- Bottomsheet state management
+- Smooth transitions between states
+- Gesture handling for drag interactions
 
-### 1. **Dashboard Screen** 
-* Interactive 2GIS map background
-* Bottomsheet with snap states: `small` / `default` / `fullscreen` / `fullscreen-scroll`
-* Search bar, stories, buttons grid, and meta items
-* Pixel-perfect Figma design implementation
+#### 4. MapSyncService (`src/services/MapSyncService.ts`)
+- Synchronization between map and UI components
+- Viewport adjustments based on bottomsheet state
 
-### 2. **Search Flow** (Architecture ready)
-* Suggest screen with live suggestions
-* Results screen with card ↔ pin synchronization
-* Filters and sorting capabilities
+## 🎪 Key Features
 
-### 3. **Organization Card** (Architecture ready)
-* Hero gallery with actions
-* Tabbed content: Overview / Reviews / Prices / Info
-* Responsive layout and animations
+### Interactive Map
+- Real 2GIS MapGL integration
+- Interactive markers and click events
+- Moscow-centered by default
+- Fallback display when MapGL unavailable
 
----
+### Bottomsheet System
+- **Small** (20%) - Collapsed state with search bar
+- **Default** (55%) - Normal content display
+- **Fullscreen** (90%) - Expanded view
+- **Fullscreen Scroll** (95%) - Scrollable content mode
+
+### Search Flow
+- **Dashboard** → Main screen with map and content
+- **Suggest** → Search suggestions and history
+- **Search Results** → Organization listings with filters
+- **Organization** → Detailed organization view
+
+### UI Components
+- Responsive design (375px max-width)
+- Touch-friendly interactions
+- Smooth animations and transitions
+- Modern CSS with custom properties
 
 ## 🛠️ Development
 
 ### Available Scripts
-
 ```bash
-npm run dev          # Start dev server (localhost:8080)
-npm run build        # Production build
+npm run dev          # Start development server (localhost:8080)
+npm run build        # Production build with TypeScript compilation
 npm run preview      # Preview production build
-npm run type-check   # TypeScript validation  
-npm run lint         # ESLint checking
-npm run lint:fix     # Auto-fix ESLint issues
-npm run format       # Format code with Prettier
+npm run type-check   # TypeScript type checking
+npm run lint         # ESLint code checking
+npm run format       # Prettier code formatting
 npm run clean        # Clean build artifacts
 ```
 
 ### Development Features
+- **Hot Module Replacement** for instant updates
+- **TypeScript strict mode** for type safety
+- **Path aliases** for clean imports (`@/components`, `@/services`, etc.)
+- **Source maps** for debugging
+- **ESLint + Prettier** integration
 
-* 🔥 **Hot reload** for instant feedback
-* 🐛 **Enhanced debugging** with source maps
-* 📊 **Performance monitoring** built-in
-* 🎨 **Modern UI controls** with visual feedback
-* 📱 **Responsive design** testing tools
+### Configuration
 
-### Environment Configuration
-
-Create `.env` file for custom settings:
-
+#### 2GIS MapGL API Key
+Create `.env` file in project root:
 ```env
-# 2GIS MapGL API Key
-VITE_MAPGL_KEY=your-api-key-here
-
-# Development settings
-NODE_ENV=development
+VITE_MAPGL_KEY=your-2gis-api-key-here
 ```
 
----
+Get your API key from [2GIS Developer Portal](https://dev.2gis.com/)
 
-## 🎨 Design Integration
+#### TypeScript Configuration
+- **Target**: ES2022 with modern features
+- **Module**: ESNext with bundler resolution
+- **Strict type checking** enabled
+- **Path mapping** for clean imports
 
-### Figma Compatibility
+## 📱 Components Usage
 
-* **Pixel-perfect** component reproduction
-* **Exact dimensions** from Figma exports
-* **Proper typography** and spacing
-* **Asset optimization** for web delivery
+### Creating a Dashboard Screen
+```typescript
+import { DashboardScreen, DashboardScreenFactory } from '@/components/Screens';
+import { SearchFlowManager } from '@/services/SearchFlowManager';
+import { BottomsheetManager } from '@/services/BottomsheetManager';
 
-### Responsive Behavior
+const container = document.getElementById('app')!;
+const searchFlowManager = new SearchFlowManager();
+const bottomsheetManager = new BottomsheetManager();
 
-* **Mobile-first** approach
-* **Touch-friendly** interactions
-* **Adaptive layouts** for different screen sizes
-* **Performance optimization** for mobile devices
+const dashboardScreen = DashboardScreenFactory.createDefault(
+  container,
+  searchFlowManager,
+  bottomsheetManager,
+  'your-mapgl-api-key'
+);
+```
 
----
+### Using Search Flow Manager
+```typescript
+import { SearchFlowManager, ScreenType } from '@/services';
 
-## 🔧 Configuration Files
+const searchManager = new SearchFlowManager(ScreenType.DASHBOARD, {
+  onScreenChange: (from, to, context) => {
+    console.log(`Navigation: ${from} → ${to}`);
+  },
+  onSearchInitiated: (query, source) => {
+    console.log(`Search: "${query}" from ${source}`);
+  }
+});
 
-### TypeScript (`tsconfig.json`)
-* **Strict type checking** enabled
-* **Path mapping** for clean imports
-* **ES2022** target with modern features
-* **Source maps** for debugging
+// Navigate to search suggestions
+searchManager.goToSuggest();
 
-### Vite (`vite.config.ts`)
-* **Development server** on port 8080
-* **Path aliases** configuration
-* **Asset handling** optimization
-* **Build optimization** settings
+// Perform search
+searchManager.goToSearchResults('кафе', { category: 'food' });
+```
 
-### ESLint (`.eslintrc.json`)
-* **TypeScript-aware** linting
-* **Prettier integration**
-* **Custom rules** for code quality
-* **Auto-fix** capabilities
+### Managing Bottomsheet States
+```typescript
+import { BottomsheetManager, BottomsheetState } from '@/services';
 
----
+const bottomsheetManager = new BottomsheetManager();
 
-## 📊 Performance
+// Snap to different states
+bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
 
-### Bundle Optimization
+// Listen to state changes
+bottomsheetManager.onStateChange((newState) => {
+  console.log(`Bottomsheet state: ${newState}`);
+});
+```
 
-* **Tree shaking** removes unused code
-* **Code splitting** for lazy loading
-* **Asset compression** with modern formats
-* **Critical CSS** inlining
+## 🎨 Styling
 
-### Runtime Performance
+### CSS Architecture
+- **CSS Custom Properties** for theming
+- **BEM-like** class naming convention
+- **Responsive design** with mobile-first approach
+- **Smooth animations** with hardware acceleration
 
-* **Efficient re-renders** with proper state management
-* **Memory leak prevention** with cleanup methods
-* **Optimized animations** with hardware acceleration
-* **Lazy loading** for non-critical resources
-
----
+### Key Style Files
+- `src/styles/base.css` - Base styles and CSS variables
+- `src/styles/dashboard.css` - Dashboard-specific styles
+- `src/styles/demo-controls.css` - Development controls
 
 ## 🧪 Testing & Quality
 
-### Code Quality Tools
-
+### Code Quality
 ```bash
-# Type safety
-npm run type-check
-
-# Code linting
-npm run lint:check
-
-# Code formatting  
-npm run format:check
+# Run all quality checks
+npm run type-check && npm run lint && npm run build
 ```
 
-### Browser Compatibility
-
-* **Modern browsers** (Chrome 90+, Firefox 88+, Safari 14+)
-* **ES2022 features** with polyfills where needed
-* **Mobile browsers** optimization
-* **Progressive enhancement** approach
-
----
+### Browser Support
+- Modern browsers (Chrome 90+, Firefox 88+, Safari 14+)
+- ES2022 features with bundler polyfills
+- Mobile browsers optimization
 
 ## 🚀 Deployment
 
-### Production Build
-
+### Static Build
 ```bash
 npm run build
 ```
 
-Generates optimized static files in `dist/` directory:
-
-* **Minified JavaScript** bundles
-* **Optimized CSS** with critical path inlining
-* **Compressed assets** (images, fonts)
-* **Service worker** ready structure
+Generates optimized files in `dist/` directory:
+- Minified TypeScript/JavaScript bundles
+- Optimized CSS with vendor prefixes
+- Asset optimization and compression
 
 ### Hosting Options
+- **Netlify/Vercel** - Static hosting with CDN
+- **GitHub Pages** - Free hosting for open source
+- **Docker** - Containerized deployment
+- **Any static web server**
 
-* **Static hosting** (Netlify, Vercel, GitHub Pages)
-* **CDN deployment** for global performance
-* **Docker containers** for consistent environments
-* **CI/CD integration** ready
+## 📚 API Reference
 
----
+### Main Classes
 
-## 📚 Documentation
+#### `DashboardScreen`
+Main application screen with map and bottomsheet.
 
-* **API Documentation** — Generated from TypeScript definitions
-* **Component Stories** — Interactive component documentation
-* **Architecture Guides** — Detailed system documentation
-* **Performance Metrics** — Bundle analysis and optimization guides
+**Methods:**
+- `activate()` - Show screen
+- `deactivate()` - Hide screen  
+- `snapToState(state)` - Change bottomsheet state
+- `centerMoscow()` - Center map on Moscow
+- `destroy()` - Clean up resources
 
----
+#### `SearchFlowManager`
+Navigation and search state management.
+
+**Methods:**
+- `goToSuggest()` - Navigate to suggestions
+- `goToSearchResults(query, filters?)` - Navigate to results
+- `goToOrganization(organization)` - Navigate to org details
+- `goBack()` - Navigate back
+- `updateQuery(query)` - Update search query
+
+#### `BottomsheetManager`
+Bottomsheet state and gesture management.
+
+**Methods:**
+- `snapToState(state)` - Change bottomsheet state
+- `getCurrentState()` - Get current state info
+- `onStateChange(callback)` - Listen to state changes
+
+### Type Definitions
+
+#### `ScreenType`
+```typescript
+enum ScreenType {
+  DASHBOARD = 'dashboard',
+  SUGGEST = 'suggest',
+  SEARCH_RESULT = 'search_result',
+  ORGANIZATION = 'organization'
+}
+```
+
+#### `BottomsheetState`
+```typescript
+enum BottomsheetState {
+  SMALL = 'small',
+  DEFAULT = 'default', 
+  FULLSCREEN = 'fullscreen',
+  FULLSCREEN_SCROLL = 'fullscreen_scroll'
+}
+```
 
 ## 🤝 Contributing
 
 ### Development Workflow
-
-1. **Install dependencies:** `npm install`
-2. **Start development:** `npm run dev`
-3. **Make changes** with hot reload feedback
-4. **Run quality checks:** `npm run lint && npm run type-check`
-5. **Format code:** `npm run format`
-6. **Test build:** `npm run build`
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Make changes with proper TypeScript types
+4. Run quality checks: `npm run type-check && npm run lint`
+5. Commit changes: `git commit -m 'Add amazing feature'`
+6. Push to branch: `git push origin feature/amazing-feature`
+7. Open Pull Request
 
 ### Code Standards
-
-* **TypeScript strict mode** enforced
-* **Consistent formatting** with Prettier
-* **Meaningful component names** and clear interfaces
-* **Performance-conscious** implementations
-
----
+- **TypeScript strict mode** required
+- **ESLint + Prettier** configuration must pass
+- **Component interfaces** for all public APIs
+- **JSDoc comments** for public methods
+- **Performance-conscious** implementations
 
 ## 📄 License
 
-MIT License - Built by 2GIS Team for UX research and rapid prototyping.
+MIT License - see LICENSE file for details.
+
+## 🔗 Links
+
+- **GitHub Repository**: https://github.com/vladprrs/vibecode-2gis-template
+- **2GIS MapGL Documentation**: https://docs.2gis.com/en/mapgl/
+- **2GIS Developer Portal**: https://dev.2gis.com/
+
+---
+
+Built with ❤️ by VibeCode Team for rapid 2GIS application development.
