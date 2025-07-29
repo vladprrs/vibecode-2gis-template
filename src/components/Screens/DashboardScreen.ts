@@ -5,6 +5,7 @@ import {
   BottomsheetManager,
   MapSyncService,
   MapManager,
+  FilterBarManager,
   BottomsheetGestureManager,
   BottomsheetAnimationManager,
   ContentManager
@@ -29,6 +30,8 @@ export interface DashboardScreenProps {
   searchFlowManager: SearchFlowManager;
   /** Менеджер шторки */
   bottomsheetManager: BottomsheetManager;
+  /** Менеджер панели фильтров */
+  filterBarManager: FilterBarManager;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
   /** Менеджер карты */
@@ -98,7 +101,7 @@ export class DashboardScreen {
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
-  private fixedFilterBar?: HTMLElement;
+  private filterBarManager: FilterBarManager;
   
   // Оригинальные параметры bottomsheet
   private bottomsheetElement?: HTMLElement;
@@ -119,6 +122,7 @@ export class DashboardScreen {
     this.element = props.container;
     this.mapManager = props.mapManager;
     this.contentManager = new ContentManager(this.props.searchFlowManager);
+    this.filterBarManager = props.filterBarManager;
     this.initialize();
   }
 
@@ -786,7 +790,7 @@ export class DashboardScreen {
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
-    this.cleanupFixedFilterBar();
+    this.filterBarManager.hide();
   }
 
   /**
@@ -904,9 +908,9 @@ export class DashboardScreen {
   public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
     console.log(`📱 DashboardScreen handling navigation: ${from} → ${to}`);
     
-    // Clean up fixed filter bar when leaving search result screen
+    // Hide filter bar when leaving search result screen
     if (from === ScreenType.SEARCH_RESULT && to !== ScreenType.SEARCH_RESULT) {
-      this.cleanupFixedFilterBar();
+      this.filterBarManager.hide();
     }
     
     switch (to) {
@@ -1498,127 +1502,42 @@ export class DashboardScreen {
     });
   }
 
-  private createBottomFilterBar(container: HTMLElement): void {
-    this.cleanupFixedFilterBar();
 
-    const filterBarWrapper = document.createElement('div');
-    filterBarWrapper.style.cssText = `
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: #FFF;
-      border-radius: 16px 16px 0 0;
-      padding: 16px;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-    `;
-
-    this.createFilterBar(filterBarWrapper);
-
-    this.fixedFilterBar = filterBarWrapper;
-
-    document.body.appendChild(filterBarWrapper);
-  }
-
-  private cleanupFixedFilterBar(): void {
-    if (this.fixedFilterBar && this.fixedFilterBar.parentNode) {
-      this.fixedFilterBar.parentNode.removeChild(this.fixedFilterBar);
-      this.fixedFilterBar = undefined;
+  /**
+   * Update content for search result screen (based on Figma design)
+   */
+  private updateContentForSearchResult(context: SearchContext): void {
+    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+    if (!contentContainer) return;
+    
+    // Store dashboard content if not already stored
+    if (!this.dashboardContent) {
+      this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
     }
-  }
-
-  private createFilterBar(container: HTMLElement): void {
-    const filterBar = document.createElement('div');
-    filterBar.className = 'inline-element-1';
-    filterBar.style.cssText = `
+    
+    // Clear current content
+    contentContainer.innerHTML = '';
+    
+    // Apply search result content styles
+    contentContainer.style.cssText = `
       display: flex;
+      flex-direction: column;
       align-items: flex-start;
       align-self: stretch;
+      background: #FFF;
       position: relative;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
     `;
-
-    const filtersContainer = document.createElement('div');
-    filtersContainer.className = 'inline-element-2';
-    filtersContainer.style.cssText = `
-      display: flex;
-      padding: 0 16px;
-      align-items: flex-start;
-      gap: 8px;
-      flex: 1 0 0;
-      position: relative;
-      overflow-x: auto;
-    `;
-
-    const filters = [
-      { text: '8', hasCounter: true },
-      { text: 'Рядом', hasCounter: false },
-      { text: 'Открыто', hasCounter: false },
-      { text: 'Доставка', hasCounter: false }
-    ];
-
-    filters.forEach(filter => {
-      const filterButton = document.createElement('div');
-      filterButton.style.cssText = `
-        display: flex;
-        height: 40px;
-        padding: 8px 12px;
-        justify-content: center;
-        align-items: center;
-        gap: 4px;
-        border-radius: 8px;
-        background: rgba(20, 20, 20, 0.06);
-        cursor: pointer;
-        flex-shrink: 0;
-      `;
-
-      if (filter.hasCounter) {
-        const counter = document.createElement('div');
-        counter.style.cssText = `
-          display: flex;
-          width: 16px;
-          height: 16px;
-          justify-content: center;
-          align-items: center;
-          border-radius: 8px;
-          background: #1BA136;
-        `;
-
-        const counterText = document.createElement('span');
-        counterText.textContent = filter.text;
-        counterText.style.cssText = `
-          color: #FFF;
-          font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
-          font-weight: 500;
-          font-size: 13px;
-          line-height: 16px;
-          letter-spacing: -0.234px;
-        `;
-
-        counter.appendChild(counterText);
-        filterButton.appendChild(counter);
-      } else {
-        const text = document.createElement('span');
-        text.textContent = filter.text;
-        text.style.cssText = `
-          color: #141414;
-          font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
-          font-weight: 500;
-          font-size: 15px;
-          line-height: 20px;
-          letter-spacing: -0.3px;
-        `;
-
-        filterButton.appendChild(text);
-      }
-
-      filtersContainer.appendChild(filterButton);
-    });
-
-    filterBar.appendChild(filtersContainer);
-    container.appendChild(filterBar);
+    
+    // Create results content
+    this.createResultsContent(contentContainer, context);
+    
+    // Show fixed filter bar at bottom of screen
+    this.filterBarManager.show();
   }
+
 
   /**
    * Create small promo banner (like in Figma)
@@ -1725,12 +1644,14 @@ export class DashboardScreenFactory {
     container: HTMLElement,
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
+    filterBarManager: FilterBarManager,
     mapManager: MapManager
   ): DashboardScreen {
     return new DashboardScreen({
       container,
       searchFlowManager,
       bottomsheetManager,
+      filterBarManager,
       mapManager
     });
   }
