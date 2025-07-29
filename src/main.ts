@@ -12,7 +12,7 @@ import { ScreenType } from './types/navigation';
 import { BottomsheetState, BottomsheetConfig } from './types/bottomsheet';
 import { SearchFlowManager } from './services/SearchFlowManager';
 import { BottomsheetManager } from './services/BottomsheetManager';
-import { MapSyncService } from './services/MapSyncService';
+import { MapSyncService, MapManager, FilterBarManager } from './services';
 import { DashboardScreen, DashboardScreenFactory } from './components/Screens/DashboardScreen';
 
 /**
@@ -28,7 +28,9 @@ class App {
   private dashboardScreen?: DashboardScreen;
   private searchFlowManager?: SearchFlowManager;
   private bottomsheetManager?: BottomsheetManager;
+  private filterBarManager?: FilterBarManager;
   private mapSyncService?: MapSyncService;
+  private mapManager?: MapManager;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -95,15 +97,23 @@ class App {
       window.innerHeight
     );
 
+    // Initialize FilterBarManager
+    this.filterBarManager = new FilterBarManager();
+
     // Initialize MapSyncService with dummy ref (will be updated by DashboardScreen)
     this.mapSyncService = new MapSyncService({ current: null });
+
+    // Initialize MapManager with API key from environment
+    this.mapManager = new MapManager({
+      mapApiKey: import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+    });
   }
 
   /**
    * Create dashboard screen using the modular component
    */
   private createDashboardScreen(): void {
-    if (!this.searchFlowManager || !this.bottomsheetManager) {
+    if (!this.searchFlowManager || !this.bottomsheetManager || !this.filterBarManager) {
       throw new Error('Services not initialized');
     }
 
@@ -112,7 +122,8 @@ class App {
       this.container,
       this.searchFlowManager,
       this.bottomsheetManager,
-      import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+      this.filterBarManager!,
+      this.mapManager!
     );
 
     // Activate the screen
