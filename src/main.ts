@@ -111,7 +111,7 @@ class App {
       this.container,
       this.searchFlowManager,
       this.bottomsheetManager,
-      process.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+      import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
     );
 
     // Activate the screen
