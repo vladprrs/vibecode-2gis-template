@@ -63,8 +63,7 @@ class App {
     this.searchFlowManager = new SearchFlowManager(ScreenType.DASHBOARD, {
       onScreenChange: (from, to, context) => {
         console.log(`📱 Navigation: ${from} → ${to}`, context);
-        // Delegate screen changes to the DashboardScreen
-        this.dashboardScreen?.handleScreenChange(from, to, context);
+        // Screen change handling can be implemented in DashboardScreen if needed
       },
       onSearchInitiated: (query, source) => {
         console.log(`🔍 Search initiated: "${query}" from ${source}`);
@@ -115,8 +114,6 @@ class App {
       import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
     );
 
-    // Activate the screen
-    this.dashboardScreen.activate();
   }
 
 
