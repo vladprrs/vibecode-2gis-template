@@ -24,7 +24,7 @@ export default defineConfig({
   server: {
     port: 8080,
     host: '0.0.0.0',
-    open: '/index.html',
+    open: false, // Disable auto-opening browser to avoid xdg-open error
     cors: true,
     hmr: {
       overlay: true
@@ -67,7 +67,7 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: '0.0.0.0',
-    open: '/index.html'
+    open: false // Disable auto-opening browser to avoid xdg-open error
   },
 
   // Environment variables
