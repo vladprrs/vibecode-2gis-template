@@ -1,6 +1,5 @@
 {
   "version": 2,
   "builds": [{ "src": "package.json", "use": "@vercel/static-build" }],
-  "outputDirectory": "dist",
-  "env": { "VITE_MAPGL_KEY": "@vite_mapgl_key" }
+  "outputDirectory": "dist"
 }
