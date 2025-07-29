@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Environment Setup
 - Create `.env` file with `VITE_MAPGL_KEY=your-2gis-api-key` for map functionality
-- Development server opens `/test/dashboard-figma-demo-modular.html` by default
+- Development server opens `index.html` which loads the modular TypeScript application
 - Demo API key is included but production requires proper 2GIS API key from dev.2gis.com
 
 ## Architecture Overview
@@ -69,15 +69,15 @@ const unsubscribe = searchFlowManager.onScreenChange((screen) => {...});
 - Graceful degradation shows placeholder when map fails to load
 - Marker management with temporary markers for user interactions
 
-### Demo and Testing Structure
-- `test/` directory contains HTML demo files, not automated tests
-- `dashboard-figma-demo-modular.html` is the main development entry point
+### Application Entry Point
+- `src/main.ts` is the main application entry point using modular TypeScript components
+- `index.html` loads the main application with demo controls for testing different states
 - Demo controls allow testing different bottomsheet states and map interactions
-- `src/demo/DashboardFigmaDemo.js` contains the primary demo implementation
+- Legacy spaghetti code has been moved to `deprecated/` folder
 
 ### Build System
 - **Vite 5.0** with ES modules and library mode
-- **Dual entry points**: `main.ts` for library, `demo/DashboardFigmaDemo.js` for demos
+- **Single entry point**: `main.ts` using modular TypeScript architecture
 - **Path aliases** configured in both Vite and TypeScript
 - **Terser minification** with console/debugger removal in production
 - **Source maps** enabled for debugging

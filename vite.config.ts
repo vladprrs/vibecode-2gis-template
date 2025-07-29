@@ -24,7 +24,7 @@ export default defineConfig({
   server: {
     port: 8080,
     host: '0.0.0.0',
-    open: '/test/dashboard-figma-demo-modular.html',
+    open: '/index.html',
     cors: true,
     hmr: {
       overlay: true
@@ -38,10 +38,7 @@ export default defineConfig({
     minify: 'terser',
     target: 'es2022',
     lib: {
-      entry: {
-        main: resolve(__dirname, 'src/main.ts'),
-        demo: resolve(__dirname, 'src/demo/DashboardFigmaDemo.js')
-      },
+      entry: resolve(__dirname, 'src/main.ts'),
       formats: ['es']
     },
     rollupOptions: {
@@ -72,7 +69,7 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: '0.0.0.0',
-    open: '/test/dashboard-figma-demo-modular.html'
+    open: '/index.html'
   },
 
   // Environment variables

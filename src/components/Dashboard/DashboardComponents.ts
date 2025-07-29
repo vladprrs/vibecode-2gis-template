@@ -2,6 +2,14 @@
  * Компоненты Dashboard на основе Figma экспорта
  */
 
+// Export ButtonRow component
+export { ButtonRow } from './ButtonRow';
+export type { ButtonRowItem, ButtonRowProps } from './ButtonRow';
+
+// Export StoriesCarousel component
+export { StoriesCarousel } from './StoriesCarousel';
+export type { StoriesCarouselProps } from './StoriesCarousel';
+
 export interface StoryItem {
   id: string;
   title: string;
