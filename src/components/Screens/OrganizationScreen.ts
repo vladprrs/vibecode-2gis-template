@@ -191,11 +191,7 @@ export class OrganizationScreen {
       flex: '1 0 0',
     });
 
-    // Друзья секция
-    if (!this.props.organization.isAdvertiser) {
-      const friendsSection = this.createFriendsSection();
-      leftContent.appendChild(friendsSection);
-    }
+
 
     // Заголовок карточки
     const cardHeader = this.createCardHeader();
@@ -700,13 +696,47 @@ export class OrganizationScreen {
     const alert = this.createAlert();
     container.appendChild(alert);
 
-    // Рекламный баннер
-    const banner = this.createBanner();
-    container.appendChild(banner);
+    // Блок "О компании"
+    const about = this.createAboutSection();
+    container.appendChild(about);
 
     // Адрес
     const address = this.createAddressSection();
     container.appendChild(address);
+
+    // Контакты
+    const contacts = this.createContactsSection();
+    container.appendChild(contacts);
+
+    // Время работы
+    const worktime = this.createWorktimeSection();
+    container.appendChild(worktime);
+
+    // Меню
+    const menu = this.createMenuSection();
+    container.appendChild(menu);
+
+    // Отзывы
+    const feedback = this.createFeedbackSection();
+    container.appendChild(feedback);
+
+    // Друзья
+    if (!this.props.organization.isAdvertiser) {
+      const friends = this.createFriendsSection();
+      container.appendChild(friends);
+    }
+
+    // Филиалы
+    const branches = this.createBranchesSection();
+    container.appendChild(branches);
+
+    // Скидки
+    const discounts = this.createDiscountsSection();
+    container.appendChild(discounts);
+
+    // Инфо
+    const info = this.createInfoSection();
+    container.appendChild(info);
 
     // Нижняя кнопка действия
     const bottomAction = this.createBottomActionBar();
@@ -957,6 +987,280 @@ export class OrganizationScreen {
     section.appendChild(header);
     section.appendChild(addressContainer);
     section.appendChild(buttonsContainer);
+
+    return section;
+  }
+
+  /**
+   * Создание секции "О компании"
+   */
+  private createAboutSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'О компании';
+
+    const desc = document.createElement('div');
+    desc.textContent = this.props.organization.description || '—';
+    Object.assign(desc.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(desc);
+
+    return section;
+  }
+
+  /**
+   * Создание секции контактов
+   */
+  private createContactsSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Контакты';
+
+    const phone = document.createElement('div');
+    phone.textContent = this.props.organization.phone || '—';
+    Object.assign(phone.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(phone);
+
+    return section;
+  }
+
+  /**
+   * Создание секции времени работы
+   */
+  private createWorktimeSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Время работы';
+
+    const hours = document.createElement('div');
+    hours.textContent = this.props.organization.workingHours || '—';
+    Object.assign(hours.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(hours);
+
+    return section;
+  }
+
+  /**
+   * Создание секции меню
+   */
+  private createMenuSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Меню';
+
+    const placeholder = document.createElement('div');
+    placeholder.textContent = 'Меню недоступно';
+    Object.assign(placeholder.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(placeholder);
+
+    return section;
+  }
+
+  /**
+   * Создание секции отзывов
+   */
+  private createFeedbackSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Отзывы';
+
+    const rating = document.createElement('div');
+    rating.textContent = `${this.props.organization.rating ?? '-'} · ${
+      this.props.organization.reviewsCount ?? 0
+    } отзывов`;
+    Object.assign(rating.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(rating);
+
+    return section;
+  }
+
+  /**
+   * Создание секции филиалов
+   */
+  private createBranchesSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Филиалы';
+
+    const placeholder = document.createElement('div');
+    placeholder.textContent = 'Нет филиалов';
+    Object.assign(placeholder.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(placeholder);
+
+    return section;
+  }
+
+  /**
+   * Создание секции скидок
+   */
+  private createDiscountsSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Скидки';
+
+    const placeholder = document.createElement('div');
+    placeholder.textContent = 'Нет доступных акций';
+    Object.assign(placeholder.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(placeholder);
+
+    return section;
+  }
+
+  /**
+   * Создание секции дополнительной информации
+   */
+  private createInfoSection(): HTMLElement {
+    const section = document.createElement('div');
+    Object.assign(section.style, { margin: '16px' });
+
+    const title = document.createElement('h3');
+    Object.assign(title.style, {
+      margin: '0 0 8px 0',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '18px',
+      fontWeight: '600',
+      lineHeight: '22px',
+      letterSpacing: '-0.36px',
+    });
+    title.textContent = 'Инфо';
+
+    const placeholder = document.createElement('div');
+    placeholder.textContent = 'Дополнительная информация отсутствует';
+    Object.assign(placeholder.style, {
+      color: '#898989',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '15px',
+      lineHeight: '20px',
+    });
+
+    section.appendChild(title);
+    section.appendChild(placeholder);
 
     return section;
   }
