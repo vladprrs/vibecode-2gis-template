@@ -299,8 +299,9 @@ export class DashboardScreen {
     // Add vertical gap between search bar and quick action buttons
     const gapContainer = document.createElement('div');
     gapContainer.style.cssText = `
-      height: var(--space-16);
+      height: 16px;
       width: 100%;
+      background: transparent;
     `;
     container.appendChild(gapContainer);
     
@@ -336,7 +337,7 @@ export class DashboardScreen {
     const buttonRowContainer = document.createElement('div');
     buttonRowContainer.style.cssText = `
       padding: 0;
-      margin-bottom: 0;
+      margin: 0;
       height: 40px;
       position: relative;
     `;
@@ -1351,6 +1352,7 @@ export class DashboardScreen {
       flex: 1;
       width: 100%;
       overflow-y: auto;
+      padding-top: 16px;
     `;
     
     // Add all the original content elements
