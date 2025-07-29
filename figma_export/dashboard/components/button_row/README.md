@@ -14,13 +14,15 @@ The ButtonRow component is a horizontal quick-action row that sits directly belo
 - ✅ Horizontal scrolling with snap behavior
 - ✅ Icons load correctly via @/assets alias
 - ✅ Matches Figma export design exactly
-- ✅ Compact 40px square buttons
-- ✅ Red "45 мин" badge for Home button (rgba(245,55,60,1))
-- ✅ Yellow "45 мин" badge for Work button (rgba(239,167,1,1))
+- ✅ Compact 40px height buttons with proper sizing
+- ✅ Red "45 мин" badge for Home button (rgba(245,55,60,1)) - INSIDE button
+- ✅ Yellow "45 мин" badge for Work button (rgba(239,167,1,1)) - INSIDE button
 - ✅ No text display in row (only icons + badges)
+- ✅ Badges positioned inside buttons, not floating above
 - ✅ Responsive on 375px device width
 - ✅ No 404 errors for assets
 - ✅ Smooth interaction and hover effects
+- ✅ 16px vertical gap between search bar and button row (using --space-16 token)
 
 ### Button Types
 1. **Icon-only**: Bookmark button ("В путь")
@@ -34,7 +36,8 @@ The ButtonRow component is a horizontal quick-action row that sits directly belo
 - `.button-content`: Button content wrapper with padding (10px 9px) and gap (5px)
 - `.icon-container`: Icon wrapper with positioning (23px × 20px)
 - `.icon-wrapper`: Icon container with absolute positioning (24px × 24px)
-- `.button-badge`: Badge element for time indicators (position: absolute, left: -2px, top: -2px)
+- `.button-badge`: Badge element for time indicators (position: relative, inside button content)
+- `.badge-container`: Container for badge with flex layout and gap
 
 ### Usage
 ```typescript
@@ -78,6 +81,7 @@ new ButtonRow({
 - ✅ **Asset loading**: Icons load via @/assets alias with fallbacks
 - ✅ **375px compatibility**: Tested and verified
 - ✅ **No 404s**: All assets load correctly
+- ✅ **16px vertical gap**: Between search bar and button row using --space-16 token
 
 ## Testing
 - **Simple Test**: `test/button-row-simple.html`

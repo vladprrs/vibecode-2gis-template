@@ -296,6 +296,14 @@ export class DashboardScreen {
    * Создание контента дашборда с точным соответствием Figma
    */
   private createDashboardContent(container: HTMLElement): void {
+    // Add vertical gap between search bar and quick action buttons
+    const gapContainer = document.createElement('div');
+    gapContainer.style.cssText = `
+      height: var(--space-16);
+      width: 100%;
+    `;
+    container.appendChild(gapContainer);
+    
     // 1. Quick action buttons (horizontal row)
     this.createQuickActionButtons(container);
     
@@ -327,8 +335,10 @@ export class DashboardScreen {
   private createQuickActionButtons(container: HTMLElement): void {
     const buttonRowContainer = document.createElement('div');
     buttonRowContainer.style.cssText = `
-      padding: 16px 0;
+      padding: 0;
       margin-bottom: 0;
+      height: 40px;
+      position: relative;
     `;
 
     // Button row items based on Figma export

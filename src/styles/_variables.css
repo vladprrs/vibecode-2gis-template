@@ -1,0 +1,7 @@
+/* CSS Variables for spacing tokens */
+
+:root {
+  --space-16: 16px;
+  --space-8: 8px;
+  --space-4: 4px;
+} 

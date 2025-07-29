@@ -82,6 +82,8 @@ export class ButtonRow {
       scroll-snap-align: start;
       flex-shrink: 0;
       transition: background-color 0.2s ease;
+      min-width: 40px;
+      height: 40px;
     `;
 
     button.addEventListener('click', () => {
@@ -169,29 +171,33 @@ export class ButtonRow {
     iconContainer.appendChild(iconWrapper);
     buttonContent.appendChild(iconContainer);
 
-    // Add badges for specific buttons (Home and Work)
+    // Add badges for specific buttons (Home and Work) - INSIDE the button content
     if (item.id === 'home' || item.id === 'work') {
+      const badgeContainer = document.createElement('div');
+      badgeContainer.className = 'badge-container';
+      badgeContainer.style.cssText = `
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 8px;
+        position: relative;
+      `;
+
       const badge = document.createElement('div');
       badge.className = 'button-badge';
       badge.style.cssText = `
-        position: absolute;
-        left: -2px;
-        top: -2px;
-        width: 24px;
-        height: 24px;
-        padding: 2px 2px 4px 2px;
-        justify-content: center;
-        align-items: center;
-        display: flex;
         font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
         font-weight: 400;
         font-size: 15px;
         color: ${item.id === 'home' ? 'rgba(245,55,60,1)' : 'rgba(239,167,1,1)'};
         line-height: 20px;
         letter-spacing: -0.3px;
+        position: relative;
       `;
       badge.textContent = '45 мин';
-      button.appendChild(badge);
+      
+      badgeContainer.appendChild(badge);
+      buttonContent.appendChild(badgeContainer);
     }
 
     button.appendChild(buttonContent);

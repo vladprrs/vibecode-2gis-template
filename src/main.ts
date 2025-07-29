@@ -3,6 +3,7 @@
  * Uses modular TypeScript components for clean architecture
  */
 
+import './styles/_variables.css';
 import './styles/base.css';
 import './styles/dashboard.css';
 import './styles/demo-controls.css';
