@@ -8,4 +8,7 @@ export { BottomsheetAnimationManager } from './BottomsheetAnimationManager';
 export { SearchFlowManager } from './SearchFlowManager';
 
 // Экспорт сервиса синхронизации карты
-export { MapSyncService, MapSyncServiceFactory } from './MapSyncService'; 
+export { MapSyncService, MapSyncServiceFactory } from './MapSyncService';
+
+// Экспорт менеджера карты
+export { MapManager } from './MapManager';

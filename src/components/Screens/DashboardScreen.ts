@@ -1,11 +1,14 @@
 import { ScreenType, BottomsheetState, SearchContext } from '../../types';
+
 import {
   SearchFlowManager,
   BottomsheetManager,
   MapSyncService,
+  MapManager,
   BottomsheetGestureManager,
   BottomsheetAnimationManager
 } from '../../services';
+
 import { 
   BottomsheetContainer, 
   BottomsheetHeader, 
@@ -27,8 +30,8 @@ export interface DashboardScreenProps {
   bottomsheetManager: BottomsheetManager;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
-  /** 2GIS MapGL API ключ */
-  mapApiKey?: string;
+  /** Менеджер карты */
+  mapManager: MapManager;
   /** CSS класс */
   className?: string;
   /** Обработчики событий */
@@ -87,7 +90,7 @@ interface ButtonItem {
 export class DashboardScreen {
   private props: DashboardScreenProps;
   private element: HTMLElement;
-  private mapComponent: any;
+  private mapManager: MapManager;
   
   // Компоненты
   private bottomsheetContainer?: BottomsheetContainer;
@@ -114,6 +117,7 @@ export class DashboardScreen {
   constructor(props: DashboardScreenProps) {
     this.props = props;
     this.element = props.container;
+    this.mapManager = props.mapManager;
     this.initialize();
   }
 
@@ -122,7 +126,7 @@ export class DashboardScreen {
    */
   private async initialize(): Promise<void> {
     this.setupElement();
-    await this.createMapContainer();
+    await this.props.mapManager.createMapContainer(this.element);
     this.createBottomsheet();
   }
 
@@ -145,89 +149,6 @@ export class DashboardScreen {
   /**
    * Создание контейнера карты с MapGL
    */
-  private async createMapContainer(): Promise<void> {
-    const mapContainer = document.createElement('div');
-    mapContainer.className = 'dashboard-map';
-    mapContainer.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 375px;
-      max-width: 100%;
-      height: 100%;
-      z-index: 1;
-    `;
-    this.element.appendChild(mapContainer);
-
-    try {
-      
-      await this.waitForMapGL();
-      await this.createRealMap(mapContainer);
-      
-    } catch (error) {
-      console.error('Map loading error:', error);
-      
-      this.createFallbackMap(mapContainer);
-    }
-  }
-
-  /**
-   * Ожидание загрузки MapGL API
-   */
-  private async waitForMapGL(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let attempts = 0;
-      const maxAttempts = 30;
-      
-      const checkMapGL = () => {
-        attempts++;
-        if ((window as any).mapgl && (window as any).mapgl.Map) {
-          console.log(`✅ MapGL API v1 загружен (попытка ${attempts})`);
-          resolve((window as any).mapgl);
-        } else if (attempts >= maxAttempts) {
-          reject(new Error('MapGL API v1 не загрузился'));
-        } else {
-          setTimeout(checkMapGL, 200);
-        }
-      };
-      checkMapGL();
-    });
-  }
-
-  /**
-   * Создание настоящей карты 2GIS
-   */
-  private async createRealMap(container: HTMLElement): Promise<void> {
-    const mapId = `mapgl-container-${Date.now()}`;
-    container.id = mapId;
-
-    this.mapComponent = new (window as any).mapgl.Map(mapId, {
-      center: [37.620393, 55.75396],
-      zoom: 12,
-      key: this.props.mapApiKey || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
-    });
-
-    await new Promise<void>((resolve) => {
-      let resolved = false;
-      this.mapComponent.on('styleload', () => {
-        if (!resolved) {
-          resolved = true;
-          resolve();
-        }
-      });
-      setTimeout(() => {
-        if (!resolved) {
-          resolved = true;
-          resolve();
-        }
-      }, 5000);
-    });
-
-    this.mapComponent.on('click', (event: any) => {
-      
-      this.addTemporaryMarker([event.lngLat.lng, event.lngLat.lat]);
-    });
-  }
 
   /**
    * Создание fallback карты
@@ -774,10 +695,10 @@ export class DashboardScreen {
   }
 
   private addTemporaryMarker(coordinates: [number, number]): void {
-    if (!this.mapComponent) return;
-    
-    // Добавляем временный маркер на карту
-    const marker = new (window as any).mapgl.Marker(this.mapComponent, {
+    const map = this.mapManager.getMapInstance();
+    if (!map) return;
+
+    const marker = new (window as any).mapgl.Marker(map, {
       coordinates,
       icon: {
         type: 'circle',
@@ -834,12 +755,14 @@ export class DashboardScreen {
   }
 
   public centerMoscow(): void {
-    this.mapComponent?.setCenter([37.620393, 55.75396]);
-    this.mapComponent?.setZoom(12);
+    const map = this.mapManager.getMapInstance();
+    map?.setCenter([37.620393, 55.75396]);
+    map?.setZoom(12);
   }
 
   public testRandomMarkers(): void {
-    if (!this.mapComponent) return;
+    const map = this.mapManager.getMapInstance();
+    if (!map) return;
     
     const moscowBounds = {
       minLng: 37.3, maxLng: 37.9,
@@ -857,9 +780,7 @@ export class DashboardScreen {
   }
 
   public destroy(): void {
-    if (this.mapComponent) {
-      this.mapComponent.destroy();
-    }
+    this.mapManager.destroy();
     this.bottomsheetContainer?.destroy();
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
@@ -2477,13 +2398,13 @@ export class DashboardScreenFactory {
     container: HTMLElement,
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
-    mapApiKey?: string
+    mapManager: MapManager
   ): DashboardScreen {
     return new DashboardScreen({
       container,
       searchFlowManager,
       bottomsheetManager,
-      mapApiKey
+      mapManager
     });
   }
-} 
+}
