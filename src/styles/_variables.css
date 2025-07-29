@@ -1,7 +1,15 @@
-/* CSS Variables for spacing tokens */
+/* CSS Variables for spacing tokens and colors */
 
 :root {
+  --space-32: 32px;
   --space-16: 16px;
   --space-8: 8px;
   --space-4: 4px;
+  
+  /* Color tokens from Figma export */
+  --color-surface-section: #F1F1F1;
+  --color-surface-white: #FFF;
+  --color-text-primary: #141414;
+  --color-text-secondary: #898989;
+  --color-accent-brand: #1BA136;
 } 

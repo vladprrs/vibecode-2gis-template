@@ -7,7 +7,7 @@ import {
   BottomsheetContainerProps 
 } from '../Bottomsheet';
 import { SearchBar, SearchBarState } from '../Search';
-import { ButtonRow, ButtonRowItem } from '../Dashboard';
+import { ButtonRow, ButtonRowItem, StoriesCarousel } from '../Dashboard';
 
 /**
  * Пропсы для DashboardScreen
@@ -296,38 +296,47 @@ export class DashboardScreen {
    * Создание контента дашборда с точным соответствием Figma
    */
   private createDashboardContent(container: HTMLElement): void {
-    // Add vertical gap between search bar and quick action buttons
-    const gapContainer = document.createElement('div');
-    gapContainer.style.cssText = `
-      height: 16px;
-      width: 100%;
-      background: transparent;
-    `;
-    container.appendChild(gapContainer);
-    
-    // 1. Quick action buttons (horizontal row)
+    // 1. Quick action buttons (horizontal row) - stays in white area
     this.createQuickActionButtons(container);
     
-    // 2. Stories carousel 
-    this.createStoriesCarousel(container);
+    // 2. Create grey section container for everything from Stories downward
+    const greySectionContainer = document.createElement('div');
+    greySectionContainer.className = 'dashboard-grey-section';
+    greySectionContainer.style.cssText = `
+      display: flex;
+      padding: var(--space-16) 16px 60px 16px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      align-self: stretch;
+      background: var(--color-surface-section);
+      position: relative;
+      width: 100%;
+    `;
     
-    // 3. "Советы к месту" heading
-    this.createSectionHeading(container, 'Советы к месту');
+    // 3. Stories carousel 
+    this.createStoriesCarousel(greySectionContainer);
     
-    // 4. Content masonry grid
-    this.createContentMasonryGrid(container);
+    // 4. "Советы к месту" heading
+    this.createSectionHeading(greySectionContainer, 'Советы к месту');
     
-    // 5. "Популярные категории" heading
-    this.createSectionHeading(container, 'Популярные категории');
+    // 5. Content masonry grid
+    this.createContentMasonryGrid(greySectionContainer);
     
-    // 6. Categories grid  
-    this.createCategoriesGrid(container);
+    // 6. "Популярные категории" heading
+    this.createSectionHeading(greySectionContainer, 'Популярные категории');
     
-    // 7. Banner
-    this.createPromoBanner(container);
+    // 7. Categories grid  
+    this.createCategoriesGrid(greySectionContainer);
     
-    // 8. Bottom spacing for scroll
-    this.createBottomSpacing(container);
+    // 8. Banner
+    this.createPromoBanner(greySectionContainer);
+    
+    // 9. Bottom spacing for scroll
+    this.createBottomSpacing(greySectionContainer);
+    
+    // Add the grey section to the main container
+    container.appendChild(greySectionContainer);
   }
 
   /**
@@ -337,7 +346,7 @@ export class DashboardScreen {
     const buttonRowContainer = document.createElement('div');
     buttonRowContainer.style.cssText = `
       padding: 0;
-      margin: 0;
+      margin: 0 0 var(--space-32) 0;
       height: 40px;
       position: relative;
     `;
@@ -383,138 +392,16 @@ export class DashboardScreen {
   private createStoriesCarousel(container: HTMLElement): void {
     const storiesContainer = document.createElement('div');
     storiesContainer.className = 'stories-section';
-    storiesContainer.style.cssText = `
-      padding: 0 16px;
-      margin-bottom: 12px;
-    `;
-
-    const storiesRow = document.createElement('div');
-    storiesRow.className = 'stories-container';
-    storiesRow.style.cssText = `
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 4px;
-    `;
-
-    // Stories data with proper rectangular cards
-    const stories = [
-      { 
-        id: 'story1', 
-        title: 'Кафе', 
-        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-0de1a764.jpg',
-        viewed: false
-      },
-      { 
-        id: 'story2', 
-        title: 'Развлечения', 
-        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-c4517f50.png',
-        viewed: false
-      },
-      { 
-        id: 'story3', 
-        title: 'Еда', 
-        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-f106c1b4.png',
-        viewed: true
-      },
-      { 
-        id: 'story4', 
-        title: 'Шоппинг', 
-        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-a24168bd.png',
-        viewed: false
+    
+    // Create StoriesCarousel component
+    new StoriesCarousel({
+      container: storiesContainer,
+      onStoryClick: (storyId: string) => {
+        console.log('Story clicked:', storyId);
+        this.props.onStoryClick?.(storyId);
       }
-    ];
-
-    stories.forEach(story => {
-      const storyItem = document.createElement('div');
-      storyItem.className = 'story-item';
-      storyItem.style.cssText = `
-        display: flex;
-        width: 96px;
-        height: 128px;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        cursor: pointer;
-        scroll-snap-align: start;
-        flex-shrink: 0;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 2px solid ${story.viewed ? 'transparent' : '#1BA136'};
-        transition: transform 0.2s ease;
-      `;
-
-      const storyCover = document.createElement('div');
-      storyCover.className = 'story-cover';
-      storyCover.style.cssText = `
-        width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-        display: flex;
-        align-items: flex-end;
-        justify-content: center;
-      `;
-
-      // Try to load image, fallback to gradient
-      const image = document.createElement('img');
-      image.src = story.imageUrl;
-      image.style.cssText = `
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        position: absolute;
-        top: 0;
-        left: 0;
-      `;
-      
-      // Image loading error fallback
-      image.onerror = () => {
-        image.style.display = 'none';
-        storyCover.innerHTML = `
-          <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); color: white; font-size: 12px; font-weight: 600; text-align: center;">
-            ${story.title}
-          </div>
-        `;
-      };
-
-      // Image loading success
-      image.onload = () => {
-        const titleOverlay = document.createElement('div');
-        titleOverlay.style.cssText = `
-          position: absolute;
-          bottom: 8px;
-          left: 50%;
-          transform: translateX(-50%);
-          color: white;
-          font-size: 12px;
-          font-weight: 600;
-          text-align: center;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        `;
-        titleOverlay.textContent = story.title;
-        storyCover.appendChild(titleOverlay);
-      };
-
-      storyCover.appendChild(image);
-      storyItem.appendChild(storyCover);
-
-      // Hover effect
-      storyItem.addEventListener('mouseenter', () => {
-        storyItem.style.transform = 'translateY(-2px)';
-      });
-      
-      storyItem.addEventListener('mouseleave', () => {
-        storyItem.style.transform = 'translateY(0)';
-      });
-
-      storiesRow.appendChild(storyItem);
     });
 
-    storiesContainer.appendChild(storiesRow);
     container.appendChild(storiesContainer);
   }
 
@@ -525,19 +412,23 @@ export class DashboardScreen {
     const heading = document.createElement('div');
     heading.className = 'section-header';
     heading.style.cssText = `
-      padding: 0 16px;
-      margin: 12px 0 16px 0;
+      padding-bottom: 12px;
+      justify-content: center;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
     `;
 
     const titleElement = document.createElement('h4');
     titleElement.className = 'section-title';
     titleElement.style.cssText = `
       font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 600;
       line-height: 24px;
-      color: #333;
+      color: var(--color-text-primary);
       margin: 0;
+      flex: 1 0 0;
     `;
     titleElement.textContent = title;
 
@@ -555,8 +446,8 @@ export class DashboardScreen {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      padding: 0 16px;
-      margin-bottom: 16px;
+      align-self: stretch;
+      position: relative;
     `;
 
     // Left column (tall image card spanning 2 rows)
@@ -693,8 +584,8 @@ export class DashboardScreen {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      padding: 0 16px;
-      margin-bottom: 16px;
+      align-self: stretch;
+      position: relative;
     `;
 
     const categories = [
@@ -746,15 +637,12 @@ export class DashboardScreen {
     const banner = document.createElement('div');
     banner.className = 'promo-banner';
     banner.style.cssText = `
-      margin: 16px;
-      padding: 16px;
-      background: white;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+      align-self: stretch;
+      border-radius: 12px;
+      border: 0.5px solid rgba(137, 137, 137, 0.30);
+      background: var(--color-surface-white);
+      position: relative;
+      height: 136px;
     `;
 
     const bannerLogo = document.createElement('div');

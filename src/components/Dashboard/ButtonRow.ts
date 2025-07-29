@@ -34,7 +34,7 @@ export class ButtonRow {
       justify-content: flex-end;
       align-items: center;
       position: relative;
-      margin-bottom: 16px;
+      margin-bottom: var(--space-16);
     `;
 
     const buttonsContainer = document.createElement('div');
@@ -44,9 +44,6 @@ export class ButtonRow {
       width: 704px;
       align-items: center;
       gap: 8px;
-      position: absolute;
-      left: 16px;
-      top: 0px;
       height: 40px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
