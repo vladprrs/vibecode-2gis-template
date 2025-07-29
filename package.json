@@ -1,7 +1,7 @@
 {
-  "name": "2gis-web-prototype",
+  "name": "vibecode-2gis-template",
   "version": "1.0.0",
-  "description": "Clickable web prototype of the 2GIS app for UX research and rapid UI iteration",
+  "description": "Современный шаблон для создания интерактивных картографических приложений на основе 2GIS API с использованием TypeScript и модульной архитектуры",
   "type": "module",
   "engines": {
     "node": ">=18.0.0",
@@ -38,17 +38,18 @@
   },
   "keywords": [
     "2gis",
-    "prototype",
-    "ux-research",
+    "template",
     "typescript",
     "mapgl",
-    "web-app"
+    "web-app",
+    "vibecode",
+    "modular-architecture"
   ],
-  "author": "2GIS Team",
+  "author": "VibeCode Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/2gis/2gis_template.git"
+    "url": "git+https://github.com/vladprrs/vibecode-2gis-template.git"
   },
   "browserslist": [
     "> 1%",
