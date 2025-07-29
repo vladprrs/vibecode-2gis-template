@@ -87,6 +87,20 @@ export class DashboardScreen {
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
+  
+  // Оригинальные параметры bottomsheet
+  private bottomsheetElement?: HTMLElement;
+  private currentState: string = 'default';
+  private currentHeight?: number;
+  private isDragging: boolean = false;
+  private dragStartY: number = 0;
+  private wheelAccumulator: number = 0;
+  private wheelThreshold: number = 50;
+  private wheelTimeout?: number;
+  private isWheelScrolling: boolean = false;
+  private touchStartY: number = 0;
+  private touchCurrentY: number = 0;
+  private isTouchScrolling: boolean = false;
 
   constructor(props: DashboardScreenProps) {
     this.props = props;
@@ -234,113 +248,48 @@ export class DashboardScreen {
   }
 
   /**
-   * Создание шторки
+   * Создание шторки с точным поведением оригинала
    */
   private createBottomsheet(): void {
-    this.createBottomsheetContainer();
-    this.createBottomsheetHeader();
-    this.createBottomsheetContent();
+    this.createOriginalBottomsheet();
+    this.setupBottomsheetEventListeners();
   }
 
   /**
-   * Создание контейнера шторки
+   * Создание шторки с оригинальным поведением
    */
-  private createBottomsheetContainer(): void {
-    const bottomsheetElement = document.createElement('div');
-    bottomsheetElement.style.cssText = `
-      position: absolute;
-      bottom: 0;
-      left: 0;
+  private createOriginalBottomsheet(): void {
+    this.bottomsheetElement = document.createElement('div');
+    this.bottomsheetElement.className = 'dashboard-bottomsheet bs-default';
+    this.bottomsheetElement.style.cssText = `
+      display: flex;
       width: 375px;
       max-width: 100%;
-      background: white;
+      flex-direction: column;
+      align-items: flex-start;
       border-radius: 16px 16px 0 0;
-      z-index: 2;
-      transform: translateY(60%);
-      transition: transform 0.3s ease;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+      background: #FFF;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
     `;
     
-    this.element.appendChild(bottomsheetElement);
-
-    const containerProps: BottomsheetContainerProps = {
-      config: {
-        state: this.props.bottomsheetManager.getCurrentState().currentState,
-        snapPoints: [0.2, 0.5, 0.9, 0.95],
-        isDraggable: true,
-        hasScrollableContent: true
-      },
-      events: {
-        onStateChange: (newState) => {
-          this.props.bottomsheetManager.snapToState(newState);
-          this.props.mapSyncService?.adjustMapViewport(this.getHeightForState(newState));
-        }
-      }
-    };
-
-    this.bottomsheetContainer = new BottomsheetContainer(bottomsheetElement, containerProps);
+    // Инициализируем текущую высоту
+    const screenHeight = window.innerHeight;
+    this.currentHeight = screenHeight * 0.55; // default состояние
+    
+    this.updateBottomsheetHeight();
+    this.createFigmaHeader();
+    this.createFigmaContent();
+    this.element.appendChild(this.bottomsheetElement);
   }
 
   /**
    * Создание заголовка шторки
    */
-  private createBottomsheetHeader(): void {
-    if (!this.bottomsheetContainer) return;
-
-    const headerElement = document.createElement('div');    
-    this.bottomsheetContainer.setContent([headerElement]);
-    
-    this.bottomsheetHeader = new BottomsheetHeader(headerElement, {
-      placeholder: 'Москва',
-      showDragger: true,
-      onSearchFocus: () => {
-        this.props.searchFlowManager.goToSuggest();
-        this.props.onSearchFocus?.();
-      }
-    });
-
-    this.createSearchBar(headerElement);
-  }
-
-  /**
-   * Создание поисковой строки
-   */
-  private createSearchBar(container: HTMLElement): void {
-    const searchContainer = document.createElement('div');
-    searchContainer.style.cssText = `
-      padding: 0 16px 16px 16px;
-    `;
-    container.appendChild(searchContainer);
-
-    this.searchBar = new SearchBar(searchContainer, {
-      placeholder: 'Поиск в Москве',
-      state: SearchBarState.INACTIVE,
-      showSearchIcon: true,
-      onFocus: () => {
-        this.props.searchFlowManager.goToSuggest();
-        this.props.onSearchFocus?.();
-      },
-      onChange: (query) => {
-        this.props.searchFlowManager.updateQuery(query);
-      }
-    });
-  }
-
-  /**
-   * Создание содержимого шторки
-   */
-  private createBottomsheetContent(): void {
-    if (!this.bottomsheetContainer) return;
-
-    const contentElement = document.createElement('div');
-    const existingContent = this.bottomsheetContainer.getCurrentState();
-    
-    this.bottomsheetContent = new BottomsheetContent(contentElement, {
-      scrollable: true
-    });
-
-    this.createDashboardContent(contentElement);
-  }
 
   /**
    * Создание контента дашборда
@@ -589,10 +538,10 @@ export class DashboardScreen {
   private getHeightForState(state: string): number {
     switch (state) {
       case 'small': return 0.2;
-      case 'default': return 0.5;
+      case 'default': return 0.55;
       case 'fullscreen': return 0.9;
       case 'fullscreen_scroll': return 0.95;
-      default: return 0.5;
+      default: return 0.55;
     }
   }
 
@@ -636,6 +585,22 @@ export class DashboardScreen {
   }
 
   public snapToState(state: BottomsheetState): void {
+    this.currentState = state.toString();
+    
+    const screenHeight = window.innerHeight;
+    const heights = {
+      'small': screenHeight * 0.2,
+      'default': screenHeight * 0.55,
+      'fullscreen': screenHeight * 0.9,
+      'fullscreen_scroll': screenHeight * 0.95
+    };
+    
+    const targetHeight = heights[this.currentState as keyof typeof heights];
+    if (targetHeight) {
+      this.animateToHeight(targetHeight);
+    }
+    
+    // Also update the original bottomsheet container if it exists
     this.bottomsheetContainer?.snapToState(state);
   }
 
@@ -670,6 +635,292 @@ export class DashboardScreen {
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
+  }
+
+  /**
+   * Методы для работы с оригинальным bottomsheet
+   */
+  private updateBottomsheetHeight(): void {
+    if (!this.bottomsheetElement) return;
+    
+    const screenHeight = window.innerHeight;
+    const heights = {
+      'small': screenHeight * 0.2,
+      'default': screenHeight * 0.55,
+      'fullscreen': screenHeight * 0.9,
+      'fullscreen-scroll': screenHeight * 0.95
+    };
+    
+    const height = heights[this.currentState as keyof typeof heights];
+    this.setBottomsheetHeight(height);
+  }
+
+  private setBottomsheetHeight(height: number): void {
+    if (!this.bottomsheetElement) return;
+    
+    const screenHeight = window.innerHeight;
+    const minHeight = screenHeight * 0.15;
+    const maxHeight = screenHeight * 0.95;
+    
+    const clampedHeight = Math.max(minHeight, Math.min(maxHeight, height));
+    
+    this.currentHeight = clampedHeight;
+    this.bottomsheetElement.style.height = `${clampedHeight}px`;
+    
+    this.updateScrollBehaviorByHeight(clampedHeight);
+  }
+
+  private updateScrollBehaviorByHeight(height: number): void {
+    if (!this.bottomsheetElement) return;
+    
+    const screenHeight = window.innerHeight;
+    const scrollableThreshold = screenHeight * 0.92;
+    
+    const contentContainer = this.bottomsheetElement.querySelector('.dashboard-content') as HTMLElement;
+    if (contentContainer) {
+      if (height > scrollableThreshold) {
+        contentContainer.style.overflowY = 'auto';
+        contentContainer.style.maxHeight = `${height - 120}px`; // Учитываем высоту заголовка
+      } else {
+        contentContainer.style.overflowY = 'hidden';
+        contentContainer.style.maxHeight = 'none';
+      }
+    }
+  }
+
+  private setupBottomsheetEventListeners(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Wheel events для smooth scroll
+    this.bottomsheetElement.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
+    
+    // Touch events для mobile
+    this.bottomsheetElement.addEventListener('touchstart', this.handleScrollTouchStart.bind(this), { passive: false });
+    this.bottomsheetElement.addEventListener('touchmove', this.handleScrollTouchMove.bind(this), { passive: false });
+    this.bottomsheetElement.addEventListener('touchend', this.handleScrollTouchEnd.bind(this), { passive: false });
+  }
+
+  private handleWheel(event: WheelEvent): void {
+    const screenHeight = window.innerHeight;
+    const currentHeight = this.currentHeight || screenHeight * 0.55;
+    const scrollableThreshold = screenHeight * 0.92;
+    
+    // Если высота больше 92%, проверяем можно ли скроллить контент
+    if (currentHeight > scrollableThreshold) {
+      const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+      if (contentContainer) {
+        const { scrollTop } = contentContainer;
+        const isAtTop = scrollTop <= 0;
+        
+        // Если скроллим вверх и уже наверху, начинаем уменьшать высоту шторки
+        if (event.deltaY < 0 && isAtTop) {
+          event.preventDefault();
+          const newHeight = Math.max(screenHeight * 0.15, currentHeight + event.deltaY * 2);
+          this.setBottomsheetHeight(newHeight);
+          this.startSnapTimeout();
+          return;
+        }
+        
+        return;
+      }
+    }
+    
+    event.preventDefault();
+    
+    // Плавное изменение высоты
+    const delta = event.deltaY * 2;
+    const newHeight = Math.max(
+      screenHeight * 0.15, 
+      Math.min(screenHeight * 0.95, currentHeight + delta)
+    );
+    
+    this.setBottomsheetHeight(newHeight);
+    this.isWheelScrolling = true;
+    
+    this.startSnapTimeout();
+  }
+
+  private startSnapTimeout(): void {
+    if (this.wheelTimeout) {
+      clearTimeout(this.wheelTimeout);
+    }
+    
+    this.wheelTimeout = window.setTimeout(() => {
+      this.snapToNearestState();
+      this.isWheelScrolling = false;
+    }, 150);
+  }
+
+  private snapToNearestState(): void {
+    if (!this.currentHeight) return;
+    
+    const screenHeight = window.innerHeight;
+    const currentRatio = this.currentHeight / screenHeight;
+    
+    const states = [
+      { name: 'small', ratio: 0.2 },
+      { name: 'default', ratio: 0.55 },
+      { name: 'fullscreen', ratio: 0.9 },
+      { name: 'fullscreen-scroll', ratio: 0.95 }
+    ];
+    
+    let nearestState = states[0];
+    let minDistance = Math.abs(currentRatio - states[0].ratio);
+    
+    for (const state of states) {
+      const distance = Math.abs(currentRatio - state.ratio);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestState = state;
+      }
+    }
+    
+    this.currentState = nearestState.name;
+    const targetHeight = screenHeight * nearestState.ratio;
+    this.animateToHeight(targetHeight);
+    
+    this.props.bottomsheetManager.snapToState(nearestState.name as any);
+  }
+
+  private animateToHeight(targetHeight: number): void {
+    if (!this.bottomsheetElement || !this.currentHeight) return;
+    
+    const startHeight = this.currentHeight;
+    const startTime = performance.now();
+    const duration = 300;
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Cubic bezier easing
+      const easeProgress = this.cubicBezierEasing(progress, 0.4, 0.0, 0.2, 1);
+      const currentHeight = startHeight + (targetHeight - startHeight) * easeProgress;
+      
+      this.setBottomsheetHeight(currentHeight);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }
+
+  private cubicBezierEasing(t: number, x1: number, y1: number, x2: number, y2: number): number {
+    // Simplified cubic bezier implementation
+    return t * t * (3 - 2 * t);
+  }
+
+  private handleScrollTouchStart(event: TouchEvent): void {
+    const touch = event.touches[0];
+    this.touchStartY = touch.clientY;
+    this.touchCurrentY = touch.clientY;
+    this.isTouchScrolling = true;
+  }
+
+  private handleScrollTouchMove(event: TouchEvent): void {
+    if (!this.isTouchScrolling) return;
+    
+    const touch = event.touches[0];
+    const currentY = touch.clientY;
+    
+    const momentumDelta = this.touchCurrentY - currentY;
+    
+    const screenHeight = window.innerHeight;
+    const currentHeight = this.currentHeight || screenHeight * 0.55;
+    const scrollableThreshold = screenHeight * 0.92;
+    
+    if (currentHeight > scrollableThreshold) {
+      const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+      if (contentContainer) {
+        const { scrollTop } = contentContainer;
+        const isAtTop = scrollTop <= 0;
+        
+        if (momentumDelta < 0 && isAtTop) {
+          event.preventDefault();
+          const newHeight = Math.max(screenHeight * 0.15, currentHeight + momentumDelta * 3);
+          this.setBottomsheetHeight(newHeight);
+          this.touchCurrentY = currentY;
+          return;
+        }
+        
+        this.touchCurrentY = currentY;
+        return;
+      }
+    }
+    
+    event.preventDefault();
+    
+    if (Math.abs(momentumDelta) > 1) {
+      const newHeight = Math.max(
+        screenHeight * 0.15,
+        Math.min(screenHeight * 0.95, currentHeight + momentumDelta * 3)
+      );
+      
+      this.setBottomsheetHeight(newHeight);
+    }
+    
+    this.touchCurrentY = currentY;
+  }
+
+  private handleScrollTouchEnd(event: TouchEvent): void {
+    this.isTouchScrolling = false;
+    this.snapToNearestState();
+  }
+
+  private createFigmaHeader(): void {
+    if (!this.bottomsheetElement) return;
+
+    const header = document.createElement('div');
+    header.className = 'bottomsheet-header';
+    
+    // Dragger
+    const dragger = document.createElement('div');
+    dragger.className = 'dragger';
+    const draggerHandle = document.createElement('div');
+    draggerHandle.className = 'dragger-handle';
+    dragger.appendChild(draggerHandle);
+    
+    // Search bar
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-nav-bar';
+    searchContainer.innerHTML = `
+      <div class="search-nav-content">
+        <div class="search-field-container">
+          <div class="search-field">
+            <div class="search-icon">
+              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
+                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
+                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="search-placeholder">Поиск в Москве</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    header.appendChild(dragger);
+    header.appendChild(searchContainer);
+    this.bottomsheetElement.appendChild(header);
+  }
+
+  private createFigmaContent(): void {
+    if (!this.bottomsheetElement) return;
+
+    const content = document.createElement('div');
+    content.className = 'dashboard-content';
+    content.style.cssText = `
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+    `;
+    
+    // Add all the original content elements
+    this.createDashboardContent(content);
+    
+    this.bottomsheetElement.appendChild(content);
   }
 }
 
