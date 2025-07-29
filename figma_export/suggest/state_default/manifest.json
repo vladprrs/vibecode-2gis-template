@@ -1,0 +1,168 @@
+{
+  "source": "input/suggest/state_default.json",
+  "generatedAt": "2025-07-28T11:38:13.630Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-0adfe6c5.jpg",
+          "sha256": "0adfe6c5789bb28cd973910f49d9ad0963cfa0c365b057d4c085c9bb3b7cf1e9",
+          "bytes": 286865,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/dbeabc5ac0f4d8edc9feb4b0b06f4520eafc61ab?width=750",
+          "path": "assets/images/img-f106c1b4.png",
+          "sha256": "f106c1b429630e3283b4befb195b2df1e63163a84949fa31e46c200f19ee95b1",
+          "bytes": 305398,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "svg-1753702693624",
+          "path": "assets/images/img-e48dc9e8.svg",
+          "sha256": "e48dc9e8ffebe59c54e5d462808565ef262c1d1f5f0b889cbe8735c60502d9be",
+          "bytes": 457,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693624",
+          "path": "assets/images/img-9233f366.svg",
+          "sha256": "9233f36610efd5443b5ce81e2423b6519710d94991a9822f224fcb9b38bfcdc9",
+          "bytes": 445,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693625",
+          "path": "assets/images/img-914fe217.svg",
+          "sha256": "914fe2172548c8dde00eafcd3831f739921779c026ac8cba91c72d8555f83f4a",
+          "bytes": 2729,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693625",
+          "path": "assets/images/img-480a1f84.svg",
+          "sha256": "480a1f848f7513944c90109db84b24adba07e7aef2b2f98bddfb6f12dac7ad4e",
+          "bytes": 1999,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693625",
+          "path": "assets/images/img-c567bc57.svg",
+          "sha256": "c567bc5788d33951ad39148a5fe14214df9ce81a12e478d64a1211ef37f32dfe",
+          "bytes": 1490,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693626",
+          "path": "assets/images/img-9d99006b.svg",
+          "sha256": "9d99006b3169749d2a079414fa129373fa62d69b796934d75fc26b356ffbc285",
+          "bytes": 1501,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693626",
+          "path": "assets/images/img-6b676ea9.svg",
+          "sha256": "6b676ea92637b3c23eba1ace667f7807cb8245e8993afe8bda1f66ebb63552f0",
+          "bytes": 1490,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693626",
+          "path": "assets/images/img-7ee26acd.svg",
+          "sha256": "7ee26acdd09f8b5968369f7ff5e0285eb11beaf04548fd27c19260c64026e8b4",
+          "bytes": 1490,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693626",
+          "path": "assets/images/img-d7ca09f8.svg",
+          "sha256": "d7ca09f858bf6e6a856b31c62f11fbe68d10256e7e98615ef4885429a6e09795",
+          "bytes": 6290,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693626",
+          "path": "assets/images/img-7dc6a922.svg",
+          "sha256": "7dc6a9227750f17e78447317d7a0915f1f8819fb5ed948fd51f072fc973f0a2f",
+          "bytes": 1477,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693627",
+          "path": "assets/images/img-a3b1deb1.svg",
+          "sha256": "a3b1deb124e18017a237f179e5ae444ee19c891fef83f56e784e2c7bb57725ff",
+          "bytes": 1622,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693627",
+          "path": "assets/images/img-3e2c06c7.svg",
+          "sha256": "3e2c06c7d749654da9150c99a3c9649dcad0a8dd6635a2d8d46b9653dadc323e",
+          "bytes": 1556,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693627",
+          "path": "assets/images/img-391f4e8c.svg",
+          "sha256": "391f4e8ce47c7ad7fe8ccce37bf56e19073091e5816fb89405576bd624a794f2",
+          "bytes": 699,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693627",
+          "path": "assets/images/img-f3ec23d5.svg",
+          "sha256": "f3ec23d5d745d700163e9e55d7dce713463622ec9ce2c934742bb616046aa511",
+          "bytes": 1795,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-99b8a103.css",
+          "bytes": 406,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-d69cee77.css",
+          "bytes": 39506,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-07e4d9be.css",
+          "bytes": 11795,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 16,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

@@ -1,0 +1,16 @@
+<svg id="I117:47976;119:1521;119:989;3250:9;105:270;3235:1236" layer-name="Container" style="display:flex;width:24px;height:24px;justify-content:center;align-items:center;flex-shrink:0;border-radius:32px;border:0.5px solid rgba(137, 137, 137, 0.30);background:#FFF;position:absolute;left:0px;top:0px" width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g clip-path="url(#clip0_117_50106)">
+<rect x="0.375" width="24" height="24" rx="12" fill="white"/>
+<path d="M0.375 0H24.375V24H0.375V0Z" fill="url(#pattern0_117_50106)"/>
+</g>
+<rect x="0.625" y="0.25" width="23.5" height="23.5" rx="11.75" stroke="#898989" stroke-opacity="0.3" stroke-width="0.5"/>
+<defs>
+<pattern id="pattern0_117_50106" patternContentUnits="objectBoundingBox" width="1" height="1">
+<use xlink:href="#image0_117_50106" transform="translate(0 -0.25) scale(0.003125)"/>
+</pattern>
+<clipPath id="clip0_117_50106">
+<rect x="0.375" width="24" height="24" rx="12" fill="white"/>
+</clipPath>
+
+</defs>
+</svg>

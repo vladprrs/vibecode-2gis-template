@@ -1,0 +1,59 @@
+{
+  "name": "2gis-web-prototype",
+  "version": "1.0.0",
+  "description": "Clickable web prototype of the 2GIS app for UX research and rapid UI iteration",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 8080",
+    "build": "tsc && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.js --fix",
+    "lint:check": "eslint . --ext .ts,.js",
+    "format": "prettier --write \"**/*.{ts,js,json,md,html,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,html,css}\"",
+    "clean": "rimraf dist node_modules/.vite",
+    "start": "npm run dev",
+    "serve": "npm run preview"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.0",
+    "vite": "^5.0.0",
+    "vite-plugin-eslint": "^1.8.1"
+  },
+  "dependencies": {
+    "@2gis/mapgl": "^1.0.0"
+  },
+  "keywords": [
+    "2gis",
+    "prototype",
+    "ux-research",
+    "typescript",
+    "mapgl",
+    "web-app"
+  ],
+  "author": "2GIS Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2gis/2gis_template.git"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie <= 11"
+  ]
+} 

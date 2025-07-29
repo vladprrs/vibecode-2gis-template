@@ -1,0 +1,56 @@
+{
+  "source": "input/search_result/components/bottomsheet_header.json",
+  "generatedAt": "2025-07-28T11:38:00.665Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-32856783.jpg",
+          "sha256": "3285678379b70d4f48d5b1d34d5db2399c30f48b7dea1a8db7696b74126e3d0b",
+          "bytes": 39201,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/0235e2ec7b64e89803c2ebe320dbddf014cebf7a?width=48",
+          "path": "assets/images/img-4346f8f5.png",
+          "sha256": "4346f8f5e804b2a22bc5b56ff00d195dc9c5e27669bf6223ceeff872e009b32e",
+          "bytes": 1717,
+          "mime": "image/png",
+          "ext": "png"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-95ff40fb.css",
+          "bytes": 259,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-23a65aba.css",
+          "bytes": 2686,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-db9fd04e.css",
+          "bytes": 651,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 2,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

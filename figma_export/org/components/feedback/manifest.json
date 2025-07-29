@@ -1,0 +1,48 @@
+{
+  "source": "input/org/components/feedback.json",
+  "generatedAt": "2025-07-28T11:37:42.425Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-6d0c1042.jpg",
+          "sha256": "6d0c104251406aca74698bbc0268eb476e98572dc34af5c6a81b6a49e3f6a235",
+          "bytes": 145660,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-633b2dae.css",
+          "bytes": 193,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-ec78354b.css",
+          "bytes": 7570,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-66a9da75.css",
+          "bytes": 654,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 1,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

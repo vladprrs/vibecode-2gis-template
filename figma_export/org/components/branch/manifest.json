@@ -1,0 +1,48 @@
+{
+  "source": "input/org/components/branch.json",
+  "generatedAt": "2025-07-28T11:37:42.409Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-384639cd.jpg",
+          "sha256": "384639cd050331be205566cf289e4f856e7c0009712661b83442c313b6fddd7a",
+          "bytes": 25358,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-b52bd0c6.css",
+          "bytes": 215,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-218901cb.css",
+          "bytes": 1571,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-661f1f35.css",
+          "bytes": 326,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 1,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

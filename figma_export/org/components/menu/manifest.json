@@ -1,0 +1,72 @@
+{
+  "source": "input/org/components/menu.json",
+  "generatedAt": "2025-07-28T11:37:43.057Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-f26a68d6.jpg",
+          "sha256": "f26a68d6c3285dbf8c9f9d277436475c9474c30bcbeb3d9fba8485eb9b794be7",
+          "bytes": 566559,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/a1e2e5dd514f0382aa88024ef5c8e10a014b1a38?width=284",
+          "path": "assets/images/img-e3ea464a.png",
+          "sha256": "e3ea464a8cd39fcb56d4973a4c5e51156f3d9ab3ef406e97faaa8cd895e3c0e4",
+          "bytes": 50525,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/e3ff5095d962591f68fc5088ed84818af1c89bb7?width=284",
+          "path": "assets/images/img-7e5b752f.png",
+          "sha256": "7e5b752f87eb328bae81405fbbf413e9f7ecc74775396c212e9ed3bf8a294188",
+          "bytes": 47309,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/31b0b9979bf374cb922f2a8f2a67445f93a003bc?width=284",
+          "path": "assets/images/img-9be8206d.png",
+          "sha256": "9be8206d669cfd853bffc08b2782fc9172111786be3b3a746ee74f816c320565",
+          "bytes": 42533,
+          "mime": "image/png",
+          "ext": "png"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-592954fd.css",
+          "bytes": 292,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-1f1cd1a5.css",
+          "bytes": 6400,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-fec36422.css",
+          "bytes": 1700,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 4,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

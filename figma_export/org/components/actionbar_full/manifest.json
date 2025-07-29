@@ -1,0 +1,48 @@
+{
+  "source": "input/org/components/actionbar_full.json",
+  "generatedAt": "2025-07-28T11:37:42.398Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-aab9aefa.jpg",
+          "sha256": "aab9aefab4b8783db363100e60de7d5ef7b573abd8e627aa429245159610c07b",
+          "bytes": 275868,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-b0389a00.css",
+          "bytes": 419,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-8966d2ea.css",
+          "bytes": 12042,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-370b9864.css",
+          "bytes": 13333,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 1,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

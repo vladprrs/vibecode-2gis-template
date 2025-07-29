@@ -1,0 +1,31 @@
+
+  :root {
+    --Background-01: #F1F1F1;
+    --Surface-01: rgba(20, 20, 20, 0.06;
+    --Background-02: #FFF;
+    --Special-Divider: rgba(137, 137, 137, 0.30;
+    --text-icons-primary: #141414;
+    --text-icons-secondary-transparent: rgba(20, 20, 20, 0.50;
+    --Button-Secondary: rgba(20, 20, 20, 0.06;
+    --text-icons-accent-subtle: #5A5A5A;
+    --Surface-02: rgba(20, 20, 20, 0.09;
+    --Surface-00: rgba(0, 0, 0, 0.00;
+    --text-icons-tertiary-transparent: rgba(20, 20, 20, 0.30;
+    --text-icons-global-white-primary: #FFF;
+    --Surface-03: #FFF;
+    --text-icons-secondary: #898989;
+    --text-icons-inverse: #FFF;
+    --Surface-Section-01: #FFF;
+    --text-icons-status-critical: #F5373C;
+    --text-icons-tertiary: #B8B8B8;
+    --Surface-Transparent: rgba(0, 0, 0, 0.00;
+    --text-icons-status-success: #1BA136;
+    --text-icons-accent-brand: #1BA136;
+    --text-icons-primary-black: #141414;
+    --text-icons-secondary-default: #898989;
+    --text-icons-traffic-heavy: #F5373C;
+    --text-icons-tertiary-default: #B8B8B8;
+    ---Ash: #929292;
+    --Background-iOS-materials-systemChromeMaterial: linear-gradient(0deg, rgba(242, 242, 242, 0.15;
+    --text-icons-traffic-unknown: #5A5A5A;
+  }

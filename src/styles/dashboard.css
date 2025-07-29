@@ -1,0 +1,820 @@
+/* Dashboard Styles - Based on Figma Export - Updated for accuracy */
+
+:root {
+  /* Color Variables from Figma - точные значения */
+  --Background-01: #F1F1F1;
+  --Background-02: #FFF;
+  --Surface-02: rgba(20, 20, 20, 0.09);
+  --Surface-01: rgba(20, 20, 20, 0.06);
+  --text-icons-secondary: #898989;
+  --Button-Secondary: rgba(20, 20, 20, 0.06);
+  --text-icons-primary: #141414;
+  --text-icons-traffic-heavy: #F5373C;
+  --text-icons-traffic-average: #EFA701;
+  --text-icons-traffic-light: #1BA136;
+  --text-icons-accent-brand: #1BA136;
+  --Special-Divider: rgba(137, 137, 137, 0.30);
+  --Surface-Section-02: rgba(20, 20, 20, 0.06);
+  --text-icons-global-white-primary: #FFF;
+  --Surface-Section-01: #FFF;
+  --Surface-Global-White: #FFF;
+  --text-icons-tertiary-transparent: rgba(20, 20, 20, 0.30);
+  --Overlay-02: rgba(0, 0, 0, 0.40);
+  --text-icons-primary-white: #FFF;
+  --text-icons-status-warning: #EFA701;
+  --text-icons-accent-subtle: #5A5A5A;
+  --text-icons-tertiary: #B8B8B8;
+  --Surface-00: rgba(0, 0, 0, 0.00);
+  --Button-Primary-brand: #1DB93C;
+  --Button-Map: #FFF;
+  --Background-Blur-02: rgba(255, 255, 255, 0.70);
+  --text-icons-accen-link-green: #1BA136;
+  --Background-Default-white: #FFF;
+}
+
+/* Main Dashboard Container */
+.dashboard-screen {
+  width: 100%;
+  height: 100vh;
+  background: var(--Background-01);
+  position: relative;
+  overflow: hidden;
+}
+
+/* MapGL Container */
+.dashboard-map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Bottomsheet Container - точные размеры из Figma */
+.dashboard-bottomsheet {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  border-radius: 16px 16px 0 0;
+  background: var(--Background-02);
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+/* Bottomsheet Header - точно как в Figma */
+.bottomsheet-header {
+  display: flex;
+  padding-top: 16px;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  border-radius: 16px 16px 0 0;
+  background: var(--Background-02);
+  position: relative;
+}
+
+/* Dragger - точные размеры из Figma */
+.dragger {
+  display: flex;
+  height: 0;
+  padding-bottom: 6px;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  align-self: stretch;
+  position: relative;
+}
+
+.dragger-handle {
+  width: 40px;
+  height: 4px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--Surface-02);
+  position: relative;
+  cursor: grab;
+}
+
+.dragger-handle:active {
+  cursor: grabbing;
+}
+
+/* Nav Bar - точно как в Figma */
+.search-nav-bar {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.search-nav-content {
+  display: flex;
+  padding: 0 16px;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1 0 0;
+  position: relative;
+}
+
+.search-field-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 0;
+  position: relative;
+}
+
+/* Search Field - точные стили из Figma */
+.search-field {
+  display: flex;
+  height: 40px;
+  padding: 10px 8px;
+  align-items: flex-start;
+  gap: 6px;
+  align-self: stretch;
+  border-radius: 8px;
+  background: var(--Surface-01);
+  position: relative;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.search-field:focus,
+.search-field:hover {
+  background: var(--Background-02);
+  box-shadow: 0 0 0 2px var(--text-icons-accent-brand);
+}
+
+/* Search Icon - точные размеры */
+.search-icon {
+  width: 24px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.search-icon svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  fill: var(--text-icons-secondary);
+}
+
+/* Search Placeholder - точная типографика из Figma */
+.search-placeholder {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  letter-spacing: -0.3px;
+  color: var(--text-icons-secondary);
+  position: relative;
+  flex: 1 0 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Assistant Icon */
+.assistant-icon {
+  width: 24px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Content Area - адаптивное поведение скролла */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  /* Базовые стили скролла - будут изменяться через JS */
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+/* Button Row - точные стили из Figma */
+.buttons-row {
+  display: flex;
+  padding: 16px 0;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  position: relative;
+}
+
+.buttons-row-mask {
+  height: 40px;
+  align-self: stretch;
+  position: relative;
+}
+
+.buttons-row-container {
+  display: flex;
+  width: 704px;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  left: 16px;
+  top: 0px;
+  height: 40px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.buttons-row-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fade masks для кнопок */
+.buttons-row-mask::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 40px;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0) 5.63%, #FFF 100%);
+  z-index: 10;
+}
+
+.buttons-row-mask::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 20px;
+  height: 40px;
+  background: linear-gradient(270deg, #FFF 5.63%, rgba(255, 255, 255, 0) 100%);
+  z-index: 10;
+}
+
+/* Smart Button - точные стили из Figma */
+.smart-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--Button-Secondary);
+  position: relative;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+  padding: 10px 14px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.smart-button:hover {
+  background: var(--Surface-02);
+}
+
+.smart-button-icon {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.smart-button-text {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.3px;
+  color: var(--text-icons-primary);
+}
+
+/* Stories Section - точные размеры из Figma */
+.stories-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.stories-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 16px 8px 16px;
+}
+
+.stories-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Story Item - точные размеры 96x112 из Figma */
+.story-item {
+  display: flex;
+  width: 96px;
+  height: 112px;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.story-item:hover {
+  transform: scale(1.05);
+}
+
+.story-cover {
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: var(--Surface-01);
+}
+
+.story-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Content Grid - точная структура из Figma */
+.content-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.content-row {
+  display: flex;
+  gap: 12px;
+  align-self: stretch;
+  position: relative;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Cover Card - точные размеры из Figma */
+.cover-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--Surface-01);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cover-card:hover {
+  transform: translateY(-2px);
+}
+
+.cover-card-big {
+  height: 142px; /* Точная высота из Figma для 232x142 */
+}
+
+.cover-card-small {
+  height: 120px;
+}
+
+.cover-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+  padding: 12px;
+}
+
+.cover-title {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: var(--text-icons-primary-white);
+  margin-bottom: 4px;
+}
+
+.cover-subtitle {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: -0.234px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Meta Item - точные размеры и стили */
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--Surface-Section-01);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-height: 72px;
+}
+
+.meta-item:hover {
+  background: var(--Surface-01);
+}
+
+.meta-item-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+}
+
+.meta-item-title {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: var(--text-icons-primary);
+}
+
+.meta-item-subtitle {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: -0.234px;
+  color: var(--text-icons-secondary);
+}
+
+.meta-item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--Surface-01);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Meta Item Ad - особые стили для рекламы */
+.meta-item-ad {
+  background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.meta-item-ad::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--Background-Blur-02);
+  z-index: 0;
+}
+
+.meta-item-ad .meta-item-icon,
+.meta-item-ad .meta-item-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header Section */
+.section-header {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.38px;
+  color: var(--text-icons-primary);
+}
+
+/* Banner - точные стили из Figma */
+.banner-small {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--Surface-Section-01);
+  margin: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--Surface-01);
+  flex-shrink: 0;
+}
+
+.banner-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.banner-title {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: var(--text-icons-primary);
+}
+
+.banner-description {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.28px;
+  color: var(--text-icons-secondary);
+}
+
+/* RD Block - точные стили организации-рекламодателя */
+.rd-block {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--Surface-Section-01);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.rd-block:hover {
+  background: var(--Surface-01);
+}
+
+.rd-gallery {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rd-main-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--Surface-01);
+}
+
+.rd-counter-photo {
+  width: 88px;
+  height: 88px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--Surface-01);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rd-counter {
+  background: var(--Overlay-02);
+  color: var(--text-icons-primary-white);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.rd-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rd-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rd-title {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: -0.24px;
+  color: var(--text-icons-primary);
+  margin: 0;
+}
+
+.rd-crown {
+  font-size: 16px;
+}
+
+.rd-subtitle {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: -0.28px;
+  color: var(--text-icons-secondary);
+}
+
+.rd-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rd-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rd-rating-value {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-icons-primary);
+}
+
+.rd-distance {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-icons-primary);
+}
+
+.rd-address {
+  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 14px;
+  color: var(--text-icons-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .content-row {
+    flex-direction: column;
+  }
+  
+  .left-column,
+  .right-column {
+    flex: none;
+  }
+  
+  .buttons-row-container {
+    width: calc(100vw - 32px);
+  }
+}
+
+/* Scroll Behavior Classes */
+.scroll-blocked .dashboard-content {
+  overflow-y: hidden !important;
+  scroll-behavior: auto;
+}
+
+.scroll-enabled .dashboard-content {
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
+}
+
+/* Визуальная индикация состояний скролла */
+.scroll-blocked {
+  cursor: ns-resize;
+}
+
+.scroll-enabled {
+  cursor: default;
+}
+
+/* Обратная связь для пользователя при скролле */
+.scroll-blocked .dashboard-content:hover {
+  background: linear-gradient(
+    180deg, 
+    rgba(27, 161, 54, 0.02) 0%, 
+    transparent 100%
+  );
+}
+
+/* Animation Classes */
+.bs-small .dashboard-content {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.bs-default .dashboard-content,
+.bs-fullscreen .dashboard-content,
+.bs-fullscreen-scroll .dashboard-content {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bs-animating {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Scrollbar Styling */
+.dashboard-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+  background: var(--Surface-02);
+  border-radius: 2px;
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+  background: var(--text-icons-tertiary);
+}
+
+/* Demo content items */
+.demo-content-item {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  border-left: 4px solid var(--text-icons-accent-brand);
+}
+
+.demo-content-item h4 {
+  margin: 0 0 8px 0;
+  color: var(--text-icons-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.demo-content-item p {
+  margin: 0;
+  color: var(--text-icons-secondary);
+  font-size: 14px;
+  line-height: 1.4;
+} 

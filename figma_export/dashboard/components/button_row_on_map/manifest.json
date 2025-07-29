@@ -1,0 +1,48 @@
+{
+  "source": "input/dashboard/components/button_row_on_map.json",
+  "generatedAt": "2025-07-28T11:37:33.030Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-19110c3c.jpg",
+          "sha256": "19110c3c8ec1ba3feb91937f031adc7f381cb0c2cb070a2d95db43f5f39a4ae6",
+          "bytes": 170843,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-6c81d6bd.css",
+          "bytes": 117,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-3f08cfac.css",
+          "bytes": 8242,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-55e3f4f0.css",
+          "bytes": 8261,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 1,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "source": "input/org/components/friends.json",
+  "generatedAt": "2025-07-28T11:37:42.428Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-41fac0da.jpg",
+          "sha256": "41fac0da5530bb1b75e09f77a029dd29a5528840b2b6f6c3626bae84579874fe",
+          "bytes": 100147,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-fdd14218.css",
+          "bytes": 222,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-8d6fe2fd.css",
+          "bytes": 4506,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-a0a1cbb0.css",
+          "bytes": 330,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 1,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

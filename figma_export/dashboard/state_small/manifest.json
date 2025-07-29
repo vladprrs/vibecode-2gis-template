@@ -1,0 +1,176 @@
+{
+  "source": "input/dashboard/state_small.json",
+  "generatedAt": "2025-07-28T11:37:42.382Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-0de1a764.jpg",
+          "sha256": "0de1a76421ff4589d04982b3815cd160ad3a1f119b8761c8bac04e59ee9bff8d",
+          "bytes": 586854,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/dbeabc5ac0f4d8edc9feb4b0b06f4520eafc61ab?width=750",
+          "path": "assets/images/img-f106c1b4.png",
+          "sha256": "f106c1b429630e3283b4befb195b2df1e63163a84949fa31e46c200f19ee95b1",
+          "bytes": 305398,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/34f67ee241b18699fd7e3f7d00e2b36780572204?width=192",
+          "path": "assets/images/img-69ff32d9.png",
+          "sha256": "69ff32d99c2ed24b24e27b78f7169ddfe8b58c287067d75ea0118060af267ef5",
+          "bytes": 10162,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/e42877ade1f2bd4cfde7c0b41fad26ebdad2f46e?width=192",
+          "path": "assets/images/img-5549a895.png",
+          "sha256": "5549a8957c06c6254d547e3f8794eb51f5ab960c7b0e8c5a3e46e29888188d75",
+          "bytes": 7372,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/3a11f310b9b132d5ce81bd19443d7d5fa0f543f7?width=192",
+          "path": "assets/images/img-62839f12.png",
+          "sha256": "62839f128e3f888fe00bd3e947b09a4ed0f77a16026c47d67708ec29e65ede24",
+          "bytes": 13414,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/40ceba486b7ff03fe9915708b46fafaa10915184?width=192",
+          "path": "assets/images/img-0f61e5de.png",
+          "sha256": "0f61e5deccb863ea29cadc1a7b8443c4693184be840247b2c3705e9bf3fb1ba4",
+          "bytes": 11608,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/4059ad157c7c81815df8c4b834e7aae0849753ec?width=332",
+          "path": "assets/images/img-a24168bd.png",
+          "sha256": "a24168bd2c8b4ed0a8165942a61bcaad9e6ea03a90051c5f2b8bbf8e2ef58808",
+          "bytes": 71309,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/72d1119004a34860694f1ef0d892326fa0de4ed1?width=332",
+          "path": "assets/images/img-b641675d.png",
+          "sha256": "b641675d9b3d146a0e2e66f67d752fc1429bc34a6b5870515a934a0436c9b585",
+          "bytes": 31296,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/b9d8f5f8b93aee6052c7f1132c16230945385ef0?width=64",
+          "path": "assets/images/img-515d9ed9.png",
+          "sha256": "515d9ed9021bb5d0025bfc3ef273d6d1e4f5e4b31a362541dd90d0455fd45119",
+          "bytes": 861,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/6278574ada67671bc00e497cc4ee6124952d86b9?width=202",
+          "path": "assets/images/img-c4517f50.png",
+          "sha256": "c4517f503040cc2dc78b128bc0d4df6aa56491121832cc168e7cc491d2088c5e",
+          "bytes": 29596,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/3e9d2967da9317163196b5e82f1d7e742136987e?width=96",
+          "path": "assets/images/img-d5ee138b.png",
+          "sha256": "d5ee138bc4098c1fbe809f63e5b48281a9567aa0d79a1dadca5c7e191e75b27d",
+          "bytes": 13918,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/f54bb09e7c08839ddf978cff53fc53f1f06ba97e?width=320",
+          "path": "assets/images/img-1cd6d524.png",
+          "sha256": "1cd6d524762772b54e534ce778d9199641f939e8e14119521f11da597c5cdba9",
+          "bytes": 6598,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "svg-1753702662378",
+          "path": "assets/images/img-8ccdb803.svg",
+          "sha256": "8ccdb803547de3808cbe03b4c3c3c9dc9e721bc550bc582e3a91634639ed2ece",
+          "bytes": 1053,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702662378",
+          "path": "assets/images/img-e3f2f075.svg",
+          "sha256": "e3f2f0757ed70db2dad3286e4a8a473833439ee851e81d673be687a62918797c",
+          "bytes": 1622,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702662379",
+          "path": "assets/images/img-311d96c3.svg",
+          "sha256": "311d96c3f76eca52d6c84796549861fd7fc5002217f7b13f3e0cef200d6ed94f",
+          "bytes": 1556,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702662379",
+          "path": "assets/images/img-716c27c3.svg",
+          "sha256": "716c27c3da96fddc36a8f2bb353cc1a9565e718f06490fb51f10329c42012977",
+          "bytes": 703,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702662379",
+          "path": "assets/images/img-77eb50ed.svg",
+          "sha256": "77eb50ede9c080d0c66d3b1b5f0e355e000a0600e46726d2ecb535a496a638b3",
+          "bytes": 1795,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-54328d79.css",
+          "bytes": 1137,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-32f3b818.css",
+          "bytes": 46584,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-51a3f9e9.css",
+          "bytes": 13196,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 17,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

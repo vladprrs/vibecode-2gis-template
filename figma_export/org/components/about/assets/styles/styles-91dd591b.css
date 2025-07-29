@@ -1,0 +1,63 @@
+.inline-element-1 {
+  display:flex;width:343px;padding-bottom:8px;flex-direction:column;align-items:flex-start;border-radius:12px;background:#FFF;position:absolute;left:0px;top:0px;height:206px
+}
+
+.inline-element-2 {
+  display:flex;flex-direction:column;align-items:flex-start;align-self:stretch;position:relative
+}
+
+.inline-element-3 {
+  display:flex;padding:15px 16px 11px 16px;justify-content:center;align-items:flex-start;gap:8px;align-self:stretch;position:relative
+}
+
+.inline-element-4 {
+  display:flex;align-items:flex-start;flex:1 0 0;align-self:stretch;position:relative
+}
+
+.inline-element-5 {
+  display:flex;padding-top:2px;align-items:flex-start;flex:1 0 0;position:relative
+}
+
+.inline-element-6 {
+  flex:1 0 0;color:#141414;font-family:
+}
+
+.inline-element-7 {
+  font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif; font-weight: 400; font-size: 16px; color: rgba(20,20,20,1);
+}
+
+.inline-element-8 {
+  display:flex;height:0.001px;align-items:flex-start;position:relative
+}
+
+.inline-element-9 {
+  width:24px;height:24px;position:relative
+}
+
+.inline-element-10 {
+  width:13px;height:8px;flex-shrink:0;fill:#B8B8B8;position:absolute;left:5px;top:8px
+}
+
+.inline-element-11 {
+  display:flex;width:24px;height:24px;padding:8.293px 5.293px 7.586px 5.293px;justify-content:center;align-items:center;position:absolute;left:-5px;top:-8px
+}
+
+.inline-element-12 {
+  display:flex;flex-direction:column;align-items:flex-start;position:relative
+}
+
+.inline-element-13 {
+  display:flex;width:343px;padding:0 16px;flex-direction:column;align-items:flex-start;position:relative
+}
+
+.inline-element-14 {
+  display:flex;padding:2px 0 8px 0;align-items:flex-start;align-self:stretch;position:relative
+}
+
+.inline-element-15 {
+  flex:1 0 0;color:#141414;font-family:
+}
+
+.inline-element-16 {
+  font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif; font-weight: 400; font-size: 16px; color: rgba(20,20,20,1);
+}

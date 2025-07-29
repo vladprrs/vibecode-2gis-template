@@ -1,0 +1,64 @@
+{
+  "source": "input/suggest/components/bottomsheet.json",
+  "generatedAt": "2025-07-28T11:38:13.390Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-2e2bbc46.jpg",
+          "sha256": "2e2bbc46d4bda24a2551e2024748b993b45e25487bcedc8c5fa5532bb297f636",
+          "bytes": 235879,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "svg-1753702693388",
+          "path": "assets/images/img-e48dc9e8.svg",
+          "sha256": "e48dc9e8ffebe59c54e5d462808565ef262c1d1f5f0b889cbe8735c60502d9be",
+          "bytes": 457,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702693388",
+          "path": "assets/images/img-9233f366.svg",
+          "sha256": "9233f36610efd5443b5ce81e2423b6519710d94991a9822f224fcb9b38bfcdc9",
+          "bytes": 445,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-57f61562.css",
+          "bytes": 368,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-df5d7d6d.css",
+          "bytes": 23221,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-dee08cd8.css",
+          "bytes": 5265,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 3,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

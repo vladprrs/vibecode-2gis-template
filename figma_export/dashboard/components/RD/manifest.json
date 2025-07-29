@@ -1,0 +1,80 @@
+{
+  "source": "input/dashboard/components/RD.json",
+  "generatedAt": "2025-07-28T11:37:30.668Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-3a5395a3.jpg",
+          "sha256": "3a5395a331e60cadc8a744c569fc646cb9eafae408d1846bf4d03f1b1ec4017d",
+          "bytes": 97692,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/03bd0bbbfb0a1d27df1016cff1a3ef451887c599?width=202",
+          "path": "assets/images/img-8cfd8047.png",
+          "sha256": "8cfd8047ff91023229acee77ba1e84c40c60068a6f6dc1d71341bad8819685b6",
+          "bytes": 776,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/d58c743a29d10391c5a5d94f7cbc5581437adac0?width=96",
+          "path": "assets/images/img-6cc6299d.png",
+          "sha256": "6cc6299d782b2ed87da03b3ba64936c84f3aeb0296b903c8ff6321563cadab25",
+          "bytes": 456,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "svg-1753702650664",
+          "path": "assets/images/img-19c9dd65.svg",
+          "sha256": "19c9dd65c5ee1ae86c258e4c337d7aaf37e6503beae90be1bfc5d50a9b48577b",
+          "bytes": 1859,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        },
+        {
+          "key": "svg-1753702650664",
+          "path": "assets/images/img-a168914e.svg",
+          "sha256": "a168914ec219e82a19afea99cbecb1cef36d878bdc00e5d1ac02a783230c4494",
+          "bytes": 383,
+          "mime": "image/svg+xml",
+          "ext": "svg"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-f1e92ffa.css",
+          "bytes": 286,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-24c4fedf.css",
+          "bytes": 5386,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-db3e0af8.css",
+          "bytes": 998,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 5,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}

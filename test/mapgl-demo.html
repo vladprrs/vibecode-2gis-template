@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2GIS MapGL Integration Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            overflow: hidden;
+        }
+
+        #mapgl-demo {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .loading-details {
+            font-size: 14px;
+            opacity: 0.8;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        .test-controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .test-button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-button:hover {
+            background: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .test-button.active {
+            background: #1976D2;
+            color: white;
+        }
+
+        .status-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .status-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .status-log {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #666;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .status-log .success {
+            color: #4CAF50;
+        }
+
+        .status-log .error {
+            color: #F44336;
+        }
+
+        .status-log .info {
+            color: #2196F3;
+        }
+
+        .error-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(244, 67, 54, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 10001;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            max-width: 400px;
+        }
+
+        .retry-button {
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 6px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .retry-button:hover {
+            background: white;
+            color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <!-- Экран загрузки -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Загрузка 2GIS MapGL</div>
+        <div class="loading-details">
+            Инициализация карты и компонентов...<br>
+            API Key: bfa6ee5b-5e88-44f0-b4ad-394e819f26fc
+        </div>
+    </div>
+
+    <!-- Экран ошибки -->
+    <div id="error-screen" class="error-screen">
+        <div class="error-icon">❌</div>
+        <div class="error-title">Ошибка загрузки</div>
+        <div id="error-message" class="error-message">
+            Не удалось загрузить 2GIS MapGL API
+        </div>
+        <button class="retry-button" onclick="retryLoad()">
+            Попробовать снова
+        </button>
+    </div>
+
+    <!-- Контейнер для демо -->
+    <div id="mapgl-demo"></div>
+
+    <!-- Панель управления тестами -->
+    <div class="test-controls">
+        <button class="test-button" onclick="switchToScreen('dashboard')">
+            🏠 Dashboard
+        </button>
+        <button class="test-button" onclick="switchToScreen('suggest')">
+            🔍 Suggest
+        </button>
+        <button class="test-button" onclick="switchToScreen('search_result')">
+            📋 Results
+        </button>
+        <button class="test-button" onclick="switchToScreen('organization')">
+            🏢 Organization
+        </button>
+        <button class="test-button" onclick="testGeolocation()">
+            📍 Геолокация
+        </button>
+        <button class="test-button" onclick="testMarkers()">
+            📌 Тест маркеров
+        </button>
+    </div>
+
+    <!-- Панель статуса -->
+    <div class="status-panel">
+        <div class="status-title">📊 Статус интеграции</div>
+        <div id="status-log" class="status-log">
+            Инициализация...
+        </div>
+    </div>
+
+    <!-- 2GIS MapGL API -->
+    <script src="https://mapgl.2gis.com/api/js/v2?key=bfa6ee5b-5e88-44f0-b4ad-394e819f26fc"></script>
+    
+    <script>
+        // Глобальные переменные
+        let demoInstance = null;
+        let currentScreen = 'dashboard';
+        let mapComponent = null;
+        let mapSyncService = null;
+
+        // Логирование
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('status-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(`[MapGL Test] ${message}`);
+        }
+
+        // Показ ошибки
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-screen').style.display = 'flex';
+            document.getElementById('loading-screen').classList.add('hidden');
+        }
+
+        // Повторная загрузка
+        function retryLoad() {
+            document.getElementById('error-screen').style.display = 'none';
+            document.getElementById('loading-screen').classList.remove('hidden');
+            setTimeout(initializeDemo, 1000);
+        }
+
+        // Упрощенная версия наших классов для браузера
+        class SimpleBrowserDemo {
+            constructor(container) {
+                this.container = container;
+                this.mapContainer = null;
+                this.map = null;
+                this.markers = new Map();
+                this.currentPins = [];
+                
+                this.initialize();
+            }
+
+            async initialize() {
+                try {
+                    log('Создание контейнеров...', 'info');
+                    this.setupContainers();
+                    
+                    log('Ожидание загрузки MapGL API...', 'info');
+                    await this.waitForMapGL();
+                    
+                    log('Создание карты...', 'info');
+                    await this.createMap();
+                    
+                    log('Добавление тестовых маркеров...', 'info');
+                    this.addTestMarkers();
+                    
+                    log('✅ Инициализация завершена успешно!', 'success');
+                    
+                    // Скрываем экран загрузки
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    
+                } catch (error) {
+                    log(`❌ Ошибка инициализации: ${error.message}`, 'error');
+                    showError(error.message);
+                }
+            }
+
+            setupContainers() {
+                this.mapContainer = document.createElement('div');
+                this.mapContainer.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 1;
+                `;
+                this.container.appendChild(this.mapContainer);
+            }
+
+            async waitForMapGL() {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 50;
+                    
+                    const checkMapGL = () => {
+                        attempts++;
+                        
+                        if (window.mapgl) {
+                            resolve(window.mapgl);
+                        } else if (attempts >= maxAttempts) {
+                            reject(new Error('MapGL API не загрузился за отведенное время'));
+                        } else {
+                            setTimeout(checkMapGL, 200);
+                        }
+                    };
+                    
+                    checkMapGL();
+                });
+            }
+
+            async createMap() {
+                if (!window.mapgl) {
+                    throw new Error('MapGL API недоступен');
+                }
+
+                this.map = new mapgl.Map(this.mapContainer, {
+                    center: [37.620393, 55.75396], // Москва
+                    zoom: 10,
+                    key: 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+                });
+
+                // Ждем готовности карты
+                await new Promise((resolve) => {
+                    this.map.on('styleload', resolve);
+                });
+
+                // Обработчики событий
+                this.map.on('click', (event) => {
+                    log(`Клик по карте: ${event.lngLat.lng.toFixed(6)}, ${event.lngLat.lat.toFixed(6)}`, 'info');
+                });
+
+                log('Карта создана и готова к использованию', 'success');
+            }
+
+            addTestMarkers() {
+                const testPins = [
+                    {
+                        id: 'kremlin',
+                        coordinates: [37.617734, 55.752023],
+                        title: 'Московский Кремль',
+                        type: 'organization'
+                    },
+                    {
+                        id: 'red_square',
+                        coordinates: [37.622504, 55.753215],
+                        title: 'Красная площадь',
+                        type: 'search_result'
+                    },
+                    {
+                        id: 'gum',
+                        coordinates: [37.618423, 55.751244],
+                        title: 'ГУМ',
+                        type: 'organization'
+                    }
+                ];
+
+                testPins.forEach(pin => this.addMarker(pin));
+                log(`Добавлено ${testPins.length} тестовых маркеров`, 'success');
+            }
+
+            addMarker(pin) {
+                const marker = new mapgl.Marker({
+                    lngLat: pin.coordinates,
+                    color: this.getMarkerColor(pin.type)
+                });
+
+                marker.on('click', () => {
+                    log(`Клик по маркеру: ${pin.title}`, 'info');
+                    this.highlightMarker(pin.id);
+                });
+
+                marker.addTo(this.map);
+                this.markers.set(pin.id, marker);
+                this.currentPins.push(pin);
+            }
+
+            getMarkerColor(type) {
+                const colors = {
+                    organization: '#1976D2',
+                    search_result: '#FF5722',
+                    user_location: '#4CAF50',
+                    selected: '#9C27B0'
+                };
+                return colors[type] || '#666666';
+            }
+
+            highlightMarker(pinId) {
+                // Сбрасываем все маркеры
+                this.markers.forEach((marker, id) => {
+                    const pin = this.currentPins.find(p => p.id === id);
+                    if (pin) {
+                        marker.setOptions({ color: this.getMarkerColor(pin.type) });
+                    }
+                });
+
+                // Выделяем нужный маркер
+                const marker = this.markers.get(pinId);
+                if (marker) {
+                    marker.setOptions({ color: '#FF5722' });
+                    log(`Маркер ${pinId} выделен`, 'success');
+                }
+            }
+
+            setCenter(coordinates, zoom = null) {
+                if (this.map) {
+                    this.map.setCenter(coordinates);
+                    if (zoom) {
+                        this.map.setZoom(zoom);
+                    }
+                    log(`Карта центрирована на ${coordinates.join(', ')}`, 'info');
+                }
+            }
+
+            testGeolocation() {
+                if (navigator.geolocation) {
+                    log('Запрос геолокации...', 'info');
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const coords = [position.coords.longitude, position.coords.latitude];
+                            
+                            // Добавляем маркер пользователя
+                            this.addMarker({
+                                id: 'user_location',
+                                coordinates: coords,
+                                title: 'Ваше местоположение',
+                                type: 'user_location'
+                            });
+                            
+                            // Центрируем карту
+                            this.setCenter(coords, 15);
+                            
+                            log(`✅ Геолокация получена: ${coords.join(', ')}`, 'success');
+                        },
+                        (error) => {
+                            log(`❌ Ошибка геолокации: ${error.message}`, 'error');
+                        }
+                    );
+                } else {
+                    log('❌ Геолокация не поддерживается браузером', 'error');
+                }
+            }
+
+            simulateScreen(screenType) {
+                log(`Переключение на экран: ${screenType}`, 'info');
+                
+                // Обновляем активную кнопку
+                document.querySelectorAll('.test-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                const activeButton = document.querySelector(`[onclick*="${screenType}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+
+                // Имитируем поведение разных экранов
+                switch (screenType) {
+                    case 'dashboard':
+                        this.setCenter([37.620393, 55.75396], 12);
+                        log('📱 Dashboard: показаны популярные места', 'info');
+                        break;
+                        
+                    case 'suggest':
+                        this.setCenter([37.620393, 55.75396], 11);
+                        log('🔍 Suggest: режим поиска активирован', 'info');
+                        break;
+                        
+                    case 'search_result':
+                        this.setCenter([37.620393, 55.75396], 13);
+                        this.highlightMarker('red_square');
+                        log('📋 Search Results: показаны результаты поиска', 'info');
+                        break;
+                        
+                    case 'organization':
+                        this.setCenter([37.617734, 55.752023], 16);
+                        this.highlightMarker('kremlin');
+                        log('🏢 Organization: показана детальная карточка', 'info');
+                        break;
+                }
+                
+                currentScreen = screenType;
+            }
+        }
+
+        // Функции для управления
+        function switchToScreen(screenType) {
+            if (demoInstance) {
+                demoInstance.simulateScreen(screenType);
+            }
+        }
+
+        function testGeolocation() {
+            if (demoInstance) {
+                demoInstance.testGeolocation();
+            }
+        }
+
+        function testMarkers() {
+            if (demoInstance) {
+                log('🧪 Тестирование маркеров...', 'info');
+                
+                // Добавляем случайные маркеры
+                const randomMarkers = [];
+                for (let i = 0; i < 5; i++) {
+                    const coords = [
+                        37.620393 + (Math.random() - 0.5) * 0.02,
+                        55.75396 + (Math.random() - 0.5) * 0.02
+                    ];
+                    
+                    const marker = {
+                        id: `test_${i}`,
+                        coordinates: coords,
+                        title: `Тестовый маркер ${i + 1}`,
+                        type: 'search_result'
+                    };
+                    
+                    demoInstance.addMarker(marker);
+                    randomMarkers.push(marker);
+                }
+                
+                log(`✅ Добавлено ${randomMarkers.length} тестовых маркеров`, 'success');
+                
+                // Через 2 секунды выделяем случайный маркер
+                setTimeout(() => {
+                    const randomMarker = randomMarkers[Math.floor(Math.random() * randomMarkers.length)];
+                    demoInstance.highlightMarker(randomMarker.id);
+                    demoInstance.setCenter(randomMarker.coordinates, 15);
+                }, 2000);
+            }
+        }
+
+        // Инициализация при загрузке страницы
+        async function initializeDemo() {
+            try {
+                log('🚀 Запуск MapGL Integration Test...', 'info');
+                
+                const container = document.getElementById('mapgl-demo');
+                demoInstance = new SimpleBrowserDemo(container);
+                
+            } catch (error) {
+                log(`❌ Критическая ошибка: ${error.message}`, 'error');
+                showError(error.message);
+            }
+        }
+
+        // Запуск при загрузке DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            log('📄 DOM загружен, запуск инициализации...', 'info');
+            
+            // Даем время на загрузку MapGL API
+            setTimeout(initializeDemo, 2000);
+        });
+
+        // Обработка ошибок
+        window.addEventListener('error', (event) => {
+            log(`❌ JavaScript ошибка: ${event.message}`, 'error');
+        });
+
+        // Информация о состоянии
+        setInterval(() => {
+            if (demoInstance && demoInstance.map) {
+                const center = demoInstance.map.getCenter();
+                const zoom = demoInstance.map.getZoom();
+                document.title = `MapGL Test - ${currentScreen} (${center.lng.toFixed(4)}, ${center.lat.toFixed(4)}) Z${zoom.toFixed(1)}`;
+            }
+        }, 1000);
+    </script>
+</body>
+</html> 

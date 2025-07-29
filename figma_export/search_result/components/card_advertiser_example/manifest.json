@@ -1,0 +1,80 @@
+{
+  "source": "input/search_result/components/card_advertiser_example.json",
+  "generatedAt": "2025-07-28T11:38:02.476Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-32449033.jpg",
+          "sha256": "3244903374367da35c4b542978b1773892bb4eb56c6820634c3e3d4092029f8f",
+          "bytes": 496316,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/a236b9f8b3626f1de652f24aa6ca76a1220c94dc?width=232",
+          "path": "assets/images/img-14a58815.png",
+          "sha256": "14a5881509483aa7782ea2194383d8d9c93e01ed9080eebd4446cf28887e1097",
+          "bytes": 39888,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/a91040b4194e89c37bf89f2d7c1b2bd7b5b48622?width=232",
+          "path": "assets/images/img-d7b7d267.png",
+          "sha256": "d7b7d267c3e09597c587397c7bc179ed4c31c540429c4432edd98f631935a464",
+          "bytes": 37998,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/040eee3ce0cc496b071fc99927d438577dae1052?width=232",
+          "path": "assets/images/img-787a6a04.png",
+          "sha256": "787a6a04d54ad2be05f996627d98011786ad24aebbe5e520be9edd6ea09cb536",
+          "bytes": 729,
+          "mime": "image/png",
+          "ext": "png"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/040eee3ce0cc496b071fc99927d438577dae1052?width=232",
+          "path": "assets/images/img-787a6a04.png",
+          "sha256": "787a6a04d54ad2be05f996627d98011786ad24aebbe5e520be9edd6ea09cb536",
+          "bytes": 729,
+          "mime": "image/png",
+          "ext": "png"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-cbf5262d.css",
+          "bytes": 453,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-a88e14a5.css",
+          "bytes": 10982,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-8489d279.css",
+          "bytes": 2401,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 4,
+    "deduped": 1
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}
