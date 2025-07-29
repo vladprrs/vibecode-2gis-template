@@ -363,19 +363,19 @@ export class DashboardScreen {
       {
         id: 'bookmark',
         text: 'В путь',
-        iconSrc: '@/assets/images/bookmark.svg',
+        iconSrc: '/assets/images/bookmark.svg',
         type: 'icon'
       },
       {
         id: 'home',
         text: 'Домой',
-        iconSrc: '@/assets/images/home.svg',
+        iconSrc: '/assets/images/home.svg',
         type: 'icon'
       },
       {
         id: 'work',
         text: 'На работу',
-        iconSrc: '@/assets/images/work.svg',
+        iconSrc: '/assets/images/work.svg',
         type: 'icon'
       }
     ];
