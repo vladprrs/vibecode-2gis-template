@@ -1,4 +1,4 @@
-import { ScreenType, BottomsheetState } from '../../types';
+import { ScreenType, BottomsheetState, SearchContext } from '../../types';
 import { SearchFlowManager, BottomsheetManager, MapSyncService } from '../../services';
 import { 
   BottomsheetContainer, 
@@ -88,6 +88,7 @@ export class DashboardScreen {
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
+  private fixedFilterBar?: HTMLElement;
   
   // Оригинальные параметры bottomsheet
   private bottomsheetElement?: HTMLElement;
@@ -102,6 +103,11 @@ export class DashboardScreen {
   private touchStartY: number = 0;
   private touchCurrentY: number = 0;
   private isTouchScrolling: boolean = false;
+
+  // Content management
+  private currentScreen: ScreenType = ScreenType.DASHBOARD;
+  private dashboardContent?: HTMLElement;
+  private suggestContent?: HTMLElement;
 
   constructor(props: DashboardScreenProps) {
     this.props = props;
@@ -835,6 +841,7 @@ export class DashboardScreen {
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
+    this.cleanupFixedFilterBar();
   }
 
   /**
@@ -1101,9 +1108,1509 @@ export class DashboardScreen {
       </div>
     `;
     
+    // Add click handler to search field
+    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
+    if (searchField) {
+      searchField.style.cursor = 'pointer';
+      searchField.addEventListener('click', () => {
+        this.handleSearchFieldClick();
+      });
+    }
+    
     header.appendChild(dragger);
     header.appendChild(searchContainer);
     this.bottomsheetElement.appendChild(header);
+  }
+
+  /**
+   * Обработка клика по поисковому полю
+   */
+  private handleSearchFieldClick(): void {
+    // Navigate to SuggestScreen
+    this.props.searchFlowManager.goToSuggest();
+    
+    // Call onSearchFocus callback if provided
+    this.props.onSearchFocus?.();
+  }
+
+  /**
+   * Handle screen changes from SearchFlowManager
+   */
+  public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
+    console.log(`📱 DashboardScreen handling navigation: ${from} → ${to}`);
+    
+    // Clean up fixed filter bar when leaving search result screen
+    if (from === ScreenType.SEARCH_RESULT && to !== ScreenType.SEARCH_RESULT) {
+      this.cleanupFixedFilterBar();
+    }
+    
+    switch (to) {
+      case ScreenType.SUGGEST:
+        this.showSuggestContent();
+        break;
+      case ScreenType.DASHBOARD:
+        this.showDashboardContent();
+        break;
+      case ScreenType.SEARCH_RESULT:
+        this.showSearchResultContent(context);
+        break;
+      case ScreenType.ORGANIZATION:
+        // Handle organization screen
+        break;
+    }
+    
+    this.currentScreen = to;
+  }
+
+  /**
+   * Show suggest content in the bottomsheet
+   */
+  private showSuggestContent(): void {
+    if (!this.bottomsheetElement) return;
+    
+    // First snap to fullscreen using both managers
+    this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
+    this.snapToState(BottomsheetState.FULLSCREEN);
+    
+    // Update header to suggest state
+    this.updateHeaderForSuggest();
+    
+    // Update content to suggest content
+    this.updateContentForSuggest();
+  }
+
+  /**
+   * Show dashboard content in the bottomsheet
+   */
+  private showDashboardContent(): void {
+    if (!this.bottomsheetElement) return;
+    
+    // Snap to default height
+    this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
+    
+    // Update header to dashboard state
+    this.updateHeaderForDashboard();
+    
+    // Update content to dashboard content
+    this.updateContentForDashboard();
+  }
+
+  /**
+   * Show search result content in the bottomsheet
+   */
+  private showSearchResultContent(context: SearchContext): void {
+    if (!this.bottomsheetElement) return;
+    
+    // Snap to fullscreen
+    this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
+    this.snapToState(BottomsheetState.FULLSCREEN);
+    
+    // Update header to search result state
+    this.updateHeaderForSearchResult(context);
+    
+    // Update content to search result content
+    this.updateContentForSearchResult(context);
+  }
+
+  /**
+   * Update header for suggest screen (pixel-perfect Figma match)
+   */
+  private updateHeaderForSuggest(): void {
+    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
+    if (!header) return;
+    
+    // Clear existing header and apply exact Figma CSS structure
+    header.innerHTML = '';
+    header.className = 'inline-element-1';
+    
+    // Apply header styles from Figma CSS - exact match
+    header.style.cssText = `
+      display: flex;
+      padding: 16px 0 8px 0;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      border-radius: 16px 16px 0 0;
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(20px);
+      position: relative;
+    `;
+    
+    // Drag handle section (inline-element-2)
+    const dragSection = document.createElement('div');
+    dragSection.className = 'inline-element-2';
+    dragSection.style.cssText = `
+      display: flex;
+      height: 0;
+      padding-bottom: 6px;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    // Drag handle (inline-element-3)
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'inline-element-3';
+    dragHandle.style.cssText = `
+      width: 40px;
+      height: 4px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      background: rgba(20, 20, 20, 0.09);
+      position: relative;
+    `;
+    dragSection.appendChild(dragHandle);
+    
+    // Nav bar (inline-element-4)
+    const navBar = document.createElement('div');
+    navBar.className = 'inline-element-4';
+    navBar.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    // Nav bar inner (inline-element-5)
+    const navBarInner = document.createElement('div');
+    navBarInner.className = 'inline-element-5';
+    navBarInner.style.cssText = `
+      display: flex;
+      padding: 0 16px;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1 0 0;
+      position: relative;
+    `;
+    
+    // Header (text field container - inline-element-6)
+    const headerContainer = document.createElement('div');
+    headerContainer.className = 'inline-element-6';
+    headerContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1 0 0;
+      position: relative;
+    `;
+    
+    // Text field (inline-element-7)
+    const textField = document.createElement('div');
+    textField.className = 'inline-element-7';
+    textField.style.cssText = `
+      display: flex;
+      height: 40px;
+      padding: 10px 8px;
+      align-items: center;
+      align-self: stretch;
+      border-radius: 8px;
+      background: rgba(20, 20, 20, 0.09);
+      position: relative;
+      gap: 4px;
+    `;
+    
+    // Search icon position (inline-element-8)
+    const searchIconPosition = document.createElement('div');
+    searchIconPosition.className = 'inline-element-8';
+    searchIconPosition.style.cssText = `
+      display: flex;
+      width: 20px;
+      height: 20px;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+    `;
+    
+    // Search icon (inline-element-10)  
+    const searchIcon = document.createElement('div');
+    searchIcon.className = 'inline-element-10';
+    searchIcon.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    searchIcon.style.cssText = `
+      width: 19px;
+      height: 19px;
+      flex-shrink: 0;
+    `;
+    
+    searchIconPosition.appendChild(searchIcon);
+    
+    // Cursor line (inline-element-11)
+    const cursorLine = document.createElement('div');
+    cursorLine.className = 'inline-element-11';
+    cursorLine.style.cssText = `
+      width: 2px;
+      height: 20px;
+      border-radius: 1px;
+      background: #1BA136;
+      flex-shrink: 0;
+    `;
+    
+    // Create input element for functionality  
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.value = 'ме';
+    searchInput.style.cssText = `
+      color: #898989;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      font-style: normal;
+      line-height: 20px;
+      letter-spacing: -0.3px;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    `;
+    
+    // Clear icon container (fixed width to prevent overflow)
+    const clearIconContainer = document.createElement('div');
+    clearIconContainer.className = 'inline-element-15';
+    clearIconContainer.style.cssText = `
+      display: flex;
+      width: 24px;
+      height: 20px;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+    `;
+    
+    // Clear icon color (inline-element-16)
+    const clearIconColor = document.createElement('div');
+    clearIconColor.className = 'inline-element-16';
+    clearIconColor.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    clearIconColor.style.cssText = `
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    `;
+    
+    clearIconContainer.appendChild(clearIconColor);
+    
+    // Assemble text field in proper order
+    textField.appendChild(searchIconPosition);
+    textField.appendChild(cursorLine);
+    textField.appendChild(searchInput);
+    textField.appendChild(clearIconContainer);
+    
+    headerContainer.appendChild(textField);
+    navBarInner.appendChild(headerContainer);
+    
+    // Action right - close button (inline-element-17)
+    const actionRight = document.createElement('div');
+    actionRight.className = 'inline-element-17';
+    actionRight.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      border-radius: 8px;
+      position: relative;
+      cursor: pointer;
+    `;
+    
+    // Button (inline-element-18)
+    const button = document.createElement('div');
+    button.className = 'inline-element-18';
+    button.style.cssText = `
+      display: flex;
+      padding: 8px;
+      justify-content: center;
+      align-items: center;
+      background: rgba(20, 20, 20, 0.06);
+      position: relative;
+      border-radius: 8px;
+    `;
+    
+    // Icon position close (inline-element-19)
+    const iconPositionClose = document.createElement('div');
+    iconPositionClose.className = 'inline-element-19';
+    iconPositionClose.style.cssText = `
+      display: flex;
+      width: 24px;
+      height: 24px;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    `;
+    
+    // Close icon container (inline-element-20)
+    const closeIconContainer = document.createElement('div');
+    closeIconContainer.className = 'inline-element-20';
+    closeIconContainer.style.cssText = `
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      position: absolute;
+      left: 0px;
+      top: 0px;
+    `;
+    
+    // Close icon color (inline-element-21)
+    const closeIconColor = document.createElement('div');
+    closeIconColor.className = 'inline-element-21';
+    closeIconColor.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    closeIconColor.style.cssText = `
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      fill: #141414;
+      position: absolute;
+      left: 5px;
+      top: 5px;
+    `;
+    
+    closeIconContainer.appendChild(closeIconColor);
+    iconPositionClose.appendChild(closeIconContainer);
+    button.appendChild(iconPositionClose);
+    actionRight.appendChild(button);
+    navBarInner.appendChild(actionRight);
+    
+    navBar.appendChild(navBarInner);
+    
+    // Assemble header
+    header.appendChild(dragSection);
+    header.appendChild(navBar);
+    
+    // Event listeners
+    actionRight.addEventListener('click', () => {
+      this.props.searchFlowManager.goToDashboard();
+    });
+    
+    clearIconContainer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      searchInput.value = '';
+      searchInput.focus();
+    });
+    
+    // Add Enter key handler
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const query = searchInput.value.trim();
+        if (query) {
+          this.props.searchFlowManager.goToSearchResults(query);
+        }
+      }
+    });
+
+    // Focus the search input
+    setTimeout(() => searchInput.focus(), 100);
+  }
+
+  /**
+   * Update header for dashboard screen
+   */
+  private updateHeaderForDashboard(): void {
+    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
+    if (!header) return;
+    
+    // Clear existing header
+    header.innerHTML = '';
+    
+    // Create dashboard header with clickable search field
+    const dragger = document.createElement('div');
+    dragger.className = 'dragger';
+    const draggerHandle = document.createElement('div');
+    draggerHandle.className = 'dragger-handle';
+    dragger.appendChild(draggerHandle);
+    
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-nav-bar';
+    searchContainer.innerHTML = `
+      <div class="search-nav-content">
+        <div class="search-field-container">
+          <div class="search-field">
+            <div class="search-icon">
+              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
+                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
+                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="search-placeholder">Поиск в Москве</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add click handler to search field
+    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
+    if (searchField) {
+      searchField.style.cursor = 'pointer';
+      searchField.addEventListener('click', () => {
+        this.handleSearchFieldClick();
+      });
+    }
+    
+    header.appendChild(dragger);
+    header.appendChild(searchContainer);
+  }
+
+  /**
+   * Update content for suggest screen (based on Figma design)
+   */
+  private updateContentForSuggest(): void {
+    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+    if (!contentContainer) return;
+    
+    // Store current dashboard content if not already stored
+    if (!this.dashboardContent) {
+      this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
+    }
+    
+    // Clear current content
+    contentContainer.innerHTML = '';
+    
+    // Apply content container styles from Figma
+    contentContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      background: rgba(0, 0, 0, 0.00);
+      box-shadow: 0 -0.5px 0 0 rgba(137, 137, 137, 0.30) inset;
+      position: relative;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+    `;
+    
+    // Create suggestions rows based on Figma
+    const suggestions = [
+      {
+        type: 'home',
+        title: 'Дом',
+        subtitle: ['Красный проспект, 49', '5 км'],
+        hasSubtitle: true,
+        icon: 'home'
+      },
+      {
+        type: 'search',
+        title: 'Мебель',
+        subtitle: [],
+        hasSubtitle: false,
+        icon: 'search'
+      },
+      {
+        type: 'branch',
+        title: 'МЕСТО, инвест-апарты',
+        subtitle: ['Красный проспект, 49'],
+        hasSubtitle: true,
+        icon: 'building'
+      },
+      {
+        type: 'category',
+        title: 'Мечети',
+        subtitle: ['6 филиалов', 'Место для намаза'],
+        hasSubtitle: true,
+        icon: 'category'
+      },
+      {
+        type: 'category',
+        title: 'Боулинг',
+        subtitle: ['6 филиалов', 'Места отдыха'],
+        hasSubtitle: true,
+        icon: 'category'
+      },
+      {
+        type: 'category',
+        title: 'Аквапарки/Водные аттракционы',
+        subtitle: ['6 филиалов', 'Места отдыха'],
+        hasSubtitle: true,
+        icon: 'category'
+      },
+      {
+        type: 'category',
+        title: 'Газпромнефть азс',
+        subtitle: [],
+        hasSubtitle: false,
+        icon: 'category'
+      },
+      {
+        type: 'category',
+        title: 'Гостиницы',
+        subtitle: ['222 филиала'],
+        hasSubtitle: true,
+        icon: 'category'
+      },
+      {
+        type: 'category',
+        title: 'Грильница, сеть ресторанов вкусной…',
+        subtitle: ['22 филиала'],
+        hasSubtitle: true,
+        icon: 'category'
+      },
+      {
+        type: 'transport',
+        title: '12, автобус',
+        subtitle: ['Александра Чистякова — Дюканова'],
+        hasSubtitle: true,
+        icon: 'bus'
+      },
+      {
+        type: 'transport',
+        title: 'Площадь Калинина, остановка',
+        subtitle: ['Новосибирск'],
+        hasSubtitle: true,
+        icon: 'bus'
+      },
+      {
+        type: 'metro',
+        title: 'Октябрьская',
+        subtitle: ['Ленинская линия', '5 км'],
+        hasSubtitle: true,
+        icon: 'metro'
+      }
+    ];
+    
+    suggestions.forEach((suggestion, index) => {
+      const suggestionRow = this.createSuggestionRow(suggestion, index === suggestions.length - 1);
+      contentContainer.appendChild(suggestionRow);
+    });
+  }
+
+  /**
+   * Create a suggestion row based on Figma design
+   */
+  private createSuggestionRow(suggestion: any, isLast: boolean): HTMLElement {
+    const row = document.createElement('div');
+    row.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    const contentRow = document.createElement('div');
+    contentRow.style.cssText = `
+      display: flex;
+      padding-left: 16px;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1 0 0;
+      position: relative;
+      padding-top: 16px;
+      padding-bottom: 16px;
+      ${!isLast ? 'border-bottom: 0.5px solid rgba(137, 137, 137, 0.30);' : ''}
+      cursor: pointer;
+    `;
+    
+    // Icon container
+    const iconContainer = document.createElement('div');
+    iconContainer.style.cssText = `
+      width: 24px;
+      height: 24px;
+      position: relative;
+      margin-top: -2px;
+    `;
+    
+    // Icon based on type
+    let iconSvg = '';
+    switch (suggestion.icon) {
+      case 'home':
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="9,22 9,12 15,12 15,22" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        break;
+      case 'search':
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/>
+          <path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        break;
+      case 'building':
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        break;
+      case 'category':
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#898989" stroke-width="1.5"/>
+          <path d="M12 6v6l4 2" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        break;
+      case 'bus':
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M8 6v6M16 6v6M4 15l4-9 8 0 4 9-4 2-8 0-4-2z" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        break;
+      case 'metro':
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#898989" stroke-width="1.5"/>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="9" y1="9" x2="9.01" y2="9" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="15" y1="9" x2="15.01" y2="9" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`;
+        break;
+      default:
+        iconSvg = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#898989" stroke-width="1.5"/>
+        </svg>`;
+    }
+    
+    iconContainer.innerHTML = iconSvg;
+    
+    // Content container
+    const textContent = document.createElement('div');
+    textContent.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1 0 0;
+      position: relative;
+    `;
+    
+    // Title
+    const titleContainer = document.createElement('div');
+    titleContainer.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    const title = document.createElement('div');
+    title.style.cssText = `
+      flex: 1 0 0;
+      font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+      font-style: normal;
+      font-weight: ${suggestion.type === 'home' ? '500' : '400'};
+      font-size: 16px;
+      line-height: 20px;
+      letter-spacing: -0.24px;
+      color: #141414;
+      position: relative;
+    `;
+    
+    // Highlight search term in title
+    if (suggestion.title.toLowerCase().includes('ме')) {
+      const parts = suggestion.title.split(/(ме|МЕ)/gi);
+      title.innerHTML = parts.map((part: string) => 
+        part.toLowerCase() === 'ме' || part === 'МЕ' 
+          ? `<span style="font-weight: 500;">${part}</span>` 
+          : part
+      ).join('');
+    } else {
+      title.textContent = suggestion.title;
+    }
+    
+    titleContainer.appendChild(title);
+    textContent.appendChild(titleContainer);
+    
+    // Subtitle (if exists)
+    if (suggestion.hasSubtitle && suggestion.subtitle.length > 0) {
+      const subtitleContainer = document.createElement('div');
+      subtitleContainer.style.cssText = `
+        display: flex;
+        align-items: flex-start;
+        align-self: stretch;
+        position: relative;
+        gap: 4px;
+      `;
+      
+      suggestion.subtitle.forEach((subtitleText: string, index: number) => {
+        const subtitle = document.createElement('div');
+        subtitle.style.cssText = `
+          font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+          font-style: normal;
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 18px;
+          letter-spacing: -0.28px;
+          color: #898989;
+          position: relative;
+        `;
+        subtitle.textContent = subtitleText;
+        subtitleContainer.appendChild(subtitle);
+        
+        // Add dot separator between subtitle parts
+        if (index < suggestion.subtitle.length - 1) {
+          const separator = document.createElement('div');
+          separator.style.cssText = `
+            color: #898989;
+            font-size: 14px;
+            line-height: 18px;
+          `;
+          separator.textContent = '•';
+          subtitleContainer.appendChild(separator);
+        }
+      });
+      
+      textContent.appendChild(subtitleContainer);
+    }
+    
+    // Add click handler
+    contentRow.addEventListener('click', () => {
+      console.log('Suggestion clicked:', suggestion.title);
+      this.props.searchFlowManager.goToSearchResults(suggestion.title);
+    });
+    
+    // Hover effects
+    contentRow.addEventListener('mouseenter', () => {
+      contentRow.style.backgroundColor = 'rgba(0, 0, 0, 0.02)';
+    });
+    
+    contentRow.addEventListener('mouseleave', () => {
+      contentRow.style.backgroundColor = 'transparent';
+    });
+    
+    contentRow.appendChild(iconContainer);
+    contentRow.appendChild(textContent);
+    row.appendChild(contentRow);
+    
+    return row;
+  }
+
+  /**
+   * Update content for dashboard screen
+   */
+  private updateContentForDashboard(): void {
+    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content');
+    if (!contentContainer || !this.dashboardContent) return;
+    
+    // Restore dashboard content
+    contentContainer.innerHTML = '';
+    const restoredContent = this.dashboardContent.cloneNode(true) as HTMLElement;
+    
+    // Move child nodes to the container
+    while (restoredContent.firstChild) {
+      contentContainer.appendChild(restoredContent.firstChild);
+    }
+  }
+
+  /**
+   * Update header for search result screen (based on Figma design)
+   */
+  private updateHeaderForSearchResult(context: SearchContext): void {
+    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
+    if (!header) return;
+    
+    // Clear existing header
+    header.innerHTML = '';
+    header.className = 'inline-element-1';
+    
+    // Apply header styles from Figma - search result header
+    header.style.cssText = `
+      display: flex;
+      padding: 16px 0 8px 0;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      border-radius: 16px 16px 0 0;
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(20px);
+      position: relative;
+    `;
+    
+    // Drag handle section
+    const dragSection = document.createElement('div');
+    dragSection.className = 'inline-element-3';
+    dragSection.style.cssText = `
+      display: flex;
+      height: 0;
+      padding-bottom: 6px;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'inline-element-4';
+    dragHandle.style.cssText = `
+      width: 40px;
+      height: 4px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      background: rgba(20, 20, 20, 0.09);
+      position: relative;
+    `;
+    dragSection.appendChild(dragHandle);
+    
+    // Nav bar section
+    const navBar = document.createElement('div');
+    navBar.className = 'inline-element-5';
+    navBar.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    const navBarInner = document.createElement('div');
+    navBarInner.className = 'inline-element-6';
+    navBarInner.style.cssText = `
+      display: flex;
+      padding: 0 16px;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1 0 0;
+      position: relative;
+    `;
+    
+    // Search field container
+    const searchFieldContainer = document.createElement('div');
+    searchFieldContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      flex: 1 0 0;
+      position: relative;
+    `;
+    
+    // Search field (filled state, background=01)
+    const searchField = document.createElement('div');
+    searchField.style.cssText = `
+      display: flex;
+      height: 40px;
+      padding: 10px 8px;
+      align-items: center;
+      align-self: stretch;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 1);
+      border: 1px solid rgba(137, 137, 137, 0.30);
+      position: relative;
+      gap: 4px;
+    `;
+    
+    // Search icon
+    const searchIcon = document.createElement('div');
+    searchIcon.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    searchIcon.style.cssText = `
+      width: 19px;
+      height: 19px;
+      flex-shrink: 0;
+    `;
+    
+    // Query text
+    const queryText = document.createElement('span');
+    queryText.textContent = context.query || 'Автосервис';
+    queryText.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      font-style: normal;
+      line-height: 20px;
+      letter-spacing: -0.3px;
+      flex: 1;
+    `;
+    
+    // Salut icon (voice assistant)
+    const salutIcon = document.createElement('div');
+    salutIcon.innerHTML = `<img src="/figma_export/search_result/components/bottomsheet_header/assets/images/img-4346f8f5.png" alt="Salut" style="width: 24px; height: 24px;" />`;
+    salutIcon.style.cssText = `
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    `;
+    
+    searchField.appendChild(searchIcon);
+    searchField.appendChild(queryText);
+    searchField.appendChild(salutIcon);
+    searchFieldContainer.appendChild(searchField);
+    navBarInner.appendChild(searchFieldContainer);
+    
+    // Close button
+    const closeButton = document.createElement('div');
+    closeButton.className = 'inline-element-17';
+    closeButton.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      border-radius: 8px;
+      cursor: pointer;
+    `;
+    
+    const closeButtonInner = document.createElement('div');
+    closeButtonInner.className = 'inline-element-18';
+    closeButtonInner.style.cssText = `
+      display: flex;
+      padding: 8px;
+      justify-content: center;
+      align-items: center;
+      background: rgba(20, 20, 20, 0.06);
+      border-radius: 8px;
+    `;
+    
+    const closeIcon = document.createElement('div');
+    closeIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    closeIcon.style.cssText = `
+      width: 13px;
+      height: 13px;
+    `;
+    
+    closeButtonInner.appendChild(closeIcon);
+    closeButton.appendChild(closeButtonInner);
+    navBarInner.appendChild(closeButton);
+    navBar.appendChild(navBarInner);
+    
+    header.appendChild(dragSection);
+    header.appendChild(navBar);
+    
+    // Event listener for close button
+    closeButton.addEventListener('click', () => {
+      this.props.searchFlowManager.goToDashboard();
+    });
+  }
+
+  /**
+   * Update content for search result screen (based on Figma design)
+   */
+  private updateContentForSearchResult(context: SearchContext): void {
+    const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
+    if (!contentContainer) return;
+    
+    // Store dashboard content if not already stored
+    if (!this.dashboardContent) {
+      this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
+    }
+    
+    // Clear current content
+    contentContainer.innerHTML = '';
+    
+    // Apply search result content styles
+    contentContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      background: #FFF;
+      position: relative;
+      padding: 0;
+      margin: 0;
+      overflow-y: auto;
+    `;
+    
+    // Create results content
+    this.createResultsContent(contentContainer, context);
+    
+    // Create fixed filter bar at bottom of bottomsheet
+    this.createBottomFilterBar(contentContainer);
+  }
+
+  /**
+   * Create fixed filter bar at bottom of bottomsheet
+   */
+  private createBottomFilterBar(container: HTMLElement): void {
+    // Clean up existing filter bar
+    this.cleanupFixedFilterBar();
+    
+    const filterBarWrapper = document.createElement('div');
+    filterBarWrapper.style.cssText = `
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: #FFF;
+      border-radius: 16px 16px 0 0;
+      padding: 16px;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    `;
+    
+    this.createFilterBar(filterBarWrapper);
+    
+    // Store reference for cleanup
+    this.fixedFilterBar = filterBarWrapper;
+    
+    // Append to body so it's fixed relative to viewport
+    document.body.appendChild(filterBarWrapper);
+  }
+
+  private cleanupFixedFilterBar(): void {
+    if (this.fixedFilterBar && this.fixedFilterBar.parentNode) {
+      this.fixedFilterBar.parentNode.removeChild(this.fixedFilterBar);
+      this.fixedFilterBar = undefined;
+    }
+  }
+
+  /**
+   * Create filter bar based on Figma design
+   */
+  private createFilterBar(container: HTMLElement): void {
+    const filterBar = document.createElement('div');
+    filterBar.className = 'inline-element-1';
+    filterBar.style.cssText = `
+      display: flex;
+      align-items: flex-start;
+      align-self: stretch;
+      position: relative;
+    `;
+    
+    const filtersContainer = document.createElement('div');
+    filtersContainer.className = 'inline-element-2';
+    filtersContainer.style.cssText = `
+      display: flex;
+      padding: 0 16px;
+      align-items: flex-start;
+      gap: 8px;
+      flex: 1 0 0;
+      position: relative;
+      overflow-x: auto;
+    `;
+    
+    // Filter buttons based on Figma
+    const filters = [
+      { text: '8', hasCounter: true },
+      { text: 'Рядом', hasCounter: false },
+      { text: 'Открыто', hasCounter: false },
+      { text: 'Доставка', hasCounter: false }
+    ];
+    
+    filters.forEach(filter => {
+      const filterButton = document.createElement('div');
+      filterButton.style.cssText = `
+        display: flex;
+        height: 40px;
+        padding: 8px 12px;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        border-radius: 8px;
+        background: rgba(20, 20, 20, 0.06);
+        cursor: pointer;
+        flex-shrink: 0;
+      `;
+      
+      if (filter.hasCounter) {
+        // Counter badge
+        const counter = document.createElement('div');
+        counter.style.cssText = `
+          display: flex;
+          width: 16px;
+          height: 16px;
+          justify-content: center;
+          align-items: center;
+          border-radius: 8px;
+          background: #1BA136;
+        `;
+        
+        const counterText = document.createElement('span');
+        counterText.textContent = filter.text;
+        counterText.style.cssText = `
+          color: #FFF;
+          font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+          font-weight: 500;
+          font-size: 13px;
+          line-height: 16px;
+          letter-spacing: -0.234px;
+        `;
+        
+        counter.appendChild(counterText);
+        filterButton.appendChild(counter);
+      } else {
+        // Regular text
+        const text = document.createElement('span');
+        text.textContent = filter.text;
+        text.style.cssText = `
+          color: #141414;
+          font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+          font-weight: 500;
+          font-size: 15px;
+          line-height: 20px;
+          letter-spacing: -0.3px;
+        `;
+        
+        filterButton.appendChild(text);
+      }
+      
+      filtersContainer.appendChild(filterButton);
+    });
+    
+    filterBar.appendChild(filtersContainer);
+    container.appendChild(filterBar);
+  }
+
+  /**
+   * Create results content based on Figma design
+   */
+  private createResultsContent(container: HTMLElement, context: SearchContext): void {
+    const resultsContainer = document.createElement('div');
+    resultsContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      background: #FFF;
+      position: relative;
+      padding-bottom: 80px;
+    `;
+    
+    // Create sample results based on Figma structure
+    const results = [
+      {
+        type: 'advertiser',
+        title: 'Реактор',
+        subtitle: 'Региональная сеть автокомплексов для японских автомобилей',
+        rating: '4.6',
+        reviews: '120 оценок',
+        distance: '3 мин',
+        address: 'Тверская 32/12, 1 этаж, Москва',
+        adText: 'Скажи кодовое слово «2ГИС» и получи карточку лояльности!',
+        buttonText: 'Записаться на прием',
+        hasCrown: true
+      },
+      {
+        type: 'advertiser',
+        title: 'Реактор',
+        subtitle: 'Региональная сеть автокомплексов для японских автомобилей',
+        rating: '4.6',
+        reviews: '120 оценок',
+        distance: '3 мин',
+        address: 'Тверская 32/12, 1 этаж, Москва',
+        adText: 'Скажи кодовое слово «2ГИС» и получи карточку лояльности!',
+        buttonText: 'Записаться на прием',
+        hasCrown: true
+      },
+      {
+        type: 'non-advertiser',
+        title: 'Шиномонтаж',
+        subtitle: 'Региональная сеть автокомплексов для японских автомобилей',
+        rating: '4.6',
+        reviews: '120 оценок',
+        distance: '3 мин',
+        address: 'Тверская 32/12, 1 этаж, Москва',
+        parking: '500 мест • Цена в час 50 ₽ • Теплая',
+        buttonText: 'Заказать доставку',
+        hasFriends: true
+      }
+    ];
+    
+    results.forEach((result, index) => {
+      const resultCard = this.createResultCard(result);
+      resultsContainer.appendChild(resultCard);
+      
+      // Add banner after second result (like in Figma)
+      if (index === 1) {
+        const banner = this.createPromoBannerSmall();
+        resultsContainer.appendChild(banner);
+      }
+    });
+    
+    container.appendChild(resultsContainer);
+  }
+
+  /**
+   * Create a result card based on Figma design
+   */
+  private createResultCard(result: any): HTMLElement {
+    const card = document.createElement('div');
+    card.style.cssText = `
+      display: flex;
+      padding: 16px;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      border-bottom: 0.5px solid rgba(137, 137, 137, 0.30);
+      cursor: pointer;
+    `;
+    
+    // Top section with title and rating
+    const topSection = document.createElement('div');
+    topSection.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      gap: 4px;
+    `;
+    
+    // Title with crown badge if applicable
+    const titleContainer = document.createElement('div');
+    titleContainer.style.cssText = `
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      gap: 8px;
+    `;
+    
+    const title = document.createElement('h3');
+    title.textContent = result.title;
+    title.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 20px;
+      letter-spacing: -0.24px;
+      margin: 0;
+      flex: 1;
+    `;
+    
+    titleContainer.appendChild(title);
+    
+    if (result.hasCrown) {
+      const crownBadge = document.createElement('div');
+      crownBadge.innerHTML = `<svg width="16" height="16" viewBox="0 0 16 16" fill="#1BA136"><path d="M8 1l2 3h4l-3 3 1 4-4-2-4 2 1-4-3-3h4l2-3z"/></svg>`;
+      titleContainer.appendChild(crownBadge);
+    }
+    
+    // Subtitle
+    const subtitle = document.createElement('p');
+    subtitle.textContent = result.subtitle;
+    subtitle.style.cssText = `
+      color: #898989;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+      margin: 0;
+      align-self: stretch;
+    `;
+    
+    topSection.appendChild(titleContainer);
+    topSection.appendChild(subtitle);
+    
+    // Rating and info section
+    const infoSection = document.createElement('div');
+    infoSection.style.cssText = `
+      display: flex;
+      align-items: center;
+      align-self: stretch;
+      gap: 12px;
+      margin-top: 8px;
+    `;
+    
+    // Rating stars and score
+    const ratingContainer = document.createElement('div');
+    ratingContainer.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    `;
+    
+    // Stars (simplified)
+    const stars = document.createElement('div');
+    stars.innerHTML = '★★★★★';
+    stars.style.cssText = `
+      color: #FFD700;
+      font-size: 12px;
+    `;
+    
+    const ratingText = document.createElement('span');
+    ratingText.textContent = result.rating;
+    ratingText.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+    `;
+    
+    const reviewsText = document.createElement('span');
+    reviewsText.textContent = result.reviews;
+    reviewsText.style.cssText = `
+      color: #898989;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+    `;
+    
+    // Distance
+    const distanceText = document.createElement('span');
+    distanceText.textContent = result.distance;
+    distanceText.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+    `;
+    
+    ratingContainer.appendChild(stars);
+    ratingContainer.appendChild(ratingText);
+    ratingContainer.appendChild(reviewsText);
+    infoSection.appendChild(ratingContainer);
+    infoSection.appendChild(distanceText);
+    
+    // Address
+    const address = document.createElement('p');
+    address.textContent = result.address;
+    address.style.cssText = `
+      color: #898989;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+      margin: 4px 0 0 0;
+      align-self: stretch;
+    `;
+    
+    card.appendChild(topSection);
+    card.appendChild(infoSection);
+    card.appendChild(address);
+    
+    // Ad section for advertiser results
+    if (result.type === 'advertiser' && result.adText) {
+      const adSection = document.createElement('div');
+      adSection.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        align-self: stretch;
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(27, 161, 54, 0.05);
+        gap: 8px;
+      `;
+      
+      const adText = document.createElement('p');
+      adText.textContent = result.adText;
+      adText.style.cssText = `
+        color: #141414;
+        font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 18px;
+        letter-spacing: -0.28px;
+        margin: 0;
+      `;
+      
+      const adButton = document.createElement('button');
+      adButton.textContent = result.buttonText;
+      adButton.style.cssText = `
+        display: flex;
+        padding: 8px 12px;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        background: #1BA136;
+        color: #FFF;
+        border: none;
+        font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+        font-weight: 600;
+        font-size: 15px;
+        line-height: 20px;
+        letter-spacing: -0.3px;
+        cursor: pointer;
+      `;
+      
+      const adDisclaimer = document.createElement('p');
+      adDisclaimer.textContent = 'Реклама • Есть противопоказания, нужна консультация врача';
+      adDisclaimer.style.cssText = `
+        color: #898989;
+        font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+        font-weight: 400;
+        font-size: 11px;
+        line-height: 14px;
+        letter-spacing: -0.176px;
+        margin: 0;
+      `;
+      
+      adSection.appendChild(adText);
+      adSection.appendChild(adButton);
+      adSection.appendChild(adDisclaimer);
+      card.appendChild(adSection);
+    }
+    
+    // Click handler
+    card.addEventListener('click', () => {
+      console.log('Result card clicked:', result.title);
+      // This will later navigate to Organization screen
+    });
+    
+    return card;
+  }
+
+  /**
+   * Create small promo banner (like in Figma)
+   */
+  private createPromoBannerSmall(): HTMLElement {
+    const banner = document.createElement('div');
+    banner.style.cssText = `
+      display: flex;
+      margin: 16px;
+      align-items: flex-start;
+      align-self: stretch;
+      border-radius: 12px;
+      background: #FFF;
+      border: 0.5px solid rgba(137, 137, 137, 0.30);
+      overflow: hidden;
+    `;
+    
+    // Image container
+    const imageContainer = document.createElement('div');
+    imageContainer.style.cssText = `
+      width: 80px;
+      height: 80px;
+      background: url('/figma_export/search_result/components/results/assets/images/img-bf9ff8a7.png') center/cover;
+      flex-shrink: 0;
+    `;
+    
+    // Content container
+    const contentContainer = document.createElement('div');
+    contentContainer.style.cssText = `
+      display: flex;
+      padding: 12px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      flex: 1 0 0;
+      gap: 4px;
+    `;
+    
+    const title = document.createElement('h4');
+    title.textContent = 'Суши Маке';
+    title.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 20px;
+      letter-spacing: -0.24px;
+      margin: 0;
+    `;
+    
+    const description = document.createElement('p');
+    description.textContent = 'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
+    description.style.cssText = `
+      color: #141414;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+      margin: 0;
+    `;
+    
+    const ctaText = document.createElement('p');
+    ctaText.textContent = 'Получить подарок';
+    ctaText.style.cssText = `
+      color: #1BA136;
+      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: -0.28px;
+      margin: 0;
+      cursor: pointer;
+    `;
+    
+    contentContainer.appendChild(title);
+    contentContainer.appendChild(description);
+    contentContainer.appendChild(ctaText);
+    
+    banner.appendChild(imageContainer);
+    banner.appendChild(contentContainer);
+    
+    return banner;
   }
 
   // createFigmaContent method removed - now using createDashboardContent directly

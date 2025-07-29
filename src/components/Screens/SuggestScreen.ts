@@ -1,4 +1,4 @@
-import { ScreenType, SearchSuggestion } from '../../types';
+import { ScreenType, SearchSuggestion, BottomsheetState } from '../../types';
 import { SearchFlowManager, BottomsheetManager, MapSyncService } from '../../services';
 import { 
   BottomsheetContainer, 
@@ -555,10 +555,8 @@ export class SuggestScreen {
   public activate(): void {
     this.element.style.display = 'flex';
     
-    // Устанавливаем состояние шторки для подсказок (обычно FULLSCREEN)
-    this.bottomsheetContainer?.snapToState(
-      this.props.bottomsheetManager.getCurrentState().currentState
-    );
+    // Устанавливаем состояние шторки в FULLSCREEN для подсказок
+    this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
     
     // Фокусируемся на поисковой строке
     setTimeout(() => {
