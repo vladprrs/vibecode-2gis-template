@@ -1,5 +1,11 @@
 import { ScreenType, BottomsheetState, SearchContext } from '../../types';
-import { SearchFlowManager, BottomsheetManager, MapSyncService } from '../../services';
+import {
+  SearchFlowManager,
+  BottomsheetManager,
+  MapSyncService,
+  BottomsheetGestureManager,
+  BottomsheetAnimationManager
+} from '../../services';
 import { 
   BottomsheetContainer, 
   BottomsheetHeader, 
@@ -96,13 +102,9 @@ export class DashboardScreen {
   private currentHeight?: number;
   private isDragging: boolean = false;
   private dragStartY: number = 0;
-  private wheelAccumulator: number = 0;
-  private wheelThreshold: number = 50;
-  private wheelTimeout?: number;
-  private isWheelScrolling: boolean = false;
-  private touchStartY: number = 0;
-  private touchCurrentY: number = 0;
-  private isTouchScrolling: boolean = false;
+
+  private gestureManager?: BottomsheetGestureManager;
+  private animationManager?: BottomsheetAnimationManager;
 
   // Content management
   private currentScreen: ScreenType = ScreenType.DASHBOARD;
@@ -259,7 +261,20 @@ export class DashboardScreen {
    */
   private createBottomsheet(): void {
     this.createOriginalBottomsheet();
-    this.setupBottomsheetEventListeners();
+    if (this.bottomsheetElement) {
+      this.animationManager = new BottomsheetAnimationManager();
+      this.gestureManager = new BottomsheetGestureManager({
+        element: this.bottomsheetElement,
+        bottomsheetManager: this.props.bottomsheetManager,
+        animationManager: this.animationManager,
+        getCurrentHeight: () => this.currentHeight,
+        setHeight: (h: number) => this.setBottomsheetHeight(h),
+        onStateChange: (s: string) => {
+          this.currentState = s;
+        }
+      });
+      this.gestureManager.setupBottomsheetEventListeners();
+    }
   }
 
   /**
@@ -802,8 +817,16 @@ export class DashboardScreen {
     };
     
     const targetHeight = heights[this.currentState as keyof typeof heights];
-    if (targetHeight) {
-      this.animateToHeight(targetHeight);
+    if (
+      targetHeight &&
+      this.currentHeight !== undefined &&
+      this.animationManager
+    ) {
+      this.animationManager.animateToHeight(
+        this.currentHeight,
+        targetHeight,
+        (h) => this.setBottomsheetHeight(h)
+      );
     }
     
     // Also update the original bottomsheet container if it exists
@@ -895,186 +918,6 @@ export class DashboardScreen {
     }
   }
 
-  private setupBottomsheetEventListeners(): void {
-    if (!this.bottomsheetElement) return;
-
-    // Wheel events для smooth scroll
-    this.bottomsheetElement.addEventListener('wheel', this.handleWheel.bind(this), { passive: false });
-    
-    // Touch events для mobile
-    this.bottomsheetElement.addEventListener('touchstart', this.handleScrollTouchStart.bind(this), { passive: false });
-    this.bottomsheetElement.addEventListener('touchmove', this.handleScrollTouchMove.bind(this), { passive: false });
-    this.bottomsheetElement.addEventListener('touchend', this.handleScrollTouchEnd.bind(this), { passive: false });
-  }
-
-  private handleWheel(event: WheelEvent): void {
-    const screenHeight = window.innerHeight;
-    const currentHeight = this.currentHeight || screenHeight * 0.55;
-    const scrollableThreshold = screenHeight * 0.92;
-    
-    // Если высота больше 92%, проверяем можно ли скроллить контент
-    if (currentHeight > scrollableThreshold) {
-      const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
-      if (contentContainer) {
-        const { scrollTop } = contentContainer;
-        const isAtTop = scrollTop <= 0;
-        
-        // Если скроллим вверх и уже наверху, начинаем уменьшать высоту шторки
-        if (event.deltaY < 0 && isAtTop) {
-          event.preventDefault();
-          const newHeight = Math.max(screenHeight * 0.15, currentHeight + event.deltaY * 2);
-          this.setBottomsheetHeight(newHeight);
-          this.startSnapTimeout();
-          return;
-        }
-        
-        return;
-      }
-    }
-    
-    event.preventDefault();
-    
-    // Плавное изменение высоты
-    const delta = event.deltaY * 2;
-    const newHeight = Math.max(
-      screenHeight * 0.15, 
-      Math.min(screenHeight * 0.95, currentHeight + delta)
-    );
-    
-    this.setBottomsheetHeight(newHeight);
-    this.isWheelScrolling = true;
-    
-    this.startSnapTimeout();
-  }
-
-  private startSnapTimeout(): void {
-    if (this.wheelTimeout) {
-      clearTimeout(this.wheelTimeout);
-    }
-    
-    this.wheelTimeout = window.setTimeout(() => {
-      this.snapToNearestState();
-      this.isWheelScrolling = false;
-    }, 150);
-  }
-
-  private snapToNearestState(): void {
-    if (!this.currentHeight) return;
-    
-    const screenHeight = window.innerHeight;
-    const currentRatio = this.currentHeight / screenHeight;
-    
-    const states = [
-      { name: 'small', ratio: 0.2 },
-      { name: 'default', ratio: 0.55 },
-      { name: 'fullscreen', ratio: 0.9 },
-      { name: 'fullscreen-scroll', ratio: 0.95 }
-    ];
-    
-    let nearestState = states[0];
-    let minDistance = Math.abs(currentRatio - states[0].ratio);
-    
-    for (const state of states) {
-      const distance = Math.abs(currentRatio - state.ratio);
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestState = state;
-      }
-    }
-    
-    this.currentState = nearestState.name;
-    const targetHeight = screenHeight * nearestState.ratio;
-    this.animateToHeight(targetHeight);
-    
-    this.props.bottomsheetManager.snapToState(nearestState.name as any);
-  }
-
-  private animateToHeight(targetHeight: number): void {
-    if (!this.bottomsheetElement || !this.currentHeight) return;
-    
-    const startHeight = this.currentHeight;
-    const startTime = performance.now();
-    const duration = 300;
-    
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Cubic bezier easing
-      const easeProgress = this.cubicBezierEasing(progress, 0.4, 0.0, 0.2, 1);
-      const currentHeight = startHeight + (targetHeight - startHeight) * easeProgress;
-      
-      this.setBottomsheetHeight(currentHeight);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    
-    requestAnimationFrame(animate);
-  }
-
-  private cubicBezierEasing(t: number, x1: number, y1: number, x2: number, y2: number): number {
-    // Simplified cubic bezier implementation
-    return t * t * (3 - 2 * t);
-  }
-
-  private handleScrollTouchStart(event: TouchEvent): void {
-    const touch = event.touches[0];
-    this.touchStartY = touch.clientY;
-    this.touchCurrentY = touch.clientY;
-    this.isTouchScrolling = true;
-  }
-
-  private handleScrollTouchMove(event: TouchEvent): void {
-    if (!this.isTouchScrolling) return;
-    
-    const touch = event.touches[0];
-    const currentY = touch.clientY;
-    
-    const momentumDelta = this.touchCurrentY - currentY;
-    
-    const screenHeight = window.innerHeight;
-    const currentHeight = this.currentHeight || screenHeight * 0.55;
-    const scrollableThreshold = screenHeight * 0.92;
-    
-    if (currentHeight > scrollableThreshold) {
-      const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
-      if (contentContainer) {
-        const { scrollTop } = contentContainer;
-        const isAtTop = scrollTop <= 0;
-        
-        if (momentumDelta < 0 && isAtTop) {
-          event.preventDefault();
-          const newHeight = Math.max(screenHeight * 0.15, currentHeight + momentumDelta * 3);
-          this.setBottomsheetHeight(newHeight);
-          this.touchCurrentY = currentY;
-          return;
-        }
-        
-        this.touchCurrentY = currentY;
-        return;
-      }
-    }
-    
-    event.preventDefault();
-    
-    if (Math.abs(momentumDelta) > 1) {
-      const newHeight = Math.max(
-        screenHeight * 0.15,
-        Math.min(screenHeight * 0.95, currentHeight + momentumDelta * 3)
-      );
-      
-      this.setBottomsheetHeight(newHeight);
-    }
-    
-    this.touchCurrentY = currentY;
-  }
-
-  private handleScrollTouchEnd(event: TouchEvent): void {
-    this.isTouchScrolling = false;
-    this.snapToNearestState();
-  }
 
   private createFigmaHeader(): void {
     if (!this.bottomsheetElement) return;
