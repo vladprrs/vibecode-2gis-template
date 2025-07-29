@@ -7,6 +7,7 @@ import {
   BottomsheetContainerProps 
 } from '../Bottomsheet';
 import { SearchBar, SearchBarState } from '../Search';
+import { ButtonRow, ButtonRowItem } from '../Dashboard';
 
 /**
  * Пропсы для DashboardScreen
@@ -292,86 +293,511 @@ export class DashboardScreen {
    */
 
   /**
-   * Создание контента дашборда
+   * Создание контента дашборда с точным соответствием Figma
    */
   private createDashboardContent(container: HTMLElement): void {
-    // Создаем контент используя Figma компоненты но с модульной архитектурой
-    this.createButtonsRow(container);
-    this.createStories(container);
-    this.createContentGrid(container);
+    // 1. Quick action buttons (horizontal row)
+    this.createQuickActionButtons(container);
+    
+    // 2. Stories carousel 
+    this.createStoriesCarousel(container);
+    
+    // 3. "Советы к месту" heading
+    this.createSectionHeading(container, 'Советы к месту');
+    
+    // 4. Content masonry grid
+    this.createContentMasonryGrid(container);
+    
+    // 5. "Популярные категории" heading
+    this.createSectionHeading(container, 'Популярные категории');
+    
+    // 6. Categories grid  
+    this.createCategoriesGrid(container);
+    
+    // 7. Banner
+    this.createPromoBanner(container);
+    
+    // 8. Bottom spacing for scroll
+    this.createBottomSpacing(container);
   }
 
   /**
-   * Создание ряда кнопок
+   * Создание горизонтального ряда быстрых действий
    */
-  private createButtonsRow(container: HTMLElement): void {
-    const buttons: ButtonItem[] = [
-      { id: 'routes', text: 'Маршруты', iconSrc: '/figma_export/dashboard/components/button_row/assets/images/img_1.png' },
-      { id: 'taxi', text: 'Такси', iconSrc: '/figma_export/dashboard/components/button_row/assets/images/img_2.png' },
-      { id: 'transport', text: 'Транспорт', iconSrc: '/figma_export/dashboard/components/button_row/assets/images/img_3.png' },
-      { id: 'food', text: 'Еда', iconSrc: '/figma_export/dashboard/components/button_row/assets/images/img_4.png' }
+  private createQuickActionButtons(container: HTMLElement): void {
+    const buttonRowContainer = document.createElement('div');
+    buttonRowContainer.style.cssText = `
+      padding: 16px 0;
+      margin-bottom: 0;
+    `;
+
+    // Button row items based on Figma export
+    const buttonItems: ButtonRowItem[] = [
+      {
+        id: 'bookmark',
+        text: 'В путь',
+        iconSrc: '@/assets/images/bookmark.svg',
+        type: 'icon'
+      },
+      {
+        id: 'home',
+        text: 'Домой',
+        iconSrc: '@/assets/images/home.svg',
+        type: 'icon'
+      },
+      {
+        id: 'work',
+        text: 'На работу',
+        iconSrc: '@/assets/images/work.svg',
+        type: 'icon'
+      }
     ];
 
-    const buttonRowElement = document.createElement('div');
-    buttonRowElement.className = 'figma-buttons-row';
-    buttonRowElement.style.cssText = `
-      display: flex;
-      gap: 8px;
-      padding: 16px;
-      justify-content: space-between;
-    `;
-
-    buttons.forEach(button => {
-      const buttonEl = this.createButtonElement(button);
-      buttonRowElement.appendChild(buttonEl);
+    // Create ButtonRow component
+    new ButtonRow({
+      container: buttonRowContainer,
+      items: buttonItems,
+      onButtonClick: (buttonId: string) => {
+        console.log('Button clicked:', buttonId);
+        // Handle button clicks here
+      }
     });
 
-    container.appendChild(buttonRowElement);
+    container.appendChild(buttonRowContainer);
   }
 
   /**
-   * Создание элемента кнопки
+   * Создание карусели историй
    */
-  private createButtonElement(button: ButtonItem): HTMLElement {
-    const buttonEl = document.createElement('div');
-    buttonEl.className = 'figma-button';
-    buttonEl.style.cssText = `
-      flex: 1;
-      min-height: 72px;
-      background: #F8F8F8;
+  private createStoriesCarousel(container: HTMLElement): void {
+    const storiesContainer = document.createElement('div');
+    storiesContainer.className = 'stories-section';
+    storiesContainer.style.cssText = `
+      padding: 0 16px;
+      margin-bottom: 12px;
+    `;
+
+    const storiesRow = document.createElement('div');
+    storiesRow.className = 'stories-container';
+    storiesRow.style.cssText = `
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
+    `;
+
+    // Stories data with proper rectangular cards
+    const stories = [
+      { 
+        id: 'story1', 
+        title: 'Кафе', 
+        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-0de1a764.jpg',
+        viewed: false
+      },
+      { 
+        id: 'story2', 
+        title: 'Развлечения', 
+        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-c4517f50.png',
+        viewed: false
+      },
+      { 
+        id: 'story3', 
+        title: 'Еда', 
+        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-f106c1b4.png',
+        viewed: true
+      },
+      { 
+        id: 'story4', 
+        title: 'Шоппинг', 
+        imageUrl: '/figma_export/dashboard/state_default/assets/images/img-a24168bd.png',
+        viewed: false
+      }
+    ];
+
+    stories.forEach(story => {
+      const storyItem = document.createElement('div');
+      storyItem.className = 'story-item';
+      storyItem.style.cssText = `
+        display: flex;
+        width: 96px;
+        height: 128px;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+        scroll-snap-align: start;
+        flex-shrink: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid ${story.viewed ? 'transparent' : '#1BA136'};
+        transition: transform 0.2s ease;
+      `;
+
+      const storyCover = document.createElement('div');
+      storyCover.className = 'story-cover';
+      storyCover.style.cssText = `
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      `;
+
+      // Try to load image, fallback to gradient
+      const image = document.createElement('img');
+      image.src = story.imageUrl;
+      image.style.cssText = `
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+      `;
+      
+      // Image loading error fallback
+      image.onerror = () => {
+        image.style.display = 'none';
+        storyCover.innerHTML = `
+          <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); color: white; font-size: 12px; font-weight: 600; text-align: center;">
+            ${story.title}
+          </div>
+        `;
+      };
+
+      // Image loading success
+      image.onload = () => {
+        const titleOverlay = document.createElement('div');
+        titleOverlay.style.cssText = `
+          position: absolute;
+          bottom: 8px;
+          left: 50%;
+          transform: translateX(-50%);
+          color: white;
+          font-size: 12px;
+          font-weight: 600;
+          text-align: center;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        `;
+        titleOverlay.textContent = story.title;
+        storyCover.appendChild(titleOverlay);
+      };
+
+      storyCover.appendChild(image);
+      storyItem.appendChild(storyCover);
+
+      // Hover effect
+      storyItem.addEventListener('mouseenter', () => {
+        storyItem.style.transform = 'translateY(-2px)';
+      });
+      
+      storyItem.addEventListener('mouseleave', () => {
+        storyItem.style.transform = 'translateY(0)';
+      });
+
+      storiesRow.appendChild(storyItem);
+    });
+
+    storiesContainer.appendChild(storiesRow);
+    container.appendChild(storiesContainer);
+  }
+
+  /**
+   * Создание заголовка секции
+   */
+  private createSectionHeading(container: HTMLElement, title: string): void {
+    const heading = document.createElement('div');
+    heading.className = 'section-header';
+    heading.style.cssText = `
+      padding: 0 16px;
+      margin: 12px 0 16px 0;
+    `;
+
+    const titleElement = document.createElement('h4');
+    titleElement.className = 'section-title';
+    titleElement.style.cssText = `
+      font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 24px;
+      color: #333;
+      margin: 0;
+    `;
+    titleElement.textContent = title;
+
+    heading.appendChild(titleElement);
+    container.appendChild(heading);
+  }
+
+  /**
+   * Создание масонри сетки контента  
+   */
+  private createContentMasonryGrid(container: HTMLElement): void {
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'content-masonry-grid';
+    gridContainer.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 16px;
+      margin-bottom: 16px;
+    `;
+
+    // Left column (tall image card spanning 2 rows)
+    const leftColumn = document.createElement('div');
+    leftColumn.style.cssText = `
+      display: grid;
+      gap: 12px;
+    `;
+
+    // Large cover card (spans 2 rows)
+    const largeCoverCard = document.createElement('div');
+    largeCoverCard.className = 'cover-card cover-card-big';
+    largeCoverCard.style.cssText = `
+      height: 142px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1BA136 0%, #4CAF50 100%);
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    `;
+
+    const coverOverlay = document.createElement('div');
+    coverOverlay.className = 'cover-overlay';
+    coverOverlay.style.cssText = `
+      padding: 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+      width: 100%;
+    `;
+
+    const coverTitle = document.createElement('div');
+    coverTitle.className = 'cover-title';
+    coverTitle.style.cssText = `
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 18px;
+      margin-bottom: 4px;
+    `;
+    coverTitle.textContent = 'Маленькие экскурсии: гуляем с "Даблби" и…';
+
+    const coverSubtitle = document.createElement('div');
+    coverSubtitle.className = 'cover-subtitle';
+    coverSubtitle.style.cssText = `
+      font-size: 12px;
+      opacity: 0.8;
+    `;
+    coverSubtitle.textContent = '59 мест';
+
+    coverOverlay.appendChild(coverTitle);
+    coverOverlay.appendChild(coverSubtitle);
+    largeCoverCard.appendChild(coverOverlay);
+    leftColumn.appendChild(largeCoverCard);
+
+    // Right column (two smaller cards)
+    const rightColumn = document.createElement('div');
+    rightColumn.style.cssText = `
+      display: grid;
+      gap: 12px;
+    `;
+
+    // Meta item 1
+    const metaItem1 = document.createElement('div');
+    metaItem1.className = 'meta-item';
+    metaItem1.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+      height: 65px;
+    `;
+
+    const metaContent1 = document.createElement('div');
+    metaContent1.innerHTML = `
+      <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px;">Вкусно позавтракать</div>
+      <div style="font-size: 14px; color: #666;">Тот самый момент</div>
+    `;
+
+    const metaIcon1 = document.createElement('div');
+    metaIcon1.style.cssText = `font-size: 24px;`;
+    metaIcon1.textContent = '🍴';
+
+    metaItem1.appendChild(metaContent1);
+    metaItem1.appendChild(metaIcon1);
+    rightColumn.appendChild(metaItem1);
+
+    // Meta item 2  
+    const metaItem2 = document.createElement('div');
+    metaItem2.className = 'meta-item';
+    metaItem2.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+      height: 65px;
+    `;
+
+    const metaContent2 = document.createElement('div');
+    metaContent2.innerHTML = `
+      <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px;">Банкоматы</div>
+      <div style="font-size: 14px; color: #666;">Number</div>
+    `;
+
+    const metaIcon2 = document.createElement('div');
+    metaIcon2.style.cssText = `font-size: 24px;`;
+    metaIcon2.textContent = '🏧';
+
+    metaItem2.appendChild(metaContent2);
+    metaItem2.appendChild(metaIcon2);
+    rightColumn.appendChild(metaItem2);
+
+    gridContainer.appendChild(leftColumn);
+    gridContainer.appendChild(rightColumn);
+    container.appendChild(gridContainer);
+  }
+
+  /**
+   * Создание сетки категорий
+   */
+  private createCategoriesGrid(container: HTMLElement): void {
+    const grid = document.createElement('div');
+    grid.className = 'categories-grid';
+    grid.style.cssText = `
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 16px;
+      margin-bottom: 16px;
+    `;
+
+    const categories = [
+      { icon: '🍕', title: 'Пицца', subtitle: '156 заведений' },
+      { icon: '☕', title: 'Кофе', subtitle: '234 кофейни' },
+      { icon: '🏪', title: 'Магазины', subtitle: '1,243 места' },
+      { icon: '⛽', title: 'АЗС', subtitle: '89 станций' },
+      { icon: '🏥', title: 'Медицина', subtitle: '567 клиник' },
+      { icon: '🎓', title: 'Образование', subtitle: '123 учреждения' }
+    ];
+
+    categories.forEach(cat => {
+      const categoryCard = document.createElement('div');
+      categoryCard.className = 'meta-item';
+      categoryCard.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        height: 65px;
+      `;
+
+      const categoryContent = document.createElement('div');
+      categoryContent.innerHTML = `
+        <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 2px;">${cat.title}</div>
+        <div style="font-size: 14px; color: #666;">${cat.subtitle}</div>
+      `;
+
+      const categoryIcon = document.createElement('div');
+      categoryIcon.style.cssText = `font-size: 24px;`;
+      categoryIcon.textContent = cat.icon;
+
+      categoryCard.appendChild(categoryContent);
+      categoryCard.appendChild(categoryIcon);
+      grid.appendChild(categoryCard);
+    });
+
+    container.appendChild(grid);
+  }
+
+  /**
+   * Создание промо баннера
+   */
+  private createPromoBanner(container: HTMLElement): void {
+    const banner = document.createElement('div');
+    banner.className = 'promo-banner';
+    banner.style.cssText = `
+      margin: 16px;
+      padding: 16px;
+      background: white;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    `;
+
+    const bannerLogo = document.createElement('div');
+    bannerLogo.style.cssText = `
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(45deg, #FF9800, #FFC107);
       border-radius: 12px;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s;
+      font-size: 20px;
+      flex-shrink: 0;
+    `;
+    bannerLogo.textContent = '🍣';
+
+    const bannerContent = document.createElement('div');
+    bannerContent.style.cssText = `flex: 1;`;
+    bannerContent.innerHTML = `
+      <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 4px;">Суши Маке</div>
+      <div style="font-size: 14px; color: #666; line-height: 18px; margin-bottom: 8px;">Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»</div>
+      <button style="background: #1BA136; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600;">Получить подарок</button>
     `;
 
-    if (button.iconSrc) {
-      const icon = document.createElement('img');
-      icon.src = button.iconSrc;
-      icon.style.cssText = `width: 24px; height: 24px;`;
-      buttonEl.appendChild(icon);
-    }
-
-    const text = document.createElement('div');
-    text.textContent = button.text;
-    text.style.cssText = `
-      font-size: 12px;
-      color: #333;
-      text-align: center;
-    `;
-    buttonEl.appendChild(text);
-
-    buttonEl.addEventListener('click', () => button.onClick?.());
-    
-    return buttonEl;
+    banner.appendChild(bannerLogo);
+    banner.appendChild(bannerContent);
+    container.appendChild(banner);
   }
 
   /**
-   * Создание секции историй
+   * Создание нижнего отступа
+   */
+  private createBottomSpacing(container: HTMLElement): void {
+    const spacing = document.createElement('div');
+    spacing.style.cssText = `
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 14px;
+      text-align: center;
+    `;
+    spacing.innerHTML = `
+      <div>
+        <div style="margin-bottom: 8px;">🎯</div>
+        <div>Тестируйте скролл в разных состояниях шторки</div>
+      </div>
+    `;
+    container.appendChild(spacing);
+  }
+
+  /**
+   * Создание секции историй (deprecated)
    */
   private createStories(container: HTMLElement): void {
     const stories: StoryItem[] = [
