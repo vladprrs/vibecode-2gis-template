@@ -12,7 +12,7 @@ import { ScreenType } from './types/navigation';
 import { BottomsheetState, BottomsheetConfig } from './types/bottomsheet';
 import { SearchFlowManager } from './services/SearchFlowManager';
 import { BottomsheetManager } from './services/BottomsheetManager';
-import { MapSyncService } from './services/MapSyncService';
+import { MapSyncService, MapManager } from './services';
 import { DashboardScreen, DashboardScreenFactory } from './components/Screens/DashboardScreen';
 
 /**
@@ -29,6 +29,7 @@ class App {
   private searchFlowManager?: SearchFlowManager;
   private bottomsheetManager?: BottomsheetManager;
   private mapSyncService?: MapSyncService;
+  private mapManager?: MapManager;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -97,6 +98,11 @@ class App {
 
     // Initialize MapSyncService with dummy ref (will be updated by DashboardScreen)
     this.mapSyncService = new MapSyncService({ current: null });
+
+    // Initialize MapManager with API key from environment
+    this.mapManager = new MapManager({
+      mapApiKey: import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+    });
   }
 
   /**
@@ -112,7 +118,7 @@ class App {
       this.container,
       this.searchFlowManager,
       this.bottomsheetManager,
-      import.meta.env.VITE_MAPGL_KEY || 'bfa6ee5b-5e88-44f0-b4ad-394e819f26fc'
+      this.mapManager!
     );
 
     // Activate the screen
