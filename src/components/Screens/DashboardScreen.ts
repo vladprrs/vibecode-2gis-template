@@ -5,6 +5,7 @@ import {
   BottomsheetManager,
   MapSyncService,
   MapManager,
+  FilterBarManager,
   BottomsheetGestureManager,
   BottomsheetAnimationManager,
   ContentManager
@@ -29,6 +30,8 @@ export interface DashboardScreenProps {
   searchFlowManager: SearchFlowManager;
   /** Менеджер шторки */
   bottomsheetManager: BottomsheetManager;
+  /** Менеджер панели фильтров */
+  filterBarManager: FilterBarManager;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
   /** Менеджер карты */
@@ -98,7 +101,7 @@ export class DashboardScreen {
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
-  private fixedFilterBar?: HTMLElement;
+  private filterBarManager: FilterBarManager;
   
   // Оригинальные параметры bottomsheet
   private bottomsheetElement?: HTMLElement;
@@ -119,6 +122,7 @@ export class DashboardScreen {
     this.element = props.container;
     this.mapManager = props.mapManager;
     this.contentManager = new ContentManager(this.props.searchFlowManager);
+    this.filterBarManager = props.filterBarManager;
     this.initialize();
   }
 
@@ -786,7 +790,7 @@ export class DashboardScreen {
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
-    this.cleanupFixedFilterBar();
+    this.filterBarManager.hide();
   }
 
   /**
@@ -904,9 +908,9 @@ export class DashboardScreen {
   public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
     console.log(`📱 DashboardScreen handling navigation: ${from} → ${to}`);
     
-    // Clean up fixed filter bar when leaving search result screen
+    // Hide filter bar when leaving search result screen
     if (from === ScreenType.SEARCH_RESULT && to !== ScreenType.SEARCH_RESULT) {
-      this.cleanupFixedFilterBar();
+      this.filterBarManager.hide();
     }
     
     switch (to) {
@@ -983,7 +987,7 @@ export class DashboardScreen {
     const contentContainer = this.bottomsheetElement?.querySelector('.dashboard-content') as HTMLElement;
     if (contentContainer) {
       this.contentManager.updateContentForSearchResult(contentContainer, context);
-      this.createBottomFilterBar(contentContainer);
+      this.filterBarManager.show(); 
     }
   }
 
@@ -1724,12 +1728,14 @@ export class DashboardScreenFactory {
     container: HTMLElement,
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
+    filterBarManager: FilterBarManager,
     mapManager: MapManager
   ): DashboardScreen {
     return new DashboardScreen({
       container,
       searchFlowManager,
       bottomsheetManager,
+      filterBarManager,
       mapManager
     });
   }
