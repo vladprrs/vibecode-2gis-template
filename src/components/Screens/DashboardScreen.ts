@@ -116,6 +116,9 @@ export class DashboardScreen {
   // Content management
   private currentScreen: ScreenType = ScreenType.DASHBOARD;
   private contentManager: ContentManager;
+  
+  // Filter bar management
+  private fixedFilterBar?: HTMLElement;
 
   constructor(props: DashboardScreenProps) {
     this.props = props;
