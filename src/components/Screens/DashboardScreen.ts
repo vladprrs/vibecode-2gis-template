@@ -6,16 +6,16 @@ import {
   MapSyncService,
   MapManager,
   BottomsheetGestureManager,
-  BottomsheetAnimationManager
+  BottomsheetAnimationManager,
+  HeaderManager
 } from '../../services';
 
-import { 
-  BottomsheetContainer, 
-  BottomsheetHeader, 
+import {
+  BottomsheetContainer,
   BottomsheetContent,
-  BottomsheetContainerProps 
+  BottomsheetContainerProps
 } from '../Bottomsheet';
-import { SearchBar, SearchBarState } from '../Search';
+
 import { ButtonRow, ButtonRowItem, StoriesCarousel } from '../Dashboard';
 
 /**
@@ -94,9 +94,7 @@ export class DashboardScreen {
   
   // Компоненты
   private bottomsheetContainer?: BottomsheetContainer;
-  private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
-  private searchBar?: SearchBar;
   private fixedFilterBar?: HTMLElement;
   
   // Оригинальные параметры bottomsheet
@@ -108,6 +106,7 @@ export class DashboardScreen {
 
   private gestureManager?: BottomsheetGestureManager;
   private animationManager?: BottomsheetAnimationManager;
+  private headerManager?: HeaderManager;
 
   // Content management
   private currentScreen: ScreenType = ScreenType.DASHBOARD;
@@ -225,7 +224,12 @@ export class DashboardScreen {
     this.currentHeight = screenHeight * 0.55; // default состояние
     
     this.updateBottomsheetHeight();
-    this.createFigmaHeader();
+    this.headerManager = new HeaderManager({
+      container: this.bottomsheetElement,
+      searchFlowManager: this.props.searchFlowManager,
+      onSearchFocus: this.props.onSearchFocus
+    });
+    this.headerManager.createSearchHeader();
     
     // Create content container
     const content = document.createElement('div');
@@ -782,9 +786,7 @@ export class DashboardScreen {
   public destroy(): void {
     this.mapManager.destroy();
     this.bottomsheetContainer?.destroy();
-    this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
-    this.searchBar?.destroy();
     this.cleanupFixedFilterBar();
   }
 
@@ -840,62 +842,7 @@ export class DashboardScreen {
   }
 
 
-  private createFigmaHeader(): void {
-    if (!this.bottomsheetElement) return;
-
-    const header = document.createElement('div');
-    header.className = 'bottomsheet-header';
-    
-    // Dragger
-    const dragger = document.createElement('div');
-    dragger.className = 'dragger';
-    const draggerHandle = document.createElement('div');
-    draggerHandle.className = 'dragger-handle';
-    dragger.appendChild(draggerHandle);
-    
-    // Search bar
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-nav-bar';
-    searchContainer.innerHTML = `
-      <div class="search-nav-content">
-        <div class="search-field-container">
-          <div class="search-field">
-            <div class="search-icon">
-              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
-                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="search-placeholder">Поиск в Москве</div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // Add click handler to search field
-    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
-    if (searchField) {
-      searchField.style.cursor = 'pointer';
-      searchField.addEventListener('click', () => {
-        this.handleSearchFieldClick();
-      });
-    }
-    
-    header.appendChild(dragger);
-    header.appendChild(searchContainer);
-    this.bottomsheetElement.appendChild(header);
-  }
-
-  /**
-   * Обработка клика по поисковому полю
-   */
-  private handleSearchFieldClick(): void {
-    // Navigate to SuggestScreen
-    this.props.searchFlowManager.goToSuggest();
-    
-    // Call onSearchFocus callback if provided
-    this.props.onSearchFocus?.();
-  }
+  
 
   /**
    * Handle screen changes from SearchFlowManager
@@ -937,7 +884,7 @@ export class DashboardScreen {
     this.snapToState(BottomsheetState.FULLSCREEN);
     
     // Update header to suggest state
-    this.updateHeaderForSuggest();
+    this.headerManager?.updateHeaderForSuggest();
     
     // Update content to suggest content
     this.updateContentForSuggest();
@@ -953,7 +900,7 @@ export class DashboardScreen {
     this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
     
     // Update header to dashboard state
-    this.updateHeaderForDashboard();
+    this.headerManager?.updateHeaderForDashboard();
     
     // Update content to dashboard content
     this.updateContentForDashboard();
@@ -970,7 +917,9 @@ export class DashboardScreen {
     this.snapToState(BottomsheetState.FULLSCREEN);
     
     // Update header to search result state
-    this.updateHeaderForSearchResult(context);
+    if (this.headerManager) {
+      this.headerManager.updateHeaderForSearchResult(context);
+    }
     
     // Update content to search result content
     this.updateContentForSearchResult(context);
@@ -979,344 +928,11 @@ export class DashboardScreen {
   /**
    * Update header for suggest screen (pixel-perfect Figma match)
    */
-  private updateHeaderForSuggest(): void {
-    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
-    if (!header) return;
-    
-    // Clear existing header and apply exact Figma CSS structure
-    header.innerHTML = '';
-    header.className = 'inline-element-1';
-    
-    // Apply header styles from Figma CSS - exact match
-    header.style.cssText = `
-      display: flex;
-      padding: 16px 0 8px 0;
-      flex-direction: column;
-      align-items: flex-start;
-      align-self: stretch;
-      border-radius: 16px 16px 0 0;
-      background: rgba(255, 255, 255, 0.70);
-      backdrop-filter: blur(20px);
-      position: relative;
-    `;
-    
-    // Drag handle section (inline-element-2)
-    const dragSection = document.createElement('div');
-    dragSection.className = 'inline-element-2';
-    dragSection.style.cssText = `
-      display: flex;
-      height: 0;
-      padding-bottom: 6px;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-      align-self: stretch;
-      position: relative;
-    `;
-    
-    // Drag handle (inline-element-3)
-    const dragHandle = document.createElement('div');
-    dragHandle.className = 'inline-element-3';
-    dragHandle.style.cssText = `
-      width: 40px;
-      height: 4px;
-      flex-shrink: 0;
-      border-radius: 6px;
-      background: rgba(20, 20, 20, 0.09);
-      position: relative;
-    `;
-    dragSection.appendChild(dragHandle);
-    
-    // Nav bar (inline-element-4)
-    const navBar = document.createElement('div');
-    navBar.className = 'inline-element-4';
-    navBar.style.cssText = `
-      display: flex;
-      align-items: flex-start;
-      align-self: stretch;
-      position: relative;
-    `;
-    
-    // Nav bar inner (inline-element-5)
-    const navBarInner = document.createElement('div');
-    navBarInner.className = 'inline-element-5';
-    navBarInner.style.cssText = `
-      display: flex;
-      padding: 0 16px;
-      align-items: flex-start;
-      gap: 12px;
-      flex: 1 0 0;
-      position: relative;
-    `;
-    
-    // Header (text field container - inline-element-6)
-    const headerContainer = document.createElement('div');
-    headerContainer.className = 'inline-element-6';
-    headerContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      flex: 1 0 0;
-      position: relative;
-    `;
-    
-    // Text field (inline-element-7)
-    const textField = document.createElement('div');
-    textField.className = 'inline-element-7';
-    textField.style.cssText = `
-      display: flex;
-      height: 40px;
-      padding: 10px 8px;
-      align-items: center;
-      align-self: stretch;
-      border-radius: 8px;
-      background: rgba(20, 20, 20, 0.09);
-      position: relative;
-      gap: 4px;
-    `;
-    
-    // Search icon position (inline-element-8)
-    const searchIconPosition = document.createElement('div');
-    searchIconPosition.className = 'inline-element-8';
-    searchIconPosition.style.cssText = `
-      display: flex;
-      width: 20px;
-      height: 20px;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      position: relative;
-    `;
-    
-    // Search icon (inline-element-10)  
-    const searchIcon = document.createElement('div');
-    searchIcon.className = 'inline-element-10';
-    searchIcon.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    searchIcon.style.cssText = `
-      width: 19px;
-      height: 19px;
-      flex-shrink: 0;
-    `;
-    
-    searchIconPosition.appendChild(searchIcon);
-    
-    // Cursor line (inline-element-11)
-    const cursorLine = document.createElement('div');
-    cursorLine.className = 'inline-element-11';
-    cursorLine.style.cssText = `
-      width: 2px;
-      height: 20px;
-      border-radius: 1px;
-      background: #1BA136;
-      flex-shrink: 0;
-    `;
-    
-    // Create input element for functionality  
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.value = 'ме';
-    searchInput.style.cssText = `
-      color: #898989;
-      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
-      font-weight: 400;
-      font-size: 15px;
-      font-style: normal;
-      line-height: 20px;
-      letter-spacing: -0.3px;
-      border: none;
-      outline: none;
-      background: transparent;
-      padding: 0;
-      margin: 0;
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    `;
-    
-    // Clear icon container (fixed width to prevent overflow)
-    const clearIconContainer = document.createElement('div');
-    clearIconContainer.className = 'inline-element-15';
-    clearIconContainer.style.cssText = `
-      display: flex;
-      width: 24px;
-      height: 20px;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      cursor: pointer;
-    `;
-    
-    // Clear icon color (inline-element-16)
-    const clearIconColor = document.createElement('div');
-    clearIconColor.className = 'inline-element-16';
-    clearIconColor.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    clearIconColor.style.cssText = `
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    `;
-    
-    clearIconContainer.appendChild(clearIconColor);
-    
-    // Assemble text field in proper order
-    textField.appendChild(searchIconPosition);
-    textField.appendChild(cursorLine);
-    textField.appendChild(searchInput);
-    textField.appendChild(clearIconContainer);
-    
-    headerContainer.appendChild(textField);
-    navBarInner.appendChild(headerContainer);
-    
-    // Action right - close button (inline-element-17)
-    const actionRight = document.createElement('div');
-    actionRight.className = 'inline-element-17';
-    actionRight.style.cssText = `
-      display: flex;
-      align-items: flex-start;
-      border-radius: 8px;
-      position: relative;
-      cursor: pointer;
-    `;
-    
-    // Button (inline-element-18)
-    const button = document.createElement('div');
-    button.className = 'inline-element-18';
-    button.style.cssText = `
-      display: flex;
-      padding: 8px;
-      justify-content: center;
-      align-items: center;
-      background: rgba(20, 20, 20, 0.06);
-      position: relative;
-      border-radius: 8px;
-    `;
-    
-    // Icon position close (inline-element-19)
-    const iconPositionClose = document.createElement('div');
-    iconPositionClose.className = 'inline-element-19';
-    iconPositionClose.style.cssText = `
-      display: flex;
-      width: 24px;
-      height: 24px;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-    `;
-    
-    // Close icon container (inline-element-20)
-    const closeIconContainer = document.createElement('div');
-    closeIconContainer.className = 'inline-element-20';
-    closeIconContainer.style.cssText = `
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-      position: absolute;
-      left: 0px;
-      top: 0px;
-    `;
-    
-    // Close icon color (inline-element-21)
-    const closeIconColor = document.createElement('div');
-    closeIconColor.className = 'inline-element-21';
-    closeIconColor.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    closeIconColor.style.cssText = `
-      width: 13px;
-      height: 13px;
-      flex-shrink: 0;
-      fill: #141414;
-      position: absolute;
-      left: 5px;
-      top: 5px;
-    `;
-    
-    closeIconContainer.appendChild(closeIconColor);
-    iconPositionClose.appendChild(closeIconContainer);
-    button.appendChild(iconPositionClose);
-    actionRight.appendChild(button);
-    navBarInner.appendChild(actionRight);
-    
-    navBar.appendChild(navBarInner);
-    
-    // Assemble header
-    header.appendChild(dragSection);
-    header.appendChild(navBar);
-    
-    // Event listeners
-    actionRight.addEventListener('click', () => {
-      this.props.searchFlowManager.goToDashboard();
-    });
-    
-    clearIconContainer.addEventListener('click', (e) => {
-      e.stopPropagation();
-      searchInput.value = '';
-      searchInput.focus();
-    });
-    
-    // Add Enter key handler
-    searchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const query = searchInput.value.trim();
-        if (query) {
-          this.props.searchFlowManager.goToSearchResults(query);
-        }
-      }
-    });
-
-    // Focus the search input
-    setTimeout(() => searchInput.focus(), 100);
-  }
 
   /**
    * Update header for dashboard screen
    */
-  private updateHeaderForDashboard(): void {
-    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
-    if (!header) return;
-    
-    // Clear existing header
-    header.innerHTML = '';
-    
-    // Create dashboard header with clickable search field
-    const dragger = document.createElement('div');
-    dragger.className = 'dragger';
-    const draggerHandle = document.createElement('div');
-    draggerHandle.className = 'dragger-handle';
-    dragger.appendChild(draggerHandle);
-    
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-nav-bar';
-    searchContainer.innerHTML = `
-      <div class="search-nav-content">
-        <div class="search-field-container">
-          <div class="search-field">
-            <div class="search-icon">
-              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
-                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="search-placeholder">Поиск в Москве</div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // Add click handler to search field
-    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
-    if (searchField) {
-      searchField.style.cursor = 'pointer';
-      searchField.addEventListener('click', () => {
-        this.handleSearchFieldClick();
-      });
-    }
-    
-    header.appendChild(dragger);
-    header.appendChild(searchContainer);
-  }
-
+  
   /**
    * Update content for suggest screen (based on Figma design)
    */
@@ -1653,178 +1269,6 @@ export class DashboardScreen {
   /**
    * Update header for search result screen (based on Figma design)
    */
-  private updateHeaderForSearchResult(context: SearchContext): void {
-    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
-    if (!header) return;
-    
-    // Clear existing header
-    header.innerHTML = '';
-    header.className = 'inline-element-1';
-    
-    // Apply header styles from Figma - search result header
-    header.style.cssText = `
-      display: flex;
-      padding: 16px 0 8px 0;
-      flex-direction: column;
-      align-items: flex-start;
-      align-self: stretch;
-      border-radius: 16px 16px 0 0;
-      background: rgba(255, 255, 255, 0.70);
-      backdrop-filter: blur(20px);
-      position: relative;
-    `;
-    
-    // Drag handle section
-    const dragSection = document.createElement('div');
-    dragSection.className = 'inline-element-3';
-    dragSection.style.cssText = `
-      display: flex;
-      height: 0;
-      padding-bottom: 6px;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-      align-self: stretch;
-      position: relative;
-    `;
-    
-    const dragHandle = document.createElement('div');
-    dragHandle.className = 'inline-element-4';
-    dragHandle.style.cssText = `
-      width: 40px;
-      height: 4px;
-      flex-shrink: 0;
-      border-radius: 6px;
-      background: rgba(20, 20, 20, 0.09);
-      position: relative;
-    `;
-    dragSection.appendChild(dragHandle);
-    
-    // Nav bar section
-    const navBar = document.createElement('div');
-    navBar.className = 'inline-element-5';
-    navBar.style.cssText = `
-      display: flex;
-      align-items: flex-start;
-      align-self: stretch;
-      position: relative;
-    `;
-    
-    const navBarInner = document.createElement('div');
-    navBarInner.className = 'inline-element-6';
-    navBarInner.style.cssText = `
-      display: flex;
-      padding: 0 16px;
-      align-items: flex-start;
-      gap: 12px;
-      flex: 1 0 0;
-      position: relative;
-    `;
-    
-    // Search field container
-    const searchFieldContainer = document.createElement('div');
-    searchFieldContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      flex: 1 0 0;
-      position: relative;
-    `;
-    
-    // Search field (filled state, background=01)
-    const searchField = document.createElement('div');
-    searchField.style.cssText = `
-      display: flex;
-      height: 40px;
-      padding: 10px 8px;
-      align-items: center;
-      align-self: stretch;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 1);
-      border: 1px solid rgba(137, 137, 137, 0.30);
-      position: relative;
-      gap: 4px;
-    `;
-    
-    // Search icon
-    const searchIcon = document.createElement('div');
-    searchIcon.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    searchIcon.style.cssText = `
-      width: 19px;
-      height: 19px;
-      flex-shrink: 0;
-    `;
-    
-    // Query text
-    const queryText = document.createElement('span');
-    queryText.textContent = context.query || 'Автосервис';
-    queryText.style.cssText = `
-      color: #141414;
-      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
-      font-weight: 400;
-      font-size: 15px;
-      font-style: normal;
-      line-height: 20px;
-      letter-spacing: -0.3px;
-      flex: 1;
-    `;
-    
-    // Salut icon (voice assistant)
-    const salutIcon = document.createElement('div');
-          salutIcon.innerHTML = `<div style="width: 24px; height: 24px; background: #F5353C; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">S</div>`;
-    salutIcon.style.cssText = `
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-    `;
-    
-    searchField.appendChild(searchIcon);
-    searchField.appendChild(queryText);
-    searchField.appendChild(salutIcon);
-    searchFieldContainer.appendChild(searchField);
-    navBarInner.appendChild(searchFieldContainer);
-    
-    // Close button
-    const closeButton = document.createElement('div');
-    closeButton.className = 'inline-element-17';
-    closeButton.style.cssText = `
-      display: flex;
-      align-items: flex-start;
-      border-radius: 8px;
-      cursor: pointer;
-    `;
-    
-    const closeButtonInner = document.createElement('div');
-    closeButtonInner.className = 'inline-element-18';
-    closeButtonInner.style.cssText = `
-      display: flex;
-      padding: 8px;
-      justify-content: center;
-      align-items: center;
-      background: rgba(20, 20, 20, 0.06);
-      border-radius: 8px;
-    `;
-    
-    const closeIcon = document.createElement('div');
-    closeIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    closeIcon.style.cssText = `
-      width: 13px;
-      height: 13px;
-    `;
-    
-    closeButtonInner.appendChild(closeIcon);
-    closeButton.appendChild(closeButtonInner);
-    navBarInner.appendChild(closeButton);
-    navBar.appendChild(navBarInner);
-    
-    header.appendChild(dragSection);
-    header.appendChild(navBar);
-    
-    // Event listener for close button
-    closeButton.addEventListener('click', () => {
-      this.props.searchFlowManager.goToDashboard();
-    });
-  }
 
   /**
    * Update content for search result screen (based on Figma design)
