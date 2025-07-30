@@ -124,6 +124,9 @@ export class SearchFlowManager implements ISearchFlowManager {
    */
   goBack(): void {
     if (this.navigationHistory.length > 1) {
+      // Сохраняем экран, с которого уходим
+      const fromScreen = this.currentScreen;
+
       // Убираем текущий экран из истории
       this.navigationHistory.pop();
 
@@ -132,6 +135,9 @@ export class SearchFlowManager implements ISearchFlowManager {
 
       // Переходим без добавления в историю
       this.setCurrentScreen(previousScreen);
+
+      // Вызываем событие смены экрана
+      this.events.onScreenChange?.(fromScreen, previousScreen, this.searchContext);
 
       // Восстанавливаем позицию скролла после короткой задержки
       setTimeout(() => {
