@@ -1,5 +1,6 @@
 import { Organization, ScreenType } from '../../types';
 import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
+import { TabBar } from '../Organization';
 
 /**
  * Пропсы для OrganizationScreen
@@ -93,11 +94,7 @@ export class OrganizationScreen {
     const organizationCardTop = this.createOrganizationCardTop();
     bottomsheetContent.appendChild(organizationCardTop);
 
-    // 2. Создаем табы
-    const tabBar = this.createTabBar();
-    bottomsheetContent.appendChild(tabBar);
-
-    // 3. Создаем прокручиваемое содержимое
+    // 2. Создаем прокручиваемое содержимое
     const scrollableContent = document.createElement('div');
     Object.assign(scrollableContent.style, {
       flex: '1',
@@ -560,127 +557,6 @@ export class OrganizationScreen {
     return container;
   }
 
-  /**
-   * Создание панели табов
-   */
-  private createTabBar(): HTMLElement {
-    const tabBar = document.createElement('div');
-    Object.assign(tabBar.style, {
-      position: 'relative',
-      backgroundColor: '#ffffff',
-      borderBottom: '1px solid rgba(137, 137, 137, 0.15)',
-    });
-
-    // Fade mask
-    const fadeMask = document.createElement('div');
-    Object.assign(fadeMask.style, {
-      position: 'absolute',
-      top: '0',
-      left: '0',
-      right: '0',
-      bottom: '0',
-      pointerEvents: 'none',
-      background: 'linear-gradient(90deg, rgba(255,255,255,0.8) 0px, transparent 16px, transparent calc(100% - 16px), rgba(255,255,255,0.8) 100%)',
-    });
-
-    // Табы контейнер
-    const tabsContainer = document.createElement('div');
-    Object.assign(tabsContainer.style, {
-      display: 'flex',
-      overflowX: 'auto',
-      scrollbarWidth: 'none',
-      msOverflowStyle: 'none',
-    });
-
-    // Скрываем scrollbar в webkit
-    const style = document.createElement('style');
-    style.textContent = `
-      .tabs-container::-webkit-scrollbar {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
-    tabsContainer.classList.add('tabs-container');
-
-    const tabs = [
-      { name: 'Обзор', active: true, count: null },
-      { name: 'Меню', active: false, count: 213 },
-      { name: 'Фото', active: false, count: 432 },
-      { name: 'Отзывы', active: false, count: 232 },
-      { name: 'Инфо', active: false, count: null },
-      { name: 'Акции', active: false, count: null },
-    ];
-
-    tabs.forEach(tab => {
-      const tabElement = this.createTab(tab.name, tab.active, tab.count);
-      tabsContainer.appendChild(tabElement);
-    });
-
-    tabBar.appendChild(fadeMask);
-    tabBar.appendChild(tabsContainer);
-
-    return tabBar;
-  }
-
-  /**
-   * Создание отдельного таба
-   */
-  private createTab(name: string, active: boolean, count: number | null): HTMLElement {
-    const tab = document.createElement('div');
-    Object.assign(tab.style, {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-      padding: '12px 16px',
-      cursor: 'pointer',
-      borderBottom: active ? '2px solid #1976D2' : '2px solid transparent',
-      whiteSpace: 'nowrap',
-      transition: 'border-color 0.2s ease',
-    });
-
-    const label = document.createElement('span');
-    Object.assign(label.style, {
-      color: active ? '#1976D2' : '#898989',
-      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-      fontSize: '14px',
-      fontWeight: '500',
-      lineHeight: '18px',
-      letterSpacing: '-0.28px',
-    });
-    label.textContent = name;
-
-    tab.appendChild(label);
-
-    if (count !== null) {
-      const counter = document.createElement('div');
-      Object.assign(counter.style, {
-        minWidth: '19px',
-        height: '19px',
-        padding: '2px 6px',
-        borderRadius: '10px',
-        backgroundColor: 'rgba(20, 20, 20, 0.06)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      });
-
-      const counterText = document.createElement('span');
-      Object.assign(counterText.style, {
-        color: '#898989',
-        fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-        fontSize: '13px',
-        fontWeight: '500',
-        lineHeight: '16px',
-        letterSpacing: '-0.234px',
-      });
-      counterText.textContent = count.toString();
-
-      counter.appendChild(counterText);
-      tab.appendChild(counter);
-    }
-
-    return tab;
-  }
 
   /**
    * Создание основного содержимого
@@ -737,6 +613,21 @@ export class OrganizationScreen {
     // Инфо
     const info = this.createInfoSection();
     container.appendChild(info);
+
+    // Панель табов
+    const tabContainer = document.createElement('div');
+    new TabBar({
+      container: tabContainer,
+      items: [
+        { label: 'Обзор' },
+        { label: 'Меню', count: 213 },
+        { label: 'Фото', count: 432 },
+        { label: 'Отзывы', count: 232 },
+        { label: 'Инфо' },
+        { label: 'Акции' },
+      ],
+    });
+    container.appendChild(tabContainer);
 
     // Нижняя кнопка действия
     const bottomAction = this.createBottomActionBar();
