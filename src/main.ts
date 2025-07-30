@@ -6,6 +6,7 @@
 import './styles/_variables.css';
 import './styles/base.css';
 import './styles/dashboard.css';
+import './styles/shop.css';
 
 import { ScreenType } from './types/navigation';
 import { BottomsheetConfig, BottomsheetState } from './types/bottomsheet';

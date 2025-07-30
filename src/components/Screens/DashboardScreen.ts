@@ -1101,7 +1101,6 @@ export class DashboardScreen {
         bottomsheetManager: this.props.bottomsheetManager,
         mapSyncService: this.props.mapSyncService,
         cartService: this.props.cartService,
-        shop: context.selectedShop!,
         previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(ScreenType.ORGANIZATION),
         onBack: () => {
           // Clean up shop screen when going back
@@ -1111,15 +1110,6 @@ export class DashboardScreen {
           }
           // Go back to organization screen instead of dashboard
           this.props.searchFlowManager.goBack();
-        },
-        onAddToCart: (product) => {
-          console.log('Added to cart:', product);
-        },
-        onRemoveFromCart: (product) => {
-          console.log('Removed from cart:', product);
-        },
-        onUpdateQuantity: (product, quantity) => {
-          console.log('Updated quantity:', product, quantity);
         },
         onCartClick: () => {
           // Navigate to cart screen
