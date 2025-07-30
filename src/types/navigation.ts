@@ -14,6 +14,8 @@ export enum ScreenType {
   SHOP = 'shop',
   /** Экран корзины */
   CART = 'cart',
+  /** Экран оформления заказа */
+  CHECKOUT = 'checkout',
 }
 
 /**
@@ -193,6 +195,7 @@ export interface SearchFlowManager {
   goToOrganization: (organization: Organization) => void;
   goToShop: (shop: Shop) => void;
   goToCart: () => void;
+  goToCheckout: () => void;
   goBack: () => void;
   goToDashboard: () => void;
 

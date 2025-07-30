@@ -54,8 +54,8 @@ export interface BottomsheetStateData {
 export const BOTTOMSHEET_HEIGHTS = {
   [BottomsheetState.SMALL]: 0.2,
   [BottomsheetState.DEFAULT]: 0.5,
-  [BottomsheetState.FULLSCREEN]: 0.9,
-  [BottomsheetState.FULLSCREEN_SCROLL]: 0.95,
+  [BottomsheetState.FULLSCREEN]: 0.95,
+  [BottomsheetState.FULLSCREEN_SCROLL]: 1.0, // True fullscreen - 100% height with safe-area padding
 } as const;
 
 /**

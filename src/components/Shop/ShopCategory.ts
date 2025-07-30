@@ -1,4 +1,4 @@
-import { ShopItem, ShopProduct, ShopItemProps } from './ShopItem';
+import { ShopItem, ShopItemProps, ShopProduct } from './ShopItem';
 import { CartService } from '../../services';
 
 /**
@@ -149,4 +149,4 @@ export class ShopCategory {
     this.shopItems = [];
     this.element.remove();
   }
-} 
+}

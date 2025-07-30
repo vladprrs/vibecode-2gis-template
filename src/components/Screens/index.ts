@@ -18,3 +18,7 @@ export type { ShopScreenProps } from './ShopScreen';
 // Cart Screen
 export { CartScreen } from './CartScreen';
 export type { CartScreenProps } from './CartScreen';
+
+// Checkout Screen
+export { CheckoutScreen } from './CheckoutScreen';
+export type { CheckoutScreenProps } from './CheckoutScreen';

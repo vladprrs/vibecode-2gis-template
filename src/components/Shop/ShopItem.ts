@@ -1,4 +1,4 @@
-import { CartService, CartItem } from '../../services';
+import { CartItem, CartService } from '../../services';
 
 /**
  * Интерфейс товара
@@ -89,7 +89,8 @@ export class ShopItem {
       img.alt = this.props.product.title;
     } else {
       // Placeholder для отсутствующего изображения
-      img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHJ4PSI4IiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9IjI4IiBjeT0iMjgiIHI9IjYiIGZpbGw9IiM4OTg5ODkiLz4KPHBhdGggZD0iTTg0IDYwTDU2IDMyTDI0IDY0IiBzdHJva2U9IiM4OTg5ODkiIHN0cm9rZS13aWR0aD0iMS41Ii8+Cjwvc3ZnPgo=';
+      img.src =
+        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHJ4PSI4IiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9IjI4IiBjeT0iMjgiIHI9IjYiIGZpbGw9IiM4OTg5ODkiLz4KPHBhdGggZD0iTTg0IDYwTDU2IDMyTDI0IDY0IiBzdHJva2U9IiM4OTg5ODkiIHN0cm9rZS13aWR0aD0iMS41Ii8+Cjwvc3ZnPgo=';
       img.alt = 'Placeholder';
     }
     photo.appendChild(img);
@@ -149,7 +150,7 @@ export class ShopItem {
     });
 
     const cartItem = this.props.cartService.getCartItem(this.props.product.id);
-    
+
     if (cartItem && cartItem.quantity > 0) {
       // Товар в корзине - показываем stepper
       const stepper = this.createStepper(cartItem);
@@ -171,7 +172,7 @@ export class ShopItem {
     button.className = 'shop-add-to-cart-button';
     button.textContent = 'В корзину';
 
-    button.addEventListener('click', (event) => {
+    button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       this.props.cartService.addToCart(this.props.product);
@@ -197,7 +198,7 @@ export class ShopItem {
       </svg>
     `;
 
-    decreaseButton.addEventListener('click', (event) => {
+    decreaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = cartItem.quantity - 1;
@@ -221,7 +222,7 @@ export class ShopItem {
       </svg>
     `;
 
-    increaseButton.addEventListener('click', (event) => {
+    increaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = cartItem.quantity + 1;
@@ -281,4 +282,4 @@ export class ShopItem {
     }
     this.element.remove();
   }
-} 
+}

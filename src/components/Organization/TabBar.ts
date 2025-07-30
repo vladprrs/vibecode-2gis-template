@@ -15,7 +15,9 @@ export class TabBar {
   private element: HTMLElement;
 
   constructor(props: TabBarProps) {
-    this.props = { activeIndex: 0, ...props } as Required<Omit<TabBarProps, 'activeIndex'>> & { activeIndex: number };
+    this.props = { activeIndex: 0, ...props } as Required<Omit<TabBarProps, 'activeIndex'>> & {
+      activeIndex: number;
+    };
     this.element = props.container;
     this.render();
   }

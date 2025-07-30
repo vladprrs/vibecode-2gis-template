@@ -5,6 +5,7 @@ import {
   BottomsheetGestureManager,
   BottomsheetManager,
   CartService,
+  CheckoutService,
   ContentManager,
   FilterBarManager,
   MapManager,
@@ -22,6 +23,7 @@ import { SearchBar, SearchBarState } from '../Search';
 import { OrganizationScreen } from './OrganizationScreen';
 import { ShopScreen } from './ShopScreen';
 import { CartScreen } from './CartScreen';
+import { CheckoutScreen } from './CheckoutScreen';
 import { ButtonRow, ButtonRowItem, StoriesCarousel } from '../Dashboard';
 
 /**
@@ -38,6 +40,8 @@ export interface DashboardScreenProps {
   filterBarManager: FilterBarManager;
   /** Сервис корзины */
   cartService: CartService;
+  /** Сервис оформления заказа */
+  checkoutService: CheckoutService;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
   /** Менеджер карты */
@@ -125,6 +129,7 @@ export class DashboardScreen {
   private organizationScreen?: OrganizationScreen;
   private shopScreen?: ShopScreen;
   private cartScreen?: CartScreen;
+  private checkoutScreen?: CheckoutScreen;
 
   // Filter bar management
   private fixedFilterBar?: HTMLElement;
@@ -716,7 +721,7 @@ export class DashboardScreen {
       case 'fullscreen':
         return 0.9;
       case 'fullscreen_scroll':
-        return 0.95;
+        return 1.0;
       default:
         return 0.55;
     }
@@ -760,7 +765,7 @@ export class DashboardScreen {
       small: screenHeight * 0.2,
       default: screenHeight * 0.55,
       fullscreen: screenHeight * 0.9,
-      fullscreen_scroll: screenHeight * 0.95,
+      fullscreen_scroll: screenHeight * 1.0,
     };
 
     const targetHeight = heights[this.currentState as keyof typeof heights];
@@ -826,6 +831,12 @@ export class DashboardScreen {
       this.cartScreen.destroy();
       this.cartScreen = undefined;
     }
+
+    // Clean up checkout screen if it exists
+    if (this.checkoutScreen) {
+      this.checkoutScreen.destroy();
+      this.checkoutScreen = undefined;
+    }
   }
 
   /**
@@ -839,7 +850,7 @@ export class DashboardScreen {
       small: screenHeight * 0.2,
       default: screenHeight * 0.55,
       fullscreen: screenHeight * 0.9,
-      'fullscreen-scroll': screenHeight * 0.95,
+      'fullscreen-scroll': screenHeight * 1.0,
     };
 
     const height = heights[this.currentState as keyof typeof heights];
@@ -851,7 +862,7 @@ export class DashboardScreen {
 
     const screenHeight = window.innerHeight;
     const minHeight = screenHeight * 0.15;
-    const maxHeight = screenHeight * 0.95;
+    const maxHeight = screenHeight * 1.0;
 
     const clampedHeight = Math.max(minHeight, Math.min(maxHeight, height));
 
@@ -972,6 +983,9 @@ export class DashboardScreen {
       case ScreenType.CART:
         this.showCartContent();
         break;
+      case ScreenType.CHECKOUT:
+        this.showCheckoutContent();
+        break;
     }
 
     this.currentScreen = to;
@@ -1063,6 +1077,7 @@ export class DashboardScreen {
         searchFlowManager: this.props.searchFlowManager,
         bottomsheetManager: this.props.bottomsheetManager,
         mapSyncService: this.props.mapSyncService,
+        cartService: this.props.cartService,
         organization: context.selectedOrganization!,
         previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(
           ScreenType.SEARCH_RESULT
@@ -1125,9 +1140,11 @@ export class DashboardScreen {
       this.shopScreen.activate();
     });
 
-    // Snap to mid height for shop screen (55%)
-    this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
-    this.snapToState(BottomsheetState.DEFAULT);
+    // Snap to fullscreen for shop screen (90%), or use saved state if returning
+    const savedState = this.props.searchFlowManager.getSavedBottomsheetState?.(ScreenType.SHOP);
+    const targetState = savedState || BottomsheetState.FULLSCREEN;
+    this.props.bottomsheetManager.snapToState(targetState);
+    this.snapToState(targetState);
   }
 
   /**
@@ -1172,9 +1189,62 @@ export class DashboardScreen {
       this.cartScreen.activate();
     });
 
-    // Snap to mid height for cart screen (55%)
-    this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
-    this.snapToState(BottomsheetState.DEFAULT);
+    // Snap to fullscreen for cart screen (90%), or use saved state if returning
+    const savedState = this.props.searchFlowManager.getSavedBottomsheetState?.(ScreenType.CART);
+    const targetState = savedState || BottomsheetState.FULLSCREEN;
+    this.props.bottomsheetManager.snapToState(targetState);
+    this.snapToState(targetState);
+  }
+
+  /**
+   * Show checkout content in the bottomsheet
+   */
+  private showCheckoutContent(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Clean up any existing checkout screen
+    if (this.checkoutScreen) {
+      this.checkoutScreen.destroy();
+      this.checkoutScreen = undefined;
+    }
+
+    // Replace bottomsheet content while preserving gesture handling
+    this.replaceBottomsheetContent((container: HTMLElement) => {
+      // Create the checkout screen in the content container
+      this.checkoutScreen = new CheckoutScreen({
+        container: container,
+        searchFlowManager: this.props.searchFlowManager,
+        bottomsheetManager: this.props.bottomsheetManager,
+        mapSyncService: this.props.mapSyncService,
+        cartService: this.props.cartService,
+        checkoutService: this.props.checkoutService,
+        previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(
+          ScreenType.CART
+        ),
+        onClose: () => {
+          // Clean up checkout screen when closing
+          if (this.checkoutScreen) {
+            this.checkoutScreen.destroy();
+            this.checkoutScreen = undefined;
+          }
+          // Go back to cart screen
+          this.props.searchFlowManager.goBack();
+        },
+        onProcessPayment: checkoutState => {
+          console.log('Payment processing:', checkoutState);
+          // TODO: Implement payment processing
+        },
+      });
+
+      // Activate the checkout screen
+      this.checkoutScreen.activate();
+    });
+
+    // Snap to fullscreen for checkout (90%), or use saved state if returning
+    const savedState = this.props.searchFlowManager.getSavedBottomsheetState?.(ScreenType.CHECKOUT);
+    const targetState = savedState || BottomsheetState.FULLSCREEN;
+    this.props.bottomsheetManager.snapToState(targetState);
+    this.snapToState(targetState);
   }
 
   /**
@@ -2020,6 +2090,7 @@ export class DashboardScreenFactory {
     bottomsheetManager: BottomsheetManager,
     filterBarManager: FilterBarManager,
     cartService: CartService,
+    checkoutService: CheckoutService,
     mapManager: MapManager
   ): DashboardScreen {
     return new DashboardScreen({
@@ -2028,6 +2099,7 @@ export class DashboardScreenFactory {
       bottomsheetManager,
       filterBarManager,
       cartService,
+      checkoutService,
       mapManager,
     });
   }

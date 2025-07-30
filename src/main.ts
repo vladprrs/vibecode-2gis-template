@@ -12,7 +12,14 @@ import { ScreenType } from './types/navigation';
 import { BottomsheetConfig, BottomsheetState } from './types/bottomsheet';
 import { SearchFlowManager } from './services/SearchFlowManager';
 import { BottomsheetManager } from './services/BottomsheetManager';
-import { FilterBarManager, MapManager, MapSyncService, CartService } from './services';
+import {
+  CartService,
+  CheckoutService,
+  FilterBarManager,
+  MapManager,
+  MapSyncService,
+  globalBottomActionBar,
+} from './services';
 import { DashboardScreen, DashboardScreenFactory } from './components/Screens/DashboardScreen';
 
 /**
@@ -30,6 +37,7 @@ class App {
   private bottomsheetManager?: BottomsheetManager;
   private filterBarManager?: FilterBarManager;
   private cartService?: CartService;
+  private checkoutService?: CheckoutService;
   private mapSyncService?: MapSyncService;
   private mapManager?: MapManager;
 
@@ -62,6 +70,9 @@ class App {
    * Initialize all services
    */
   private initializeServices(): void {
+    // Initialize global bottom action bar overlay
+    globalBottomActionBar.initialize();
+
     // Initialize SearchFlowManager with navigation events
     this.searchFlowManager = new SearchFlowManager(ScreenType.DASHBOARD, {
       onScreenChange: (from, to, context) => {
@@ -77,7 +88,7 @@ class App {
     // Initialize BottomsheetManager with configuration
     const bottomsheetConfig: BottomsheetConfig = {
       state: BottomsheetState.DEFAULT,
-      snapPoints: [0.2, 0.55, 0.9, 0.95],
+      snapPoints: [0.2, 0.55, 0.95, 1.0],
       isDraggable: true,
       hasScrollableContent: true,
     };
@@ -87,6 +98,10 @@ class App {
       {
         onStateChange: (fromState, toState) => {
           console.log(`📋 Bottomsheet: ${fromState} → ${toState}`);
+          // Save the current bottomsheet state for the active screen
+          if (this.searchFlowManager) {
+            this.searchFlowManager.saveCurrentBottomsheetState(toState);
+          }
         },
         onDragStart: height => {
           console.log(`🖱️ Drag start: ${height}px`);
@@ -103,14 +118,30 @@ class App {
 
     // Initialize CartService
     this.cartService = new CartService({
-      onCartUpdated: (state) => {
+      onCartUpdated: state => {
         console.log('🛒 Cart updated:', state);
       },
-      onItemAdded: (item) => {
+      onItemAdded: item => {
         console.log('🛒 Item added to cart:', item);
       },
-      onItemRemoved: (productId) => {
+      onItemRemoved: productId => {
         console.log('🛒 Item removed from cart:', productId);
+      },
+    });
+
+    // Initialize CheckoutService
+    this.checkoutService = new CheckoutService(0, {
+      onCheckoutUpdated: state => {
+        console.log('💳 Checkout updated:', state);
+      },
+      onPromoCodeChanged: promoCode => {
+        console.log('💳 Promo code changed:', promoCode);
+      },
+      onLoyaltyToggled: enabled => {
+        console.log('💳 Loyalty toggled:', enabled);
+      },
+      onDateSelected: date => {
+        console.log('💳 Date selected:', date);
       },
     });
 
@@ -127,7 +158,13 @@ class App {
    * Create dashboard screen using the modular component
    */
   private createDashboardScreen(): void {
-    if (!this.searchFlowManager || !this.bottomsheetManager || !this.filterBarManager || !this.cartService) {
+    if (
+      !this.searchFlowManager ||
+      !this.bottomsheetManager ||
+      !this.filterBarManager ||
+      !this.cartService ||
+      !this.checkoutService
+    ) {
       throw new Error('Services not initialized');
     }
 
@@ -137,7 +174,8 @@ class App {
       this.searchFlowManager,
       this.bottomsheetManager,
       this.filterBarManager,
-      this.cartService!,
+      this.cartService,
+      this.checkoutService,
       this.mapManager!
     );
 

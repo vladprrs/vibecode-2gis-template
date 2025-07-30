@@ -188,17 +188,26 @@
   background: #333333;
 }
 
-/* ===== BOTTOM ACTION BAR ===== */
-.shop-bottom-action-bar {
-  position: absolute;
-  bottom: 0;
+/* ===== GLOBAL BOTTOM ACTION BAR ===== */
+.global-bottom-action-bar {
+  /* Fixed overlay above bottomsheet */
+  position: fixed;
   left: 0;
   right: 0;
+  bottom: 0;
+  z-index: 1000; /* Above bottomsheet but below modals */
   background: var(--shop-background);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 16px;
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
-  z-index: 10;
+  pointer-events: auto;
+}
+
+/* Legacy support for existing classes */
+.shop-bottom-action-bar {
+  /* Use same styling as global bar when used as class */
+  background: var(--shop-background);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .shop-action-bar-content {
@@ -206,6 +215,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding: 16px;
+  /* Add safe-area support for iOS and Android */
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  min-height: 72px;
+  box-sizing: border-box;
 }
 
 .shop-cart-info {
@@ -319,6 +333,233 @@
   position: relative;
 }
 
+/* ===== CHECKOUT COMPONENTS ===== */
+
+/* Checkout Screen */
+.checkout-screen {
+  background: var(--shop-background);
+  border-radius: var(--shop-radius-large) var(--shop-radius-large) 0 0;
+}
+
+/* Checkout Header */
+.checkout-header-title-text {
+  color: var(--shop-primary-color);
+  font-family: var(--shop-font-family);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.43px;
+}
+
+/* Checkout Section Titles */
+.checkout-section-title {
+  color: var(--shop-primary-color);
+  font-family: var(--shop-font-family);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.43px;
+  margin-bottom: 16px;
+}
+
+/* Checkout List Rows */
+.checkout-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+/* Date Chips */
+.checkout-date-chip {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: var(--shop-primary-color);
+  font-family: var(--shop-font-family);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.checkout-date-chip.active {
+  border-color: #8B5CF6;
+  color: #8B5CF6;
+}
+
+.checkout-date-chip:hover {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+/* Product Preview */
+.checkout-product-preview {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--shop-radius-small);
+  background: #f5f5f5;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.checkout-product-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.checkout-product-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: #8B5CF6;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--shop-font-family);
+}
+
+/* Info Chip */
+.checkout-info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--shop-secondary-color);
+  font-family: var(--shop-font-family);
+  cursor: pointer;
+}
+
+/* Promo Code Field */
+.checkout-promo-field {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--shop-radius-small);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  font-size: 15px;
+  font-weight: 400;
+  font-family: var(--shop-font-family);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.checkout-promo-field:focus {
+  border-color: #8B5CF6;
+}
+
+.checkout-promo-field::placeholder {
+  color: var(--shop-secondary-color);
+}
+
+/* Toggle Switch */
+.checkout-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.checkout-toggle.active {
+  background: #8B5CF6;
+}
+
+.checkout-toggle-handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: #ffffff;
+  transition: left 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-toggle.active .checkout-toggle-handle {
+  left: 22px;
+}
+
+/* Price Lines */
+.checkout-price-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.checkout-price-label,
+.checkout-price-value {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--shop-primary-color);
+  font-family: var(--shop-font-family);
+}
+
+.checkout-price-line.total .checkout-price-label,
+.checkout-price-line.total .checkout-price-value {
+  font-weight: 600;
+}
+
+/* Price Divider */
+.checkout-price-divider {
+  height: 1px;
+  background: repeating-linear-gradient(to right, #E5E5E5 0, #E5E5E5 4px, transparent 4px, transparent 8px);
+  margin: 12px 0;
+}
+
+/* Disclaimer */
+.checkout-disclaimer {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--shop-secondary-color);
+  font-family: var(--shop-font-family);
+  margin-top: 16px;
+}
+
+.checkout-disclaimer a {
+  color: #8B5CF6;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.checkout-disclaimer a:hover {
+  text-decoration: underline;
+}
+
+/* Badge for List Items */
+.checkout-badge {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(34, 197, 94, 0.1);
+  font-size: 12px;
+  font-weight: 400;
+  color: #22C55E;
+  font-family: var(--shop-font-family);
+  flex-shrink: 0;
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 375px) {
   .shop-item-card {
@@ -344,6 +585,29 @@
   .shop-item-price-text {
     font-size: 16px;
     line-height: 20px;
+  }
+  
+  /* Checkout responsive styles */
+  .checkout-section-title,
+  .checkout-header-title-text {
+    font-size: 16px;
+    line-height: 20px;
+  }
+  
+  .checkout-date-chip {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .checkout-product-preview {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .checkout-product-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
   }
 }
 
