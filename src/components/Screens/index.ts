@@ -12,7 +12,7 @@ export { SearchResultScreen } from './SearchResultScreen';
 export { SuggestScreen } from './SuggestScreen';
 
 // Shop Screen
-export { ShopScreen, ShopScreenFactory } from './ShopScreen';
+export { ShopScreen } from './ShopScreen';
 export type { ShopScreenProps } from './ShopScreen';
 
 // Cart Screen

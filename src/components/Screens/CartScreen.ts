@@ -157,14 +157,9 @@ export class CartScreen {
 
     // Заголовок с количеством товаров
     const title = document.createElement('h1');
+    title.className = 'shop-header-title-text';
     Object.assign(title.style, {
-      fontSize: '19px',
-      fontWeight: '500',
-      lineHeight: '24px',
-      letterSpacing: '-0.437px',
-      color: '#141414',
       margin: '0',
-      fontFamily: 'SB Sans Text',
     });
     
     const itemCount = this.cartState.totalItems;
@@ -315,87 +310,52 @@ export class CartScreen {
    */
   private createItemRow(cartItem: CartItem): HTMLElement {
     const row = document.createElement('div');
-    Object.assign(row.style, {
-      display: 'flex',
-      padding: '12px',
-      backgroundColor: '#ffffff',
-      borderRadius: '8px',
-      border: '1px solid rgba(0, 0, 0, 0.08)',
-      boxShadow: '0 1px 4px rgba(0, 0, 0, 0.04)',
-      gap: '12px',
-    });
+    row.className = 'shop-item-card';
 
     // Изображение товара
     const image = document.createElement('div');
-    Object.assign(image.style, {
-      width: '60px',
-      height: '60px',
-      backgroundColor: '#f5f5f5',
-      borderRadius: '8px',
-      flexShrink: '0',
-      backgroundImage: cartItem.product.imageUrl ? `url(${cartItem.product.imageUrl})` : 'none',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    });
-
-    if (!cartItem.product.imageUrl) {
-      image.innerHTML = `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <rect x="3" y="3" width="18" height="18" rx="2" stroke="#898989" stroke-width="1.5"/>
-          <circle cx="8.5" cy="8.5" r="1.5" stroke="#898989" stroke-width="1.5"/>
-          <path d="M21 15L16 10L5 21" stroke="#898989" stroke-width="1.5"/>
-        </svg>
-      `;
+    image.className = 'shop-item-photo';
+    
+    const img = document.createElement('img');
+    if (cartItem.product.imageUrl) {
+      img.src = cartItem.product.imageUrl;
+      img.alt = cartItem.product.title;
+    } else {
+      // Placeholder для отсутствующего изображения
+      img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHJ4PSI4IiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9IjI4IiBjeT0iMjgiIHI9IjYiIGZpbGw9IiM4OTg5ODkiLz4KPHBhdGggZD0iTTg0IDYwTDU2IDMyTDI0IDY0IiBzdHJva2U9IiM4OTg5ODkiIHN0cm9rZS13aWR0aD0iMS41Ii8+Cjwvc3ZnPgo=';
+      img.alt = 'Placeholder';
     }
+    image.appendChild(img);
 
     row.appendChild(image);
 
     // Информация о товаре
     const info = document.createElement('div');
-    Object.assign(info.style, {
-      flex: '1',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      minWidth: '0', // Для корректного сжатия текста
-    });
+    info.className = 'shop-item-content';
 
     // Название товара
-    const name = document.createElement('div');
-    Object.assign(name.style, {
-      fontSize: '16px',
-      fontWeight: '500',
-      lineHeight: '20px',
-      letterSpacing: '-0.24px',
-      color: '#141414',
-      fontFamily: 'SB Sans Text',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    });
-    name.textContent = cartItem.product.title;
-    info.appendChild(name);
+    const title = document.createElement('div');
+    title.className = 'shop-item-title';
+    
+    const titleText = document.createElement('div');
+    titleText.className = 'shop-item-title-text';
+    titleText.textContent = cartItem.product.title;
+    title.appendChild(titleText);
+    info.appendChild(title);
 
-    // Цена за единицу
+    // Цена
     const price = document.createElement('div');
-    Object.assign(price.style, {
-      fontSize: '14px',
-      fontWeight: '400',
-      lineHeight: '18px',
-      letterSpacing: '-0.28px',
-      color: '#898989',
-      fontFamily: 'SB Sans Text',
-      marginTop: '4px',
-    });
-    price.textContent = `${cartItem.product.price.toLocaleString('ru-RU')} ₽ за шт.`;
+    price.className = 'shop-item-price';
+    
+    const priceText = document.createElement('div');
+    priceText.className = 'shop-item-price-text';
+    priceText.textContent = `${cartItem.product.price.toLocaleString('ru-RU')} ₽`;
+    price.appendChild(priceText);
     info.appendChild(price);
 
     row.appendChild(info);
 
-    // Правая часть: селектор количества и общая цена
+    // Правая часть: stepper
     const rightSection = document.createElement('div');
     Object.assign(rightSection.style, {
       display: 'flex',
@@ -405,23 +365,9 @@ export class CartScreen {
       flexShrink: '0',
     });
 
-    // Селектор количества
-    const quantitySelector = this.createQuantitySelector(cartItem);
-    rightSection.appendChild(quantitySelector);
-
-    // Общая цена строки
-    const lineTotal = document.createElement('div');
-    Object.assign(lineTotal.style, {
-      fontSize: '16px',
-      fontWeight: '600',
-      lineHeight: '20px',
-      letterSpacing: '-0.24px',
-      color: '#141414',
-      fontFamily: 'SB Sans Text',
-      marginTop: '8px',
-    });
-    lineTotal.textContent = this.props.cartService.getFormattedLineTotal(cartItem.product.id);
-    rightSection.appendChild(lineTotal);
+    // Stepper для количества
+    const stepper = this.createStepper(cartItem);
+    rightSection.appendChild(stepper);
 
     row.appendChild(rightSection);
 
@@ -429,34 +375,15 @@ export class CartScreen {
   }
 
   /**
-   * Создание селектора количества
+   * Создание stepper для количества товара
    */
-  private createQuantitySelector(cartItem: CartItem): HTMLElement {
-    const selector = document.createElement('div');
-    Object.assign(selector.style, {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      backgroundColor: '#f5f5f5',
-      borderRadius: '20px',
-      padding: '4px',
-    });
+  private createStepper(cartItem: CartItem): HTMLElement {
+    const stepper = document.createElement('div');
+    stepper.className = 'shop-stepper';
 
     // Кнопка уменьшения
     const decreaseButton = document.createElement('button');
-    Object.assign(decreaseButton.style, {
-      width: '32px',
-      height: '32px',
-      border: 'none',
-      borderRadius: '16px',
-      backgroundColor: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
-    });
-
+    decreaseButton.className = 'shop-stepper-button';
     decreaseButton.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M4 8H12" stroke="#141414" stroke-width="1.5" stroke-linecap="round"/>
@@ -470,37 +397,17 @@ export class CartScreen {
       this.props.cartService.updateQuantity(cartItem.product.id, newQuantity);
     });
 
-    selector.appendChild(decreaseButton);
+    stepper.appendChild(decreaseButton);
 
     // Количество
     const quantity = document.createElement('div');
-    Object.assign(quantity.style, {
-      fontSize: '16px',
-      fontWeight: '500',
-      lineHeight: '20px',
-      color: '#141414',
-      fontFamily: 'SB Sans Text',
-      minWidth: '24px',
-      textAlign: 'center',
-    });
+    quantity.className = 'shop-stepper-quantity';
     quantity.textContent = cartItem.quantity.toString();
-    selector.appendChild(quantity);
+    stepper.appendChild(quantity);
 
     // Кнопка увеличения
     const increaseButton = document.createElement('button');
-    Object.assign(increaseButton.style, {
-      width: '32px',
-      height: '32px',
-      border: 'none',
-      borderRadius: '16px',
-      backgroundColor: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
-    });
-
+    increaseButton.className = 'shop-stepper-button';
     increaseButton.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M8 4V12M4 8H12" stroke="#141414" stroke-width="1.5" stroke-linecap="round"/>
@@ -514,9 +421,9 @@ export class CartScreen {
       this.props.cartService.updateQuantity(cartItem.product.id, newQuantity);
     });
 
-    selector.appendChild(increaseButton);
+    stepper.appendChild(increaseButton);
 
-    return selector;
+    return stepper;
   }
 
   /**
@@ -524,79 +431,33 @@ export class CartScreen {
    */
   private createBottomActionBar(): HTMLElement {
     const actionBar = document.createElement('div');
-    Object.assign(actionBar.style, {
-      position: 'absolute',
-      bottom: '0',
-      left: '0',
-      right: '0',
-      backgroundColor: '#ffffff',
-      borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-      padding: '16px',
-      boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.08)',
-      zIndex: '10',
-    });
+    actionBar.className = 'shop-bottom-action-bar';
 
     // Контейнер для содержимого
     const content = document.createElement('div');
-    Object.assign(content.style, {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '16px',
-    });
+    content.className = 'shop-action-bar-content';
 
-    // Левая часть с суммой
-    const leftSection = document.createElement('div');
-    Object.assign(leftSection.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-    });
+    // Левая часть с информацией о корзине
+    const cartInfo = document.createElement('div');
+    cartInfo.className = 'shop-cart-info';
 
     // Количество товаров
     const itemCountText = document.createElement('div');
-    Object.assign(itemCountText.style, {
-      fontSize: '14px',
-      fontWeight: '400',
-      lineHeight: '18px',
-      letterSpacing: '-0.28px',
-      color: '#898989',
-      fontFamily: 'SB Sans Text',
-    });
+    itemCountText.className = 'shop-cart-count';
     itemCountText.textContent = this.props.cartService.getFormattedItemCount();
-    leftSection.appendChild(itemCountText);
+    cartInfo.appendChild(itemCountText);
 
     // Общая сумма
     const totalText = document.createElement('div');
-    Object.assign(totalText.style, {
-      fontSize: '19px',
-      fontWeight: '600',
-      lineHeight: '24px',
-      letterSpacing: '-0.437px',
-      color: '#141414',
-      fontFamily: 'SB Sans Text',
-    });
+    totalText.className = 'shop-cart-total';
     totalText.textContent = this.props.cartService.getFormattedSubtotal();
-    leftSection.appendChild(totalText);
+    cartInfo.appendChild(totalText);
 
-    content.appendChild(leftSection);
+    content.appendChild(cartInfo);
 
     // Кнопка оформления заказа
     const orderButton = document.createElement('button');
-    Object.assign(orderButton.style, {
-      backgroundColor: '#0066CC',
-      color: '#ffffff',
-      border: 'none',
-      borderRadius: '12px',
-      padding: '12px 24px',
-      fontSize: '16px',
-      fontWeight: '600',
-      lineHeight: '20px',
-      letterSpacing: '-0.24px',
-      cursor: 'pointer',
-      fontFamily: 'SB Sans Text',
-      flexShrink: '0',
-    });
+    orderButton.className = 'shop-order-button';
     orderButton.textContent = 'Оформить заказ';
 
     orderButton.addEventListener('click', (event) => {
