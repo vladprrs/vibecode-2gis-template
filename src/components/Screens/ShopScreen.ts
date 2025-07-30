@@ -1,6 +1,7 @@
 import { ScreenType } from '../../types';
-import { BottomsheetManager, MapSyncService, SearchFlowManager, CartService } from '../../services';
+import { BottomsheetManager, CartService, CartState, MapSyncService, SearchFlowManager } from '../../services';
 import { ShopCategory, ShopProduct } from '../Shop';
+import { BottomActionBar, BottomActionBarContent } from '../Shared';
 
 /**
  * Пропсы для ShopScreen
@@ -32,6 +33,8 @@ export class ShopScreen {
   private props: ShopScreenProps;
   private element: HTMLElement;
   private shopCategories: ShopCategory[] = [];
+  private bottomActionBar?: BottomActionBar;
+  private cartSubscription?: () => void;
 
   // Моковые данные для демонстрации
   private mockProducts: ShopProduct[] = [
@@ -137,6 +140,7 @@ export class ShopScreen {
     this.createShopLayout();
     this.setupEventListeners();
     this.syncWithServices();
+    this.subscribeToCartUpdates();
   }
 
   /**
@@ -147,10 +151,15 @@ export class ShopScreen {
     Object.assign(this.element.style, {
       position: 'relative',
       width: '100%',
-      height: '100%',
+      // Remove height constraint - let it size naturally
       backgroundColor: '#ffffff',
       borderRadius: '16px 16px 0 0',
       overflow: 'hidden',
+      // Ensure it fills the container properly
+      display: 'flex',
+      flexDirection: 'column',
+      flex: '1',
+      minHeight: '0',
     });
 
     if (this.props.className) {
@@ -168,12 +177,15 @@ export class ShopScreen {
     Object.assign(shopContent.style, {
       position: 'relative',
       width: '100%',
-      height: '100%',
+      // Remove height: 100% - let it size naturally within bottomsheet container
       backgroundColor: '#ffffff',
       borderRadius: '16px 16px 0 0',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
+      // Ensure it takes the full space available in the flex container
+      flex: '1',
+      minHeight: '0',
     });
 
     // 1. Создаем заголовок магазина
@@ -186,7 +198,7 @@ export class ShopScreen {
       flex: '1',
       overflowY: 'auto',
       backgroundColor: '#F1F1F1',
-      paddingBottom: '100px', // Место для нижней панели
+      // Remove hardcoded paddingBottom - action bar will be positioned outside scroll area
     });
 
     // 3. Создаем содержимое магазина
@@ -195,9 +207,8 @@ export class ShopScreen {
 
     shopContent.appendChild(scrollableContent);
 
-    // 4. Создаем нижнюю панель действий
-    const bottomActionBar = this.createBottomActionBar();
-    shopContent.appendChild(bottomActionBar);
+    // 4. Создаем нижнюю панель действий с новым компонентом
+    this.createBottomActionBar(shopContent);
 
     this.element.appendChild(shopContent);
   }
@@ -278,7 +289,7 @@ export class ShopScreen {
       </svg>
     `;
 
-    button.addEventListener('click', (event) => {
+    button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       console.log('🔙 Shop back button clicked');
@@ -301,18 +312,18 @@ export class ShopScreen {
 
     // Группируем товары по категориям
     const categories = this.groupProductsByCategory();
-    
+
     // Создаем компоненты категорий
     categories.forEach(({ title, products }) => {
       const category = new ShopCategory({
         title,
         products,
         cartService: this.props.cartService,
-        onAddToCart: (product) => {
+        onAddToCart: product => {
           console.log('🛒 Product added to cart:', product);
         },
       });
-      
+
       this.shopCategories.push(category);
       container.appendChild(category.getElement());
     });
@@ -325,7 +336,7 @@ export class ShopScreen {
    */
   private groupProductsByCategory(): Array<{ title: string; products: ShopProduct[] }> {
     const categories = new Map<string, ShopProduct[]>();
-    
+
     this.mockProducts.forEach(product => {
       if (!categories.has(product.category)) {
         categories.set(product.category, []);
@@ -340,50 +351,58 @@ export class ShopScreen {
   }
 
   /**
-   * Создание нижней панели действий
+   * Создание нижней панели действий используя новый BottomActionBar компонент
    */
-  private createBottomActionBar(): HTMLElement {
-    const actionBar = document.createElement('div');
-    actionBar.className = 'shop-bottom-action-bar';
-
-    // Контейнер для содержимого
-    const content = document.createElement('div');
-    content.className = 'shop-action-bar-content';
-
-    // Левая часть с информацией о корзине
-    const cartInfo = document.createElement('div');
-    cartInfo.className = 'shop-cart-info';
-
-    // Количество товаров
-    const itemCountText = document.createElement('div');
-    itemCountText.className = 'shop-cart-count';
-    itemCountText.textContent = this.props.cartService.getFormattedItemCount();
-    cartInfo.appendChild(itemCountText);
-
-    // Общая сумма
-    const totalText = document.createElement('div');
-    totalText.className = 'shop-cart-total';
-    totalText.textContent = this.props.cartService.getFormattedSubtotal();
-    cartInfo.appendChild(totalText);
-
-    content.appendChild(cartInfo);
-
-    // Кнопка корзины
-    const cartButton = document.createElement('button');
-    cartButton.className = 'shop-order-button';
-    cartButton.textContent = 'Корзина';
-
-    cartButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      this.props.onCartClick?.();
-      console.log('🛒 Cart button clicked');
+  private createBottomActionBar(container: HTMLElement): void {
+    // Create the action bar using the shared component
+    this.bottomActionBar = new BottomActionBar({
+      container: container,
+      className: 'shop-bottom-action-bar',
+      visible: true,
     });
 
-    content.appendChild(cartButton);
-    actionBar.appendChild(content);
+    // Update the content
+    this.updateActionBarContent();
+  }
 
-    return actionBar;
+  /**
+   * Обновление содержимого панели действий
+   */
+  private updateActionBarContent(): void {
+    if (!this.bottomActionBar) return;
+
+    const cartState = this.props.cartService.getState();
+
+    if (cartState.totalItems === 0) {
+      // Hide action bar when cart is empty
+      this.bottomActionBar.hide();
+      return;
+    }
+
+    // Show action bar and set content
+    this.bottomActionBar.show();
+
+    // Create cart info
+    const cartInfo = BottomActionBar.createCartInfo(
+      this.props.cartService.getFormattedItemCount(),
+      this.props.cartService.getFormattedSubtotal()
+    );
+
+    // Create view cart button
+    const viewCartButton = BottomActionBar.createButton(
+      'Корзина',
+      () => {
+        this.props.onCartClick?.();
+        console.log('🛒 Cart button clicked');
+      },
+      'primary'
+    );
+
+    // Set the content
+    this.bottomActionBar.setContent({
+      leftContent: cartInfo,
+      rightContent: viewCartButton,
+    });
   }
 
   /**
@@ -404,6 +423,16 @@ export class ShopScreen {
   }
 
   /**
+   * Подписка на обновления корзины
+   */
+  private subscribeToCartUpdates(): void {
+    this.cartSubscription = this.props.cartService.subscribe((newState: CartState) => {
+      // Update action bar when cart changes
+      this.updateActionBarContent();
+    });
+  }
+
+  /**
    * Активация экрана
    */
   public activate(): void {
@@ -414,13 +443,25 @@ export class ShopScreen {
    * Очистка ресурсов при уничтожении экрана
    */
   public destroy(): void {
+    // Отписываемся от обновлений корзины
+    if (this.cartSubscription) {
+      this.cartSubscription();
+      this.cartSubscription = undefined;
+    }
+
+    // Очищаем компонент действий
+    if (this.bottomActionBar) {
+      this.bottomActionBar.destroy();
+      this.bottomActionBar = undefined;
+    }
+
     // Очищаем компоненты категорий
     this.shopCategories.forEach(category => category.destroy());
     this.shopCategories = [];
 
     // Очищаем содержимое
     this.element.innerHTML = '';
-    
+
     console.log('🛍️ ShopScreen destroyed');
   }
 }

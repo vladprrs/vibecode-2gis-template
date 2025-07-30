@@ -48,7 +48,7 @@ export class CartService {
   getState(): CartState {
     const items = Array.from(this.items.values());
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    const totalPrice = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
     return {
       items,
@@ -87,7 +87,7 @@ export class CartService {
    */
   removeFromCart(productId: string): void {
     const wasRemoved = this.items.delete(productId);
-    
+
     if (wasRemoved) {
       this.events.onItemRemoved?.(productId);
       this.notifyStateChange();
@@ -170,7 +170,7 @@ export class CartService {
   getFormattedItemCount(): string {
     const state = this.getState();
     const count = state.totalItems;
-    
+
     if (count === 0) return '';
     if (count === 1) return '1 товар';
     if (count < 5) return `${count} товара`;
@@ -182,10 +182,10 @@ export class CartService {
    */
   private notifyStateChange(): void {
     const state = this.getState();
-    
+
     // Notify event callbacks
     this.events.onCartUpdated?.(state);
-    
+
     // Notify all subscribers
     this.listeners.forEach(callback => callback(state));
   }
@@ -222,13 +222,13 @@ export class CartService {
   importData(data: any): void {
     if (data?.items && Array.isArray(data.items)) {
       this.items.clear();
-      
+
       data.items.forEach(([productId, item]: [string, CartItem]) => {
         // Reconstruct Date objects
         item.addedAt = new Date(item.addedAt);
         this.items.set(productId, item);
       });
-      
+
       this.notifyStateChange();
     }
   }

@@ -7,6 +7,7 @@ import {
   SearchFilters,
   SearchSuggestion,
   Shop,
+  BottomsheetState,
 } from '../types';
 
 /**
@@ -21,6 +22,7 @@ export class SearchFlowManager implements ISearchFlowManager {
   private events: Partial<NavigationEvents>;
   private screenChangeCallbacks: Array<(screen: ScreenType) => void> = [];
   private scrollPositions: Map<ScreenType, number> = new Map();
+  private bottomsheetStates: Map<ScreenType, BottomsheetState> = new Map();
 
   constructor(
     initialScreen: ScreenType = ScreenType.DASHBOARD,
@@ -117,6 +119,19 @@ export class SearchFlowManager implements ISearchFlowManager {
 
     // Аналитика
     this.events.onScreenChange?.(this.currentScreen, ScreenType.CART, {});
+  }
+
+  /**
+   * Переход к экрану оформления заказа
+   */
+  goToCheckout(): void {
+    // Сохраняем позицию скролла текущего экрана
+    this.saveCurrentScrollPosition();
+
+    this.navigateToScreen(ScreenType.CHECKOUT);
+
+    // Аналитика
+    this.events.onScreenChange?.(this.currentScreen, ScreenType.CHECKOUT, {});
   }
 
   /**
@@ -418,6 +433,13 @@ export class SearchFlowManager implements ISearchFlowManager {
   }
 
   /**
+   * Сохранение текущего состояния bottomsheet
+   */
+  saveCurrentBottomsheetState(state: BottomsheetState): void {
+    this.bottomsheetStates.set(this.currentScreen, state);
+  }
+
+  /**
    * Восстановление позиции скролла для указанного экрана
    */
   private restoreScrollPosition(screen: ScreenType): void {
@@ -438,9 +460,17 @@ export class SearchFlowManager implements ISearchFlowManager {
   }
 
   /**
+   * Получение сохраненного состояния bottomsheet для экрана
+   */
+  getSavedBottomsheetState(screen: ScreenType): BottomsheetState | undefined {
+    return this.bottomsheetStates.get(screen);
+  }
+
+  /**
    * Очистка сохраненных позиций скролла
    */
   clearScrollPositions(): void {
     this.scrollPositions.clear();
+    this.bottomsheetStates.clear();
   }
 }

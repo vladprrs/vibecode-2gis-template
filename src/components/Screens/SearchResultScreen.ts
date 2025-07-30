@@ -126,7 +126,7 @@ export class SearchResultScreen {
     const bottomsheetConfig: BottomsheetContainerProps = {
       config: {
         state: this.props.bottomsheetManager.getCurrentState().currentState,
-        snapPoints: [0.2, 0.5, 0.9, 0.95],
+        snapPoints: [0.2, 0.5, 0.95, 1.0],
         isDraggable: true,
         hasScrollableContent: true,
       },

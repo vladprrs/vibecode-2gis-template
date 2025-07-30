@@ -387,7 +387,8 @@ export class ContentManager {
           rating: 4.5,
           reviewsCount: 89,
           category: 'Фитнес-клуб',
-          description: 'Уютный фитнес-центр с разнообразными групповыми занятиями и персональными тренировками.',
+          description:
+            'Уютный фитнес-центр с разнообразными групповыми занятиями и персональными тренировками.',
           phone: '+7 (495) 987-65-43',
           workingHours: 'Пн-Вс: 07:00-23:00',
         },
@@ -995,7 +996,8 @@ export class ContentManager {
     `;
 
     const offerText = document.createElement('div');
-    offerText.textContent = 'Скидка 15% на спортивную одежду и обувь при покупке абонемента на 3 месяца';
+    offerText.textContent =
+      'Скидка 15% на спортивную одежду и обувь при покупке абонемента на 3 месяца';
     offerText.style.cssText = `
       color: #141414;
       font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;

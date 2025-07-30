@@ -1,4 +1,4 @@
-import { Organization, ScreenType, Shop, Product, ProductCategory } from '../../types';
+import { Organization, Product, ProductCategory, ScreenType, Shop } from '../../types';
 import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
 import { TabBar } from '../Organization';
 
@@ -196,8 +196,6 @@ export class OrganizationScreen {
       alignItems: 'flex-start',
       flex: '1 0 0',
     });
-
-
 
     // Заголовок карточки
     const cardHeader = this.createCardHeader();
@@ -566,7 +564,6 @@ export class OrganizationScreen {
     return container;
   }
 
-
   /**
    * Создание основного содержимого
    */
@@ -683,7 +680,8 @@ export class OrganizationScreen {
       lineHeight: '18px',
       letterSpacing: '-0.28px',
     });
-    description.textContent = 'Сейчас этот филиал временно закрыт, но вернется к работе через некоторое время. Уточняйте информацию у компании';
+    description.textContent =
+      'Сейчас этот филиал временно закрыт, но вернется к работе через некоторое время. Уточняйте информацию у компании';
 
     alert.appendChild(header);
     alert.appendChild(description);
@@ -838,10 +836,7 @@ export class OrganizationScreen {
       msOverflowStyle: 'none',
     });
 
-    const buttons = [
-      'Входы 5',
-      'На такси за 249 ₽'
-    ];
+    const buttons = ['Входы 5', 'На такси за 249 ₽'];
 
     buttons.forEach(buttonText => {
       const button = document.createElement('button');
@@ -985,7 +980,7 @@ export class OrganizationScreen {
    */
   private createMenuSection(): HTMLElement {
     const section = document.createElement('div');
-    Object.assign(section.style, { 
+    Object.assign(section.style, {
       margin: '16px',
       cursor: 'pointer',
     });
@@ -1199,7 +1194,7 @@ export class OrganizationScreen {
         imageUrl: '/assets/images/products/sport-shirt.jpg',
       },
       {
-        id: 'sport-pants-1', 
+        id: 'sport-pants-1',
         title: 'Спортивные штаны Adidas',
         description: 'Удобные штаны для фитнеса',
         price: 3200,
@@ -1208,7 +1203,7 @@ export class OrganizationScreen {
       {
         id: 'sport-shoes-1',
         title: 'Кроссовки Nike Air Max',
-        description: 'Профессиональные кроссовки для бега', 
+        description: 'Профессиональные кроссовки для бега',
         price: 8900,
         imageUrl: '/assets/images/products/sport-shoes.jpg',
       },

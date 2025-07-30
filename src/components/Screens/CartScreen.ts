@@ -1,5 +1,13 @@
 import { ScreenType } from '../../types';
-import { BottomsheetManager, MapSyncService, SearchFlowManager, CartService, CartState, CartItem } from '../../services';
+import {
+  BottomsheetManager,
+  CartItem,
+  CartService,
+  CartState,
+  MapSyncService,
+  SearchFlowManager,
+} from '../../services';
+import { BottomActionBar, BottomActionBarContent } from '../Shared';
 
 /**
  * Пропсы для CartScreen
@@ -33,6 +41,7 @@ export class CartScreen {
   private element: HTMLElement;
   private cartState: CartState;
   private cartSubscription?: () => void;
+  private bottomActionBar?: BottomActionBar;
 
   constructor(props: CartScreenProps) {
     this.props = props;
@@ -60,10 +69,15 @@ export class CartScreen {
     Object.assign(this.element.style, {
       position: 'relative',
       width: '100%',
-      height: '100%',
+      // Remove height constraint - let it size naturally
       backgroundColor: '#ffffff',
       borderRadius: '16px 16px 0 0',
       overflow: 'hidden',
+      // Ensure it fills the container properly
+      display: 'flex',
+      flexDirection: 'column',
+      flex: '1',
+      minHeight: '0',
     });
 
     if (this.props.className) {
@@ -81,12 +95,15 @@ export class CartScreen {
     Object.assign(bottomsheetContent.style, {
       position: 'relative',
       width: '100%',
-      height: '100%',
+      // Remove height: 100% - let it size naturally within bottomsheet container  
       backgroundColor: '#ffffff',
       borderRadius: '16px 16px 0 0',
       overflow: 'hidden',
       display: 'flex',
       flexDirection: 'column',
+      // Ensure it takes the full space available in the flex container
+      flex: '1',
+      minHeight: '0',
     });
 
     // 1. Создаем заголовок корзины
@@ -99,7 +116,7 @@ export class CartScreen {
       flex: '1',
       overflowY: 'auto',
       backgroundColor: '#ffffff',
-      paddingBottom: '100px', // Место для нижней панели
+      // Remove hardcoded paddingBottom - action bar will be positioned outside scroll area
     });
 
     // 3. Создаем содержимое корзины
@@ -108,11 +125,8 @@ export class CartScreen {
 
     bottomsheetContent.appendChild(scrollableContent);
 
-    // 4. Создаем нижнюю панель действий (если есть товары)
-    if (this.cartState.totalItems > 0) {
-      const bottomActionBar = this.createBottomActionBar();
-      bottomsheetContent.appendChild(bottomActionBar);
-    }
+    // 4. Создаем нижнюю панель действий с новым компонентом
+    this.createBottomActionBar(bottomsheetContent);
 
     this.element.appendChild(bottomsheetContent);
   }
@@ -161,7 +175,7 @@ export class CartScreen {
     Object.assign(title.style, {
       margin: '0',
     });
-    
+
     const itemCount = this.cartState.totalItems;
     title.textContent = `Корзина (${itemCount})`;
     leftSection.appendChild(title);
@@ -197,7 +211,7 @@ export class CartScreen {
       </svg>
     `;
 
-    button.addEventListener('click', (event) => {
+    button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       console.log('🔙 Cart back button clicked');
@@ -315,14 +329,15 @@ export class CartScreen {
     // Изображение товара
     const image = document.createElement('div');
     image.className = 'shop-item-photo';
-    
+
     const img = document.createElement('img');
     if (cartItem.product.imageUrl) {
       img.src = cartItem.product.imageUrl;
       img.alt = cartItem.product.title;
     } else {
       // Placeholder для отсутствующего изображения
-      img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHJ4PSI4IiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9IjI4IiBjeT0iMjgiIHI9IjYiIGZpbGw9IiM4OTg5ODkiLz4KPHBhdGggZD0iTTg0IDYwTDU2IDMyTDI0IDY0IiBzdHJva2U9IiM4OTg5ODkiIHN0cm9rZS13aWR0aD0iMS41Ii8+Cjwvc3ZnPgo=';
+      img.src =
+        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3QgeD0iMTIiIHk9IjEyIiB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHJ4PSI4IiBmaWxsPSIjRjVGNUY1Ii8+CjxjaXJjbGUgY3g9IjI4IiBjeT0iMjgiIHI9IjYiIGZpbGw9IiM4OTg5ODkiLz4KPHBhdGggZD0iTTg0IDYwTDU2IDMyTDI0IDY0IiBzdHJva2U9IiM4OTg5ODkiIHN0cm9rZS13aWR0aD0iMS41Ii8+Cjwvc3ZnPgo=';
       img.alt = 'Placeholder';
     }
     image.appendChild(img);
@@ -336,7 +351,7 @@ export class CartScreen {
     // Название товара
     const title = document.createElement('div');
     title.className = 'shop-item-title';
-    
+
     const titleText = document.createElement('div');
     titleText.className = 'shop-item-title-text';
     titleText.textContent = cartItem.product.title;
@@ -346,7 +361,7 @@ export class CartScreen {
     // Цена
     const price = document.createElement('div');
     price.className = 'shop-item-price';
-    
+
     const priceText = document.createElement('div');
     priceText.className = 'shop-item-price-text';
     priceText.textContent = `${cartItem.product.price.toLocaleString('ru-RU')} ₽`;
@@ -390,7 +405,7 @@ export class CartScreen {
       </svg>
     `;
 
-    decreaseButton.addEventListener('click', (event) => {
+    decreaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = cartItem.quantity - 1;
@@ -414,7 +429,7 @@ export class CartScreen {
       </svg>
     `;
 
-    increaseButton.addEventListener('click', (event) => {
+    increaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = cartItem.quantity + 1;
@@ -427,50 +442,57 @@ export class CartScreen {
   }
 
   /**
-   * Создание нижней панели действий
+   * Создание нижней панели действий используя новый BottomActionBar компонент
    */
-  private createBottomActionBar(): HTMLElement {
-    const actionBar = document.createElement('div');
-    actionBar.className = 'shop-bottom-action-bar';
-
-    // Контейнер для содержимого
-    const content = document.createElement('div');
-    content.className = 'shop-action-bar-content';
-
-    // Левая часть с информацией о корзине
-    const cartInfo = document.createElement('div');
-    cartInfo.className = 'shop-cart-info';
-
-    // Количество товаров
-    const itemCountText = document.createElement('div');
-    itemCountText.className = 'shop-cart-count';
-    itemCountText.textContent = this.props.cartService.getFormattedItemCount();
-    cartInfo.appendChild(itemCountText);
-
-    // Общая сумма
-    const totalText = document.createElement('div');
-    totalText.className = 'shop-cart-total';
-    totalText.textContent = this.props.cartService.getFormattedSubtotal();
-    cartInfo.appendChild(totalText);
-
-    content.appendChild(cartInfo);
-
-    // Кнопка оформления заказа
-    const orderButton = document.createElement('button');
-    orderButton.className = 'shop-order-button';
-    orderButton.textContent = 'Оформить заказ';
-
-    orderButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      this.props.onOrderClick?.(this.cartState);
-      console.log('Order clicked:', this.cartState);
+  private createBottomActionBar(container: HTMLElement): void {
+    // Create the action bar using the shared component
+    this.bottomActionBar = new BottomActionBar({
+      container: container,
+      className: 'shop-bottom-action-bar',
+      visible: true,
     });
 
-    content.appendChild(orderButton);
-    actionBar.appendChild(content);
+    // Update the content
+    this.updateActionBarContent();
+  }
 
-    return actionBar;
+  /**
+   * Обновление содержимого панели действий
+   */
+  private updateActionBarContent(): void {
+    if (!this.bottomActionBar) return;
+
+    if (this.cartState.totalItems === 0) {
+      // Hide action bar when cart is empty
+      this.bottomActionBar.hide();
+      return;
+    }
+
+    // Show action bar and set content
+    this.bottomActionBar.show();
+
+    // Create cart info
+    const cartInfo = BottomActionBar.createCartInfo(
+      this.props.cartService.getFormattedItemCount(),
+      this.props.cartService.getFormattedSubtotal()
+    );
+
+    // Create checkout button
+    const checkoutButton = BottomActionBar.createButton(
+      `К оплате — ${this.props.cartService.getFormattedSubtotal()}`,
+      () => {
+        this.props.onOrderClick?.(this.cartState);
+        console.log('🛒 Proceeding to checkout:', this.cartState);
+        this.props.searchFlowManager.goToCheckout();
+      },
+      'primary'
+    );
+
+    // Set the content
+    this.bottomActionBar.setContent({
+      leftContent: cartInfo,
+      rightContent: checkoutButton,
+    });
   }
 
   /**
@@ -506,6 +528,8 @@ export class CartScreen {
   private refreshContent(): void {
     // Пересоздаем весь макет с новыми данными
     this.createCartLayout();
+    // Update action bar content for dynamic cart state
+    this.updateActionBarContent();
   }
 
   /**
@@ -520,6 +544,12 @@ export class CartScreen {
    * Очистка ресурсов при уничтожении экрана
    */
   public destroy(): void {
+    // Очищаем компонент действий
+    if (this.bottomActionBar) {
+      this.bottomActionBar.destroy();
+      this.bottomActionBar = undefined;
+    }
+
     // Отписываемся от обновлений корзины
     if (this.cartSubscription) {
       this.cartSubscription();
@@ -528,7 +558,7 @@ export class CartScreen {
 
     // Очищаем содержимое
     this.element.innerHTML = '';
-    
+
     console.log('🛒 CartScreen destroyed');
   }
 }

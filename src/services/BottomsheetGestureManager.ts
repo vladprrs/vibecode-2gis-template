@@ -58,11 +58,12 @@ export class BottomsheetGestureManager {
 
     if (currentHeight > scrollableThreshold) {
       // Find scrollable content container - prioritize known classes, then find overflow auto
-      const contentContainer = this.element.querySelector('.dashboard-content') ||
-                              this.element.querySelector('[style*="overflow-y: auto"]') ||
-                              this.element.querySelector('[style*="overflowY: auto"]') ||
-                              this.findScrollableElement(this.element);
-      
+      const contentContainer =
+        this.element.querySelector('.dashboard-content') ||
+        this.element.querySelector('[style*="overflow-y: auto"]') ||
+        this.element.querySelector('[style*="overflowY: auto"]') ||
+        this.findScrollableElement(this.element);
+
       if (contentContainer) {
         const { scrollTop } = contentContainer;
         const isAtTop = scrollTop <= 0;
@@ -82,7 +83,7 @@ export class BottomsheetGestureManager {
     const delta = event.deltaY * 2;
     const newHeight = Math.max(
       screenHeight * 0.15,
-      Math.min(screenHeight * 0.95, currentHeight + delta)
+      Math.min(screenHeight * 1.0, currentHeight + delta)
     );
     this.setHeight(newHeight);
     this.isWheelScrolling = true;
@@ -110,8 +111,8 @@ export class BottomsheetGestureManager {
     const states = [
       { name: 'small', ratio: 0.2 },
       { name: 'default', ratio: 0.55 },
-      { name: 'fullscreen', ratio: 0.9 },
-      { name: 'fullscreen-scroll', ratio: 0.95 },
+      { name: 'fullscreen', ratio: 0.95 },
+      { name: 'fullscreen-scroll', ratio: 1.0 },
     ];
 
     let nearestState = states[0];
@@ -135,18 +136,19 @@ export class BottomsheetGestureManager {
   private handleScrollTouchStart(event: TouchEvent): void {
     if (event.touches.length !== 1) return;
     const touch = event.touches[0];
-    
+
     // Check if touch started on the drag handle area
     const target = event.target as Element;
-    const isDragHandle = target?.closest('.bottomsheet-drag-handle-area') || 
-                        target?.closest('.bottomsheet-drag-handle');
-    
+    const isDragHandle =
+      target?.closest('.bottomsheet-drag-handle-area') ||
+      target?.closest('.bottomsheet-drag-handle');
+
     // Only allow dragging from the drag handle area
     if (!isDragHandle) {
       this.isTouchScrolling = false;
       return;
     }
-    
+
     this.touchStartY = touch.clientY;
     this.touchCurrentY = touch.clientY;
     this.isTouchScrolling = true;
@@ -166,11 +168,12 @@ export class BottomsheetGestureManager {
 
     if (currentHeight > scrollableThreshold) {
       // Find scrollable content container - prioritize known classes, then find overflow auto
-      const contentContainer = this.element.querySelector('.dashboard-content') ||
-                              this.element.querySelector('[style*="overflow-y: auto"]') ||
-                              this.element.querySelector('[style*="overflowY: auto"]') ||
-                              this.findScrollableElement(this.element);
-      
+      const contentContainer =
+        this.element.querySelector('.dashboard-content') ||
+        this.element.querySelector('[style*="overflow-y: auto"]') ||
+        this.element.querySelector('[style*="overflowY: auto"]') ||
+        this.findScrollableElement(this.element);
+
       if (contentContainer) {
         const { scrollTop } = contentContainer;
         const isAtTop = scrollTop <= 0;
@@ -193,7 +196,7 @@ export class BottomsheetGestureManager {
     if (Math.abs(momentumDelta) > 1) {
       const newHeight = Math.max(
         screenHeight * 0.15,
-        Math.min(screenHeight * 0.95, currentHeight + momentumDelta * 3)
+        Math.min(screenHeight * 1.0, currentHeight + momentumDelta * 3)
       );
       this.setHeight(newHeight);
     }
@@ -211,16 +214,16 @@ export class BottomsheetGestureManager {
    */
   private findScrollableElement(container: Element): Element | null {
     const elements = container.querySelectorAll('*');
-    
+
     for (const element of elements) {
       const computedStyle = getComputedStyle(element);
       const overflowY = computedStyle.overflowY;
-      
+
       if (overflowY === 'auto' || overflowY === 'scroll') {
         return element;
       }
     }
-    
+
     return null;
   }
 }
