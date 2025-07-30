@@ -6,7 +6,6 @@ import {
   BottomsheetManager,
   CartService,
   CheckoutService,
-  main,
   ContentManager,
   FilterBarManager,
   MapManager,
