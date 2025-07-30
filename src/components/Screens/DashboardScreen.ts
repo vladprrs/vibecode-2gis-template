@@ -6,6 +6,7 @@ import {
   BottomsheetManager,
   CartService,
   CheckoutService,
+  main
   ContentManager,
   FilterBarManager,
   MapManager,
@@ -1128,8 +1129,7 @@ export class DashboardScreen {
             this.shopScreen.destroy();
             this.shopScreen = undefined;
           }
-          // Go back to organization screen instead of dashboard
-          this.props.searchFlowManager.goBack();
+          // Navigation back is handled within ShopScreen
         },
         onCartClick: () => {
           // Navigate to cart screen
@@ -1178,8 +1178,7 @@ export class DashboardScreen {
             this.cartScreen.destroy();
             this.cartScreen = undefined;
           }
-          // Go back to shop screen
-          this.props.searchFlowManager.goBack();
+          // Navigation back is handled within CartScreen
         },
         onOrderClick: cartState => {
           console.log('Order clicked from cart:', cartState);
