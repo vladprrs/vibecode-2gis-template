@@ -9,6 +9,7 @@ import {
   globalBottomActionBar,
 } from '../../services';
 import { ShopCategory, ShopProduct } from '../Shop';
+import { getProductRepository } from '../../data/products';
 
 /**
  * Пропсы для ShopScreen
@@ -41,67 +42,7 @@ export class ShopScreen {
   private element: HTMLElement;
   private shopCategories: ShopCategory[] = [];
   private cartSubscription?: () => void;
-
-  // Новые товары с актуальными данными
-  private mockProducts: ShopProduct[] = [
-    {
-      id: 'prod-001',
-      title: 'Мужские спортивные брюки Tommy Hilfiger, синие, S',
-      price: 7349,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111201494_1.jpg',
-    },
-    {
-      id: 'prod-002',
-      title: 'Мужские спортивные брюки Tommy Hilfiger, чёрные, S',
-      price: 7489,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111205591_1.jpg',
-    },
-    {
-      id: 'prod-003',
-      title: 'Брюки Tommy Hilfiger спортивные, зелёные, XL',
-      price: 10529,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720646433131_1.jpg',
-    },
-    {
-      id: 'prod-004',
-      title: 'Мужские спортивные брюки Nike French Terry, серые, S',
-      price: 2455,
-      category: 'Спортивная одежда',
-      imageUrl:
-        'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
-    },
-    {
-      id: 'prod-005',
-      title: 'Мужские спортивные брюки Nike Repeat, синие, L',
-      price: 2438,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919801_1.jpg',
-    },
-    {
-      id: 'prod-006',
-      title: 'Мужские спортивные брюки Nike Yoga Dri‑Fit, серые, L',
-      price: 2629,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/0194501845649_1.jpg',
-    },
-    {
-      id: 'prod-007',
-      title: 'Мужские спортивные брюки Nike Repeat, белые, L',
-      price: 2438,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919740_1.jpg',
-    },
-    {
-      id: 'prod-008',
-      title: 'Брюки Adidas GM5542, размер S',
-      price: 1632,
-      category: 'Спортивная одежда',
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/4064044668639_1.jpg',
-    },
-  ];
+  private productRepository = getProductRepository();
 
   constructor(props: ShopScreenProps) {
     this.props = props;
@@ -120,6 +61,20 @@ export class ShopScreen {
     this.subscribeToCartUpdates();
     // Show action bar based on initial cart state
     this.updateActionBarContent();
+  }
+
+  /**
+   * Получить продукты в формате ShopProduct из ProductRepository
+   */
+  private getShopProducts(): ShopProduct[] {
+    return this.productRepository.getSportsClothing().map(product => ({
+      id: product.id,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      category: product.category || 'Спортивная одежда',
+    }));
   }
 
   /**
@@ -315,7 +270,7 @@ export class ShopScreen {
   private groupProductsByCategory(): Array<{ title: string; products: ShopProduct[] }> {
     const categories = new Map<string, ShopProduct[]>();
 
-    this.mockProducts.forEach(product => {
+    this.getShopProducts().forEach(product => {
       if (!categories.has(product.category)) {
         categories.set(product.category, []);
       }
