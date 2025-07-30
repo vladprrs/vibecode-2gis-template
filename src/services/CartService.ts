@@ -232,4 +232,52 @@ export class CartService {
       this.notifyStateChange();
     }
   }
+
+  /**
+   * Get sample sports products for demo
+   */
+  getSampleProducts(): Product[] {
+    return [
+      {
+        id: 'sport-shirt-1',
+        title: 'Спортивная футболка Nike',
+        description: 'Дышащая футболка для тренировок',
+        price: 2500,
+        imageUrl: '/assets/images/products/sport-shirt.jpg',
+        badges: ['Хит продаж', 'Быстрая доставка'],
+      },
+      {
+        id: 'sport-pants-1',
+        title: 'Спортивные штаны Adidas',
+        description: 'Удобные штаны для фитнеса',
+        price: 3200,
+        imageUrl: '/assets/images/products/sport-pants.jpg',
+        badges: ['Новинка'],
+      },
+      {
+        id: 'sport-shoes-1',
+        title: 'Кроссовки Nike Air Max',
+        description: 'Профессиональные кроссовки для бега',
+        price: 8900,
+        imageUrl: '/assets/images/products/sport-shoes.jpg',
+        badges: ['Премиум', 'Гарантия'],
+      },
+      {
+        id: 'sport-bag-1',
+        title: 'Спортивная сумка Under Armour',
+        description: 'Вместительная сумка для спортивного инвентаря',
+        price: 1800,
+        imageUrl: '/assets/images/products/sport-bag.jpg',
+        badges: ['Скидка'],
+      },
+      {
+        id: 'sport-water-1',
+        title: 'Бутылка для воды 0.5л',
+        description: 'Экологичная бутылка для тренировок',
+        price: 450,
+        imageUrl: '/assets/images/products/water-bottle.jpg',
+        badges: ['Эко'],
+      },
+    ];
+  }
 }

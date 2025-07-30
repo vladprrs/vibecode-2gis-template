@@ -39,28 +39,34 @@ The application uses a service-oriented architecture where business logic is
 separated from UI components:
 
 - **SearchFlowManager** (`src/services/SearchFlowManager.ts`) - Handles
-  navigation between screens (Dashboard → Suggest → SearchResult → Organization)
+  navigation between screens (Dashboard → Suggest → SearchResult → Organization → Shop → Cart)
   and manages search state context
 - **BottomsheetManager** (`src/services/BottomsheetManager.ts`) - Controls
   bottomsheet state transitions with snap points at 20%, 55%, 90%, and 95%
   heights
-- **BottomsheetScrollManager** - Manages scroll behavior differences between
+- **BottomsheetScrollManager** (`src/services/BottomsheetScrollManager.ts`) - Manages scroll behavior differences between
   fixed-height and scrollable content modes
+- **BottomsheetGestureManager** (`src/services/BottomsheetGestureManager.ts`) - Handles touch gestures and drag interactions
+- **BottomsheetAnimationManager** (`src/services/BottomsheetAnimationManager.ts`) - Manages smooth transitions and animations
 - **ContentManager** (`src/services/ContentManager.ts`) - Dynamically manages
   bottomsheet content for different screen states, handles suggestion rendering
   and search result display
 - **FilterBarManager** (`src/services/FilterBarManager.ts`) - Manages fixed
   filter bar overlay with show/hide functionality for search result filtering
-- **MapSyncService** - Synchronizes 2GIS MapGL viewport with UI state changes
+- **CartService** (`src/services/CartService.ts`) - Manages shopping cart state,
+  product operations, and cart events
+- **MapManager** (`src/services/MapManager.ts`) - Handles 2GIS MapGL integration,
+  map initialization, and map operations
+- **MapSyncService** (`src/services/MapSyncService.ts`) - Synchronizes 2GIS MapGL viewport with UI state changes
 
 ### Screen Architecture
 
 Screens are TypeScript classes that compose components and coordinate with
 services:
 
-- **DashboardScreen** - Main screen combining 2GIS MapGL with interactive
+- **DashboardScreen** (`src/components/Screens/DashboardScreen.ts`) - Main screen combining 2GIS MapGL with interactive
   bottomsheet, using factory pattern for instantiation
-- **SearchResultScreen, SuggestScreen, OrganizationScreen** - Additional screens
+- **SearchResultScreen, SuggestScreen, OrganizationScreen, ShopScreen, CartScreen** - Additional screens
   managed by SearchFlowManager
 
 ### Component System
@@ -75,6 +81,9 @@ Components follow a composition pattern rather than inheritance:
 - **Search/** - SearchBar, SearchFilters, SearchSuggestions with state
   management
 - **Cards/** - OrganizationCard for displaying search results
+- **Dashboard/** - ButtonRow, StoriesCarousel, AdviceGrid for dashboard-specific components
+- **Map/** - MapContainer, MapGLComponent for map integration
+- **Organization/** - TabBar for organization details
 - All components have `destroy()` methods for proper cleanup
 
 ### State Management Pattern
@@ -100,14 +109,14 @@ const unsubscribe = searchFlowManager.onScreenChange((screen) => {...});
 ### 2GIS MapGL Integration
 
 - Async initialization with fallback when MapGL API unavailable
-- Map component waits for `window.mapgl` global before initializing
+- MapManager handles map initialization and operations
 - Graceful degradation shows placeholder when map fails to load
 - Marker management with temporary markers for user interactions
 
 ### Application Entry Point
 
 - `src/main.ts` is the main application entry point using modular TypeScript
-  components
+  components with App class pattern
 - `index.html` loads the main application with demo controls for testing
   different states
 - Demo controls allow testing different bottomsheet states and map interactions
@@ -145,3 +154,23 @@ Components communicate through events rather than direct method calls:
 - **dashboard.css** - Main application styling
 - **figma-components.css** - Component-specific styles matching Figma designs
 - **demo-controls.css** - Development-only control panel styling
+
+### New Features Added
+
+- **CartService** - Shopping cart functionality with product management
+- **ShopScreen** - Product catalog and shopping interface
+- **CartScreen** - Shopping cart management screen
+- **MapManager** - Centralized map operations and initialization
+- **FilterBarManager** - Enhanced filter bar management
+- **ContentManager** - Dynamic content management for different screen states
+- **BottomsheetGestureManager** - Advanced gesture handling
+- **BottomsheetAnimationManager** - Smooth animation management
+
+### Key Architectural Changes
+
+- **Factory Pattern** - DashboardScreenFactory for consistent object creation
+- **Promise-based Animations** - Bottomsheet animations return promises
+- **Immutable Cart State** - Cart operations create new state objects
+- **Enhanced Event System** - More detailed event callbacks with from/to states
+- **Service Composition** - Multiple specialized services instead of monolithic classes
+- **Type Safety** - Enhanced TypeScript types for all new features

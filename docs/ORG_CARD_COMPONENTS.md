@@ -1,61 +1,276 @@
-# Organization Card - Not Advertiser Fullscreen
+# Organization Card Components
 
-This document describes the structure of the organization (POI) card exported from Figma under `figma_export/org/state_not_advertiser_fullscreen` and lists which UI components from `figma_export/org/components` are used.
+## 📋 Overview
 
-## Source
-- Figma export page: [`figma_export/org/state_not_advertiser_fullscreen/pages/0001.html`](../figma_export/org/state_not_advertiser_fullscreen/pages/0001.html)
-- Preview image: [`figma_export/org/state_not_advertiser_fullscreen/assets/images/img-408e4063.jpg`](../figma_export/org/state_not_advertiser_fullscreen/assets/images/img-408e4063.jpg)
+This document describes the organization card components and their usage in the 2GIS template application.
 
-The export represents a mobile bottomsheet in fullscreen mode (`state_not_advertiser_fullscreen`). It combines several reusable components defined in `figma_export/org/components`.
+## 🏗️ Component Architecture
 
-## Component blocks
-Below is a list of high‑level blocks that appear in the card. Component folder paths are given for reference.
+### OrganizationCard
 
-1. **Header** – shows organization name and controls.
-   - Folder: [`figma_export/org/components/header_not_advertiser`](../figma_export/org/components/header_not_advertiser)
-2. **Alert** – optional notice (e.g., "temporarily closed").
-   - Folder: [`figma_export/org/components/alert`](../figma_export/org/components/alert)
-3. **About** – short description of the company.
-   - Folder: [`figma_export/org/components/about`](../figma_export/org/components/about)
-4. **Address** – location information and route buttons.
-   - Folder: [`figma_export/org/components/adress`](../figma_export/org/components/adress)
-5. **Contacts** – phone number, website and messenger buttons.
-   - Folder: [`figma_export/org/components/contacts`](../figma_export/org/components/contacts)
-6. **Worktime** – opening hours block.
-   - Folder: [`figma_export/org/components/worktime`](../figma_export/org/components/worktime)
-7. **Menu** – list of goods or services (if available).
-   - Folder: [`figma_export/org/components/menu`](../figma_export/org/components/menu)
-8. **Feedback** – customer reviews summary.
-   - Folder: [`figma_export/org/components/feedback`](../figma_export/org/components/feedback)
-9. **Friends** – activity of user’s friends in the app.
-   - Folder: [`figma_export/org/components/friends`](../figma_export/org/components/friends)
-10. **Branches** – information about additional locations.
-    - Folder: [`figma_export/org/components/branch`](../figma_export/org/components/branch)
-11. **Discounts** – promotions and special offers.
-    - Folder: [`figma_export/org/components/discounts`](../figma_export/org/components/discounts)
-12. **Info** – extra details about the organization.
-    - Folder: [`figma_export/org/components/info`](../figma_export/org/components/info)
-13. **Tab bar** – tabs for switching between Overview, Menu, Photos, Reviews, Info and Discounts.
-    - Folder: [`figma_export/org/components/tabbar`](../figma_export/org/components/tabbar)
-14. **Bottom action bar** – fixed row of quick actions at the bottom (call, route, etc.).
-    - Folder: [`figma_export/org/components/actionbar_full`](../figma_export/org/components/actionbar_full)
+Main component for displaying organization information in search results and details.
 
-Additional minor elements such as icons and buttons come from subcomponents inside each folder. The stylesheets referenced by the page are located in `assets/styles` inside the state folder.
+#### Location
+`src/components/Cards/OrganizationCard.ts`
 
-## Typical order of blocks
-The fullscreen card shows the following sequence from top to bottom (as seen in the exported HTML and image):
+#### Props Interface
+```typescript
+interface OrganizationCardProps {
+  showRating?: boolean;
+  showDistance?: boolean;
+  showAddress?: boolean;
+  onClick?: (organization: Organization) => void;
+  onCallClick?: (phone: string) => void;
+  onRouteClick?: (coordinates: [number, number]) => void;
+}
+```
 
-1. Header with dragger and action buttons.
-2. Alert message (if present).
-3. About section.
-4. Address block with route button(s).
-5. Contacts information.
-6. Worktime schedule.
-7. Menu or other main content.
-8. Feedback (reviews).
-9. Friends activity block.
-10. Branches / Discounts / Additional info (if available).
-11. Tab bar for switching between sections.
-12. Bottom action bar (persistent at the very bottom).
+#### Methods
+```typescript
+class OrganizationCard {
+  updateOrganization(organization: Organization): void
+  highlight(): void
+  removeHighlight(): void
+  destroy(): void
+}
+```
 
-This order corresponds to the component arrangement in the exported Figma page `0001.html`.
+#### Usage Example
+```typescript
+import { OrganizationCard } from '@/components/Cards';
+
+const organization = {
+  id: '1',
+  name: 'Coffee Shop',
+  address: 'Moscow, Tverskaya st. 1',
+  coordinates: [37.620393, 55.75396],
+  isAdvertiser: true,
+  rating: 4.5,
+  reviewsCount: 128,
+  category: 'Cafe',
+  phone: '+7 (495) 123-45-67'
+};
+
+const card = new OrganizationCard(container, organization, {
+  showRating: true,
+  showDistance: true,
+  onClick: (org) => {
+    searchFlowManager.goToOrganization(org);
+  },
+  onCallClick: (phone) => {
+    window.open(`tel:${phone}`);
+  }
+});
+```
+
+### OrganizationScreen
+
+Screen component for displaying detailed organization information.
+
+#### Location
+`src/components/Screens/OrganizationScreen.ts`
+
+#### Features
+- Organization details display
+- Contact information
+- Working hours
+- Photos and gallery
+- Reviews and ratings
+- Map integration
+- Action buttons (call, route, website)
+
+#### Content Structure
+```typescript
+interface OrganizationContent {
+  mainCard: HTMLElement;      // Organization header with basic info
+  tabs: HTMLElement;          // Tab navigation (Info, Photos, Reviews)
+  contacts: HTMLElement;      // Contact information
+  actions: HTMLElement;       // Action buttons
+  map: HTMLElement;          // Embedded map
+}
+```
+
+### TabBar
+
+Navigation component for organization details tabs.
+
+#### Location
+`src/components/Organization/TabBar.ts`
+
+#### Tab Types
+```typescript
+enum OrganizationTab {
+  INFO = 'info',
+  PHOTOS = 'photos',
+  REVIEWS = 'reviews',
+  CONTACTS = 'contacts'
+}
+```
+
+#### Usage
+```typescript
+import { TabBar } from '@/components/Organization';
+
+const tabBar = new TabBar(container, {
+  activeTab: OrganizationTab.INFO,
+  onTabChange: (tab) => {
+    updateContent(tab);
+  }
+});
+```
+
+## 🎨 Styling
+
+### CSS Classes
+- `.organization-card` - Main card container
+- `.organization-card--advertiser` - Advertiser styling
+- `.organization-card__header` - Card header
+- `.organization-card__title` - Organization name
+- `.organization-card__rating` - Rating display
+- `.organization-card__address` - Address information
+- `.organization-card__actions` - Action buttons
+
+### Responsive Design
+- Mobile-first approach (375px max-width)
+- Touch-friendly interactions
+- Proper spacing for mobile devices
+- Optimized for thumb navigation
+
+## 🔄 State Management
+
+### Organization Data Flow
+```
+Search Results → Organization Card → Organization Screen → Tab Content
+```
+
+### Event Handling
+```typescript
+// Card click events
+organizationCard.onClick = (organization) => {
+  searchFlowManager.goToOrganization(organization);
+};
+
+// Contact action events
+organizationCard.onCallClick = (phone) => {
+  window.open(`tel:${phone}`);
+};
+
+organizationCard.onRouteClick = (coordinates) => {
+  mapManager.centerOn(coordinates);
+  mapManager.addRoute(coordinates);
+};
+```
+
+## 📱 Mobile Optimization
+
+### Touch Interactions
+- Large touch targets (44px minimum)
+- Swipe gestures for tab navigation
+- Pull-to-refresh for content updates
+- Long press for additional actions
+
+### Performance
+- Lazy loading of images
+- Virtual scrolling for large lists
+- Debounced search interactions
+- Optimized animations
+
+## 🧪 Testing
+
+### Component Testing
+```typescript
+describe('OrganizationCard', () => {
+  let container: HTMLElement;
+  let organization: Organization;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    organization = createMockOrganization();
+  });
+
+  it('should render organization information', () => {
+    const card = new OrganizationCard(container, organization);
+    
+    expect(container.querySelector('.organization-card__title'))
+      .toHaveTextContent(organization.name);
+  });
+
+  it('should handle click events', () => {
+    const onClick = jest.fn();
+    const card = new OrganizationCard(container, organization, { onClick });
+    
+    container.querySelector('.organization-card')?.click();
+    
+    expect(onClick).toHaveBeenCalledWith(organization);
+  });
+});
+```
+
+## 🔧 Configuration
+
+### Default Settings
+```typescript
+const DEFAULT_ORGANIZATION_CARD_CONFIG = {
+  showRating: true,
+  showDistance: true,
+  showAddress: true,
+  maxTitleLength: 50,
+  ratingPrecision: 1,
+  distanceUnit: 'km'
+};
+```
+
+### Customization
+```typescript
+// Custom card styling
+const customCard = new OrganizationCard(container, organization, {
+  showRating: false,
+  showDistance: false,
+  customStyles: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: '12px'
+  }
+});
+```
+
+## 📊 Analytics Integration
+
+### Event Tracking
+```typescript
+// Track card interactions
+organizationCard.onClick = (organization) => {
+  analytics.track('organization_card_click', {
+    organizationId: organization.id,
+    organizationName: organization.name,
+    category: organization.category,
+    position: cardPosition
+  });
+  
+  searchFlowManager.goToOrganization(organization);
+};
+```
+
+### Metrics
+- Card view impressions
+- Click-through rates
+- Time spent on organization details
+- Contact action usage (call, route, website)
+
+## 🔄 Future Enhancements
+
+### Planned Features
+- **Rich Media Support** - Video content and 360° photos
+- **Social Integration** - Share buttons and social proof
+- **Personalization** - User preferences and history
+- **Offline Support** - Cached organization data
+- **Accessibility** - Screen reader support and keyboard navigation
+
+### Technical Improvements
+- **Virtual Scrolling** - For large organization lists
+- **Image Optimization** - WebP format and lazy loading
+- **Caching Strategy** - Intelligent data caching
+- **Performance Monitoring** - Real-time performance metrics
+
+---
+
+This component system provides a flexible and extensible foundation for displaying organization information in 2GIS applications.

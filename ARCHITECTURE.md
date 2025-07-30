@@ -11,14 +11,16 @@ VibeCode 2GIS Template follows a **modular component-based architecture** with c
 │                    Browser Layer                         │
 ├─────────────────────────────────────────────────────────┤
 │  main.ts (Entry Point)                                  │
-│  ├── DashboardApp                                       │
-│  └── Event Handlers                                     │
+│  ├── App Class                                          │
+│  └── Global Error Handlers                              │
 ├─────────────────────────────────────────────────────────┤
 │                   Screen Layer                           │
 │  ├── DashboardScreen (Primary)                          │
 │  ├── SearchResultScreen                                 │
 │  ├── SuggestScreen                                      │
-│  └── OrganizationScreen                                 │
+│  ├── OrganizationScreen                                 │
+│  ├── ShopScreen                                         │
+│  └── CartScreen                                         │
 ├─────────────────────────────────────────────────────────┤
 │                 Component Layer                          │
 │  ├── Bottomsheet/                                       │
@@ -29,19 +31,37 @@ VibeCode 2GIS Template follows a **modular component-based architecture** with c
 │  │   ├── SearchBar                                      │
 │  │   ├── SearchFilters                                  │
 │  │   └── SearchSuggestions                              │
-│  └── Cards/                                             │
-│      └── OrganizationCard                               │
+│  ├── Cards/                                             │
+│  │   └── OrganizationCard                               │
+│  ├── Dashboard/                                         │
+│  │   ├── ButtonRow                                      │
+│  │   ├── StoriesCarousel                                │
+│  │   └── AdviceGrid                                     │
+│  ├── Filter/                                            │
+│  │   └── FilterBar                                      │
+│  ├── Map/                                               │
+│  │   ├── MapContainer                                   │
+│  │   └── MapGLComponent                                 │
+│  └── Organization/                                      │
+│      └── TabBar                                         │
 ├─────────────────────────────────────────────────────────┤
 │                 Service Layer                            │
 │  ├── SearchFlowManager (Navigation)                     │
 │  ├── BottomsheetManager (State)                         │
 │  ├── BottomsheetScrollManager (Scroll)                  │
-│  └── MapSyncService (Map Integration)                   │
+│  ├── BottomsheetGestureManager (Gestures)               │
+│  ├── BottomsheetAnimationManager (Animations)           │
+│  ├── ContentManager (Content Management)                │
+│  ├── FilterBarManager (Filter UI)                       │
+│  ├── CartService (Shopping Cart)                        │
+│  ├── MapManager (Map Integration)                       │
+│  └── MapSyncService (Map-UI Sync)                       │
 ├─────────────────────────────────────────────────────────┤
 │                   Type Layer                             │
 │  ├── bottomsheet.ts                                     │
 │  ├── navigation.ts                                      │
-│  └── map.ts                                             │
+│  ├── map.ts                                             │
+│  └── index.ts                                           │
 ├─────────────────────────────────────────────────────────┤
 │                External Dependencies                     │
 │  ├── 2GIS MapGL API                                     │
@@ -54,10 +74,12 @@ VibeCode 2GIS Template follows a **modular component-based architecture** with c
 
 ### 1. Single Responsibility
 Each class has one clear purpose:
-- **DashboardScreen** - Renders main UI with map
-- **SearchFlowManager** - Handles navigation logic
-- **BottomsheetManager** - Manages bottomsheet states
-- **MapSyncService** - Synchronizes map with UI
+- **DashboardScreen** - Renders main UI with map and coordinates all components
+- **SearchFlowManager** - Handles navigation logic and search state
+- **BottomsheetManager** - Manages bottomsheet states and transitions
+- **ContentManager** - Manages dynamic content for different screens
+- **CartService** - Handles shopping cart state and operations
+- **MapSyncService** - Synchronizes map with UI state
 
 ### 2. Dependency Injection
 Components receive dependencies through constructors:
@@ -66,7 +88,9 @@ class DashboardScreen {
   constructor(props: DashboardScreenProps) {
     this.searchFlowManager = props.searchFlowManager;
     this.bottomsheetManager = props.bottomsheetManager;
-    this.mapSyncService = props.mapSyncService;
+    this.filterBarManager = props.filterBarManager;
+    this.cartService = props.cartService;
+    this.mapManager = props.mapManager;
   }
 }
 ```
@@ -110,11 +134,13 @@ this.searchContext = {
 class DashboardScreen {
   // Dependencies
   private props: DashboardScreenProps;
-  private mapComponent: any;
+  private mapManager: MapManager;
   
   // Child components
   private bottomsheetContainer?: BottomsheetContainer;
   private searchBar?: SearchBar;
+  private filterBarManager: FilterBarManager;
+  private cartService: CartService;
   
   // Lifecycle
   async initialize(): Promise<void>
@@ -124,12 +150,14 @@ class DashboardScreen {
   activate(): void
   deactivate(): void
   snapToState(state: BottomsheetState): void
+  handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void
 }
 ```
 
 **Responsibilities**:
 - Map initialization and 2GIS MapGL integration
 - Bottomsheet creation and configuration
+- Screen state management (Dashboard/Suggest/SearchResult/Organization/Shop/Cart)
 - Event handling for user interactions
 - Component lifecycle management
 
@@ -142,6 +170,8 @@ User Input → DashboardScreen → Services → State Update → UI Rerender
 - **SearchResultScreen** - Displays search results with filters
 - **SuggestScreen** - Shows search suggestions and history
 - **OrganizationScreen** - Detailed organization information
+- **ShopScreen** - Product catalog and shopping interface
+- **CartScreen** - Shopping cart management
 
 ### Service Architecture
 
@@ -160,7 +190,10 @@ class SearchFlowManager implements ISearchFlowManager {
   goToSuggest(): void
   goToSearchResults(query: string, filters?: SearchFilters): void
   goToOrganization(organization: Organization): void
+  goToShop(shop: Shop): void
+  goToCart(): void
   goBack(): void
+  goToDashboard(): void
   
   // Search
   updateQuery(query: string): void
@@ -199,9 +232,11 @@ class BottomsheetManager {
   private config: BottomsheetConfig;
   
   // State management
-  snapToState(state: BottomsheetState): void
-  getCurrentState(): BottomsheetStateInfo
-  getScrollState(): ScrollState | null
+  snapToState(state: BottomsheetState): Promise<void>
+  getCurrentState(): BottomsheetStateData
+  startDrag(startY: number): void
+  handleDrag(deltaY: number): void
+  endDrag(velocity: number, currentHeight: number): Promise<void>
   
   // Events
   onStateChange(callback: (state: BottomsheetState) => void): () => void
@@ -215,19 +250,57 @@ SMALL ←→ DEFAULT ←→ FULLSCREEN ←→ FULLSCREEN_SCROLL
  20%       55%         90%            95%
 ```
 
+#### ContentManager
+**Purpose**: Dynamic content management for different screen states
+**Location**: `src/services/ContentManager.ts`
+
+```typescript
+class ContentManager {
+  // Content management
+  updateContentForSuggest(contentContainer: HTMLElement): void
+  updateContentForDashboard(contentContainer: HTMLElement): void
+  updateContentForSearchResult(contentContainer: HTMLElement, context: SearchContext): void
+  updateContentForOrganization(contentContainer: HTMLElement, organization: Organization): void
+}
+```
+
+#### CartService
+**Purpose**: Shopping cart state management
+**Location**: `src/services/CartService.ts`
+
+```typescript
+class CartService {
+  // Cart operations
+  addToCart(product: Product, quantity?: number): void
+  removeFromCart(productId: string): void
+  updateQuantity(productId: string, newQuantity: number): void
+  clearCart(): void
+  
+  // State queries
+  getState(): CartState
+  getProductQuantity(productId: string): number
+  isInCart(productId: string): boolean
+  
+  // Events
+  subscribe(callback: (state: CartState) => void): () => void
+}
+```
+
 ### Component Hierarchy
 
 ```
 DashboardScreen
 ├── MapComponent (2GIS MapGL)
-└── BottomsheetContainer
-    ├── BottomsheetHeader
-    │   └── SearchBar
-    └── BottomsheetContent
-        ├── ButtonsRow
-        ├── StoriesSection
-        ├── ContentGrid
-        └── ScrollableContent
+├── BottomsheetContainer
+│   ├── BottomsheetHeader
+│   │   └── SearchBar
+│   └── BottomsheetContent
+│       ├── ButtonRow
+│       ├── StoriesCarousel
+│       ├── ContentGrid
+│       └── ScrollableContent
+├── FilterBarManager
+└── CartService
 ```
 
 ## 🔄 Data Flow Patterns
@@ -333,13 +406,17 @@ export class DashboardScreenFactory {
     container: HTMLElement,
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
-    mapApiKey?: string
+    filterBarManager: FilterBarManager,
+    cartService: CartService,
+    mapManager: MapManager
   ): DashboardScreen {
     return new DashboardScreen({
       container,
       searchFlowManager,
       bottomsheetManager,
-      mapApiKey
+      filterBarManager,
+      cartService,
+      mapManager
     });
   }
 }
@@ -364,10 +441,18 @@ interface NavigationEvents {
 }
 
 interface BottomsheetEvents {
-  onStateChange?: (newState: BottomsheetState) => void;
+  onStateChange?: (fromState: BottomsheetState, toState: BottomsheetState) => void;
   onDragStart?: (height: number) => void;
   onDrag?: (height: number, progress: number) => void;
   onDragEnd?: (startHeight: number, endHeight: number) => void;
+  onSnapToState?: (targetState: BottomsheetState) => void;
+}
+
+interface CartEvents {
+  onCartUpdated?: (state: CartState) => void;
+  onItemAdded?: (item: CartItem) => void;
+  onItemRemoved?: (productId: string) => void;
+  onQuantityChanged?: (productId: string, newQuantity: number) => void;
 }
 ```
 
@@ -398,26 +483,19 @@ class ServiceWithEvents {
 
 ## 🗺️ Map Integration Architecture
 
-### MapGL Integration Pattern
+### MapManager Integration Pattern
 ```typescript
 class DashboardScreen {
   private async createRealMap(container: HTMLElement): Promise<void> {
-    // 1. Wait for MapGL API
-    await this.waitForMapGL();
+    // 1. Use MapManager for initialization
+    await this.mapManager.initialize(container);
     
-    // 2. Create map instance
-    this.mapComponent = new (window as any).mapgl.Map(containerId, {
-      center: [37.620393, 55.75396],
-      zoom: 12,
-      key: this.props.mapApiKey
-    });
+    // 2. Setup event handlers
+    this.mapManager.on('click', this.handleMapClick.bind(this));
+    this.mapManager.on('styleload', this.handleMapReady.bind(this));
     
-    // 3. Setup event handlers
-    this.mapComponent.on('click', this.handleMapClick.bind(this));
-    this.mapComponent.on('styleload', this.handleMapReady.bind(this));
-    
-    // 4. Add initial markers
-    this.addTestMarkers();
+    // 3. Add initial markers
+    this.mapManager.addTestMarkers();
   }
   
   private createFallbackMap(container: HTMLElement): void {
@@ -456,6 +534,8 @@ class DashboardScreen {
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
+  private filterBarManager: FilterBarManager;
+  private cartService: CartService;
   
   private createBottomsheet(): void {
     // Create container
@@ -533,18 +613,27 @@ describe('DashboardScreen', () => {
   let container: HTMLElement;
   let searchFlowManager: SearchFlowManager;
   let bottomsheetManager: BottomsheetManager;
+  let filterBarManager: FilterBarManager;
+  let cartService: CartService;
+  let mapManager: MapManager;
   
   beforeEach(() => {
     container = document.createElement('div');
     searchFlowManager = new SearchFlowManager();
     bottomsheetManager = new BottomsheetManager();
+    filterBarManager = new FilterBarManager();
+    cartService = new CartService();
+    mapManager = new MapManager({ mapApiKey: 'test-key' });
   });
   
   it('should initialize with map and bottomsheet', async () => {
     const screen = new DashboardScreen({
       container,
       searchFlowManager,
-      bottomsheetManager
+      bottomsheetManager,
+      filterBarManager,
+      cartService,
+      mapManager
     });
     
     await screen.initialize();

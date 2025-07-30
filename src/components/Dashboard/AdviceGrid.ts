@@ -40,10 +40,10 @@ export class AdviceGrid {
     leftColumn.appendChild(largeCoverCard);
 
     // Meta Items in left column
-    const metaItem1 = this.createMetaItem('Воскресные бранчи', '156 мест', '🍴');
+    const metaItem1 = this.createMetaItem('Спортивная одежда', '24 магазина', '👕');
     leftColumn.appendChild(metaItem1);
 
-    const metaItem2 = this.createMetaItem('Банкоматы', 'Number', '🏧');
+    const metaItem2 = this.createMetaItem('Спортивное питание', '18 магазинов', '🥤');
     leftColumn.appendChild(metaItem2);
 
     // Small Cover Card
@@ -66,7 +66,7 @@ export class AdviceGrid {
     rightColumn.appendChild(metaItemAd);
 
     // Meta Item
-    const metaItem3 = this.createMetaItem('Школьная форма', '112 мест', '🎓');
+    const metaItem3 = this.createMetaItem('Фитнес тренеры', '45 специалистов', '💪');
     rightColumn.appendChild(metaItem3);
 
     // RD Card
@@ -139,7 +139,7 @@ export class AdviceGrid {
       line-height: 20px;
       letter-spacing: -0.24px;
     `;
-    titleText.textContent = 'Туристический слой';
+    titleText.textContent = 'Спортивная одежда';
 
     // Subtitle
     const subtitle = document.createElement('div');
@@ -161,12 +161,12 @@ export class AdviceGrid {
       line-height: 18px;
       letter-spacing: -0.28px;
     `;
-    subtitleText.textContent = 'Лучшие места города на карте';
+    subtitleText.textContent = 'Лучшие магазины спортивной одежды';
 
     // Image
     const image = document.createElement('img');
     image.src = '/assets/images/promo/img-c1dcdcdd.png';
-    image.alt = 'Туристический слой';
+    image.alt = 'Спортивная одежда';
     image.style.cssText = `
       display: flex;
       flex-direction: column;
@@ -189,7 +189,7 @@ export class AdviceGrid {
     card.appendChild(cardContainer);
 
     card.addEventListener('click', () => {
-      this.props.onItemClick?.('promo-card');
+      this.props.onItemClick?.('sport-clothing');
     });
 
     return card;
@@ -266,7 +266,7 @@ export class AdviceGrid {
       font-size: 16px;
       color: rgba(255,255,255,1);
     `;
-    titleText.textContent = 'Товары для ремонта';
+    titleText.textContent = 'Спортивная обувь';
 
     // Subtitle
     const subtitle = document.createElement('div');
@@ -287,7 +287,7 @@ export class AdviceGrid {
       font-size: 13px;
       color: rgba(255,255,255,1);
     `;
-    subtitleText.textContent = '13 мест';
+    subtitleText.textContent = '18 магазинов';
 
     title.appendChild(titleText);
     subtitle.appendChild(subtitleText);
@@ -299,7 +299,7 @@ export class AdviceGrid {
     card.appendChild(content);
 
     card.addEventListener('click', () => {
-      this.props.onItemClick?.('small-cover');
+      this.props.onItemClick?.('sport-shoes');
     });
 
     return card;
@@ -587,7 +587,7 @@ export class AdviceGrid {
       font-size: 16px;
       color: rgba(20,20,20,1);
     `;
-    titleText.textContent = 'Xiaomi';
+    titleText.textContent = 'Nike';
 
     // Subtitle
     const subtitleDiv = document.createElement('div');
@@ -625,7 +625,7 @@ export class AdviceGrid {
     card.appendChild(cardContent);
 
     card.addEventListener('click', () => {
-      this.props.onItemClick?.('xiaomi-ad');
+      this.props.onItemClick?.('nike-ad');
     });
 
     return card;
@@ -806,7 +806,7 @@ export class AdviceGrid {
       font-size: 16px;
       color: rgba(20,20,20,1);
     `;
-    titleText.textContent = 'Geraldine';
+    titleText.textContent = 'СпортМаркет';
 
     // Container position for badges
     const containerPosition = document.createElement('div');
@@ -858,7 +858,7 @@ export class AdviceGrid {
       font-size: 14px;
       color: rgba(137,137,137,1);
     `;
-    subtitleText.textContent = 'Необистро';
+    subtitleText.textContent = 'Спортивные товары';
 
     // Secondary line
     const secondaryLine = document.createElement('div');
@@ -1040,7 +1040,7 @@ export class AdviceGrid {
     card.appendChild(content);
 
     card.addEventListener('click', () => {
-      this.props.onItemClick?.('geraldine-rd');
+      this.props.onItemClick?.('sportmarket-rd');
     });
 
     return card;

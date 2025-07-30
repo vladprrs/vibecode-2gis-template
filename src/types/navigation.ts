@@ -86,6 +86,14 @@ export interface Product {
   badges?: string[];
   /** Количество в корзине */
   quantity?: number;
+  /** Категория товара */
+  category?: string;
+  /** Размер (для одежды) */
+  size?: string;
+  /** Цвет */
+  color?: string;
+  /** Бренд */
+  brand?: string;
 }
 
 /**
@@ -100,6 +108,8 @@ export interface ProductCategory {
   count: number;
   /** Товары в категории */
   products: Product[];
+  /** Иконка категории */
+  icon?: string;
 }
 
 /**
@@ -118,6 +128,10 @@ export interface Shop {
   cartTotal?: number;
   /** Количество товаров в корзине */
   cartItemsCount?: number;
+  /** Тип магазина */
+  type?: 'sports' | 'fitness' | 'general';
+  /** Описание магазина */
+  description?: string;
 }
 
 /**

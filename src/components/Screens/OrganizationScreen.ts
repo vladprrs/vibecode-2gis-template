@@ -134,7 +134,7 @@ export class OrganizationScreen {
       container: tabBarContainer,
       items: [
         { label: 'Обзор' },
-        { label: 'Меню', count: 213 },
+        { label: 'Вам может пригодиться', count: 45 },
         { label: 'Фото', count: 432 },
         { label: 'Отзывы', count: 232 },
         { label: 'Инфо' },
@@ -1009,7 +1009,7 @@ export class OrganizationScreen {
       lineHeight: '20px',
       letterSpacing: '-0.24px',
     });
-    title.textContent = 'Меню';
+    title.textContent = 'Вам может пригодиться';
 
     const arrowIcon = document.createElement('div');
     Object.assign(arrowIcon.style, {
@@ -1139,7 +1139,7 @@ export class OrganizationScreen {
         color: '#898989',
         fontSize: '32px',
       });
-      placeholder.textContent = '🍔';
+      placeholder.textContent = '👕';
       photo.appendChild(placeholder);
     }
 
@@ -1192,25 +1192,25 @@ export class OrganizationScreen {
   private getDemoProducts(): Product[] {
     return [
       {
-        id: '1',
-        title: 'Бургер из мраморной говядины',
-        description: 'Бургер из мраморной говядины',
-        price: 1249,
-        imageUrl: '/figma_export/org/components/menu/assets/images/img-e3ea464a.png',
+        id: 'sport-shirt-1',
+        title: 'Спортивная футболка Nike',
+        description: 'Дышащая футболка для тренировок',
+        price: 2500,
+        imageUrl: '/assets/images/products/sport-shirt.jpg',
       },
       {
-        id: '2', 
-        title: 'Бургер классический',
-        description: 'Бургер из мраморной говядины',
-        price: 1249,
-        imageUrl: '/figma_export/org/components/menu/assets/images/img-7e5b752f.png',
+        id: 'sport-pants-1', 
+        title: 'Спортивные штаны Adidas',
+        description: 'Удобные штаны для фитнеса',
+        price: 3200,
+        imageUrl: '/assets/images/products/sport-pants.jpg',
       },
       {
-        id: '3',
-        title: 'Бургер премиум',
-        description: 'Бургер из мраморной говядины', 
-        price: 1249,
-        imageUrl: '/figma_export/org/components/menu/assets/images/img-9be8206d.png',
+        id: 'sport-shoes-1',
+        title: 'Кроссовки Nike Air Max',
+        description: 'Профессиональные кроссовки для бега', 
+        price: 8900,
+        imageUrl: '/assets/images/products/sport-shoes.jpg',
       },
     ];
   }
@@ -1224,58 +1224,77 @@ export class OrganizationScreen {
       name: this.props.organization.name,
       categories: [
         {
-          id: 'burgers',
-          name: 'Бургеры',
+          id: 'sport-clothing',
+          name: 'Спортивная одежда',
           count: 15,
           products: [
             {
-              id: '1',
-              title: 'Бургер из мраморной говядины',
-              description: 'Котлета из мраморной говядины, сыр чеддер, томаты, лук, соус бургер',
-              price: 1249,
-              imageUrl: '/figma_export/shop/state_default/assets/images/img-5e00bc93.png',
+              id: 'sport-shirt-1',
+              title: 'Спортивная футболка Nike',
+              description: 'Дышащая футболка для тренировок из высококачественного материала',
+              price: 2500,
+              imageUrl: '/assets/images/products/sport-shirt.jpg',
+              category: 'sport-clothing',
+              brand: 'Nike',
             },
             {
-              id: '2',
-              title: 'Тако Гранде «Чизбургер»',
-              description: 'Котлета из мраморной говядины, халапеньо, томаты, сыр, соус чипотле...',
-              price: 480,
-              imageUrl: '/figma_export/shop/state_default/assets/images/img-a3dec8a0.png',
-            },
-          ],
-        },
-        {
-          id: 'soups',
-          name: 'Супы',
-          count: 1,
-          products: [
-            {
-              id: '3',
-              title: 'Суп «Позоле»',
-              description: 'Томатно-кукурузный суп на бычьих хвостах. 290 г',
-              price: 440,
-              imageUrl: '/figma_export/shop/state_default/assets/images/img-f9508205.png',
+              id: 'sport-pants-1',
+              title: 'Спортивные штаны Adidas',
+              description: 'Удобные штаны для фитнеса с эластичным поясом',
+              price: 3200,
+              imageUrl: '/assets/images/products/sport-pants.jpg',
+              category: 'sport-clothing',
+              brand: 'Adidas',
             },
           ],
         },
         {
-          id: 'street-food',
-          name: 'Стрит-фуд',
-          count: 3,
+          id: 'sport-shoes',
+          name: 'Спортивная обувь',
+          count: 8,
           products: [
             {
-              id: '4',
-              title: 'Гамбургер «Воппер»',
-              description: 'Томленая рваная говядина, соус чипотле, сахар мускавадо, лук. 220 г',
-              price: 380,
-              imageUrl: '/figma_export/shop/state_default/assets/images/img-95094060.png',
+              id: 'sport-shoes-1',
+              title: 'Кроссовки Nike Air Max',
+              description: 'Профессиональные кроссовки для бега с амортизацией',
+              price: 8900,
+              imageUrl: '/assets/images/products/sport-shoes.jpg',
+              category: 'sport-shoes',
+              brand: 'Nike',
             },
             {
-              id: '5',
-              title: 'КорнДоги Сандерса (5 шт)',
-              description: 'Котлета из мраморной говядины, много сыра, сальса Пико-де-гальо, ма...',
-              price: 580,
-              imageUrl: '/figma_export/shop/state_default/assets/images/img-f532eee9.png',
+              id: 'sport-shoes-2',
+              title: 'Кроссовки Adidas Ultraboost',
+              description: 'Легкие кроссовки для бега с технологией Boost',
+              price: 12000,
+              imageUrl: '/assets/images/products/sport-shoes-2.jpg',
+              category: 'sport-shoes',
+              brand: 'Adidas',
+            },
+          ],
+        },
+        {
+          id: 'sport-accessories',
+          name: 'Спортивные аксессуары',
+          count: 12,
+          products: [
+            {
+              id: 'sport-bag-1',
+              title: 'Спортивная сумка Under Armour',
+              description: 'Вместительная сумка для спортивного инвентаря',
+              price: 1800,
+              imageUrl: '/assets/images/products/sport-bag.jpg',
+              category: 'sport-accessories',
+              brand: 'Under Armour',
+            },
+            {
+              id: 'sport-water-1',
+              title: 'Бутылка для воды 0.5л',
+              description: 'Экологичная бутылка для тренировок',
+              price: 450,
+              imageUrl: '/assets/images/products/water-bottle.jpg',
+              category: 'sport-accessories',
+              brand: 'Generic',
             },
           ],
         },
@@ -1283,6 +1302,8 @@ export class OrganizationScreen {
       products: [],
       cartTotal: 0,
       cartItemsCount: 0,
+      type: 'sports',
+      description: 'Магазин спортивных товаров при фитнес-клубе',
     };
 
     // Собираем все товары из категорий
