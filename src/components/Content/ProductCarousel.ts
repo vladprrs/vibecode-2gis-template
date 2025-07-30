@@ -16,6 +16,8 @@ export interface ProductCarouselProps {
   /** Обработчики событий */
   onProductClick?: (product: Product) => void;
   onAddToCart?: (product: Product) => void;
+  /** Обработчик клика на весь блок карусели для открытия магазина */
+  onCarouselClick?: () => void;
 }
 
 /**
@@ -206,6 +208,24 @@ export class ProductCarousel {
     this.element.appendChild(headerContainer);
     this.element.appendChild(gallery);
 
+    // Обработчик клика на весь блок карусели для открытия магазина
+    this.element.addEventListener('click', (event) => {
+      // Проверяем, что клик не на кнопке добавления в корзину или на отдельном товаре
+      const target = event.target as HTMLElement;
+      const isAddButton = target.closest('button') && target.closest('button')?.textContent === '+';
+      const isStepperButton = target.closest('button') && (target.closest('button')?.textContent === '−' || target.closest('button')?.textContent === '+');
+      const isProductItem = target.closest('.product-item');
+      
+      // Если клик не на кнопке добавления/удаления или на отдельном товаре, открываем магазин
+      if (!isAddButton && !isStepperButton && !isProductItem) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        console.log('Carousel clicked - opening shop');
+        this.props.onCarouselClick?.();
+      }
+    });
+
     // Обработчик клика для перехода к магазину (опционально)
     if (this.props.onProductClick) {
       headerContainer.addEventListener('click', () => {
@@ -234,6 +254,7 @@ export class ProductCarousel {
    */
   private createProductItem(product: Product): HTMLElement {
     const item = document.createElement('div');
+    item.className = 'product-item';
     Object.assign(item.style, {
       display: 'flex',
       flexDirection: 'column',

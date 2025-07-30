@@ -1,11 +1,16 @@
 import { Organization, SearchContext, SearchFlowManager } from '../types';
+import { CartService } from './CartService';
+import { ProductCarousel } from '../components/Content/ProductCarousel';
+import { Product } from '../types';
 
 export class ContentManager {
   private searchFlowManager: SearchFlowManager;
   private dashboardContent?: HTMLElement;
+  private cartService?: CartService;
 
-  constructor(searchFlowManager: SearchFlowManager) {
+  constructor(searchFlowManager: SearchFlowManager, cartService?: CartService) {
     this.searchFlowManager = searchFlowManager;
+    this.cartService = cartService;
   }
 
   updateContentForSuggest(contentContainer: HTMLElement): void {
@@ -421,20 +426,285 @@ export class ContentManager {
           workingHours: 'Круглосуточно',
         },
       },
+      {
+        id: 'advertiser-3',
+        type: 'advertiser',
+        title: 'СпортМакс',
+        subtitle: 'Современный спортивный комплекс',
+        rating: '4.7',
+        reviews: '189 оценок',
+        distance: '4 мин',
+        address: 'ул. Спортивная, 15, Москва',
+        adText: 'Скидка 30% на первый месяц!',
+        buttonText: 'Записаться на пробное',
+        hasCrown: true,
+        isAdvertiser: true,
+        organization: {
+          id: 'advertiser-3',
+          name: 'СпортМакс',
+          address: 'ул. Спортивная, 15, Москва',
+          coordinates: [37.6000, 55.7500] as [number, number],
+          isAdvertiser: true,
+          rating: 4.7,
+          reviewsCount: 189,
+          category: 'Фитнес-клуб',
+          description:
+            'Современный спортивный комплекс с тренажерным залом, бассейном и групповыми занятиями.',
+          phone: '+7 (495) 111-22-33',
+          workingHours: 'Пн-Вс: 06:00-23:00',
+        },
+      },
+      {
+        id: 'non-advertiser-2',
+        type: 'non-advertiser',
+        title: 'ФитнесПлюс',
+        subtitle: 'Демократичный фитнес-центр',
+        rating: '4.3',
+        reviews: '67 оценок',
+        distance: '8 мин',
+        address: 'ул. Фитнесная, 8, Москва',
+        parking: 'Платная парковка • Тренажерный зал',
+        buttonText: 'Записаться на занятие',
+        hasFriends: false,
+        isAdvertiser: false,
+        organization: {
+          id: 'non-advertiser-2',
+          name: 'ФитнесПлюс',
+          address: 'ул. Фитнесная, 8, Москва',
+          coordinates: [37.6100, 55.7400] as [number, number],
+          isAdvertiser: false,
+          rating: 4.3,
+          reviewsCount: 67,
+          category: 'Фитнес-клуб',
+          description:
+            'Демократичный фитнес-центр с доступными ценами и качественным оборудованием.',
+          phone: '+7 (495) 444-55-66',
+          workingHours: 'Пн-Вс: 08:00-22:00',
+        },
+      },
+      {
+        id: 'advertiser-4',
+        type: 'advertiser',
+        title: 'Премиум Фитнес',
+        subtitle: 'Элитный фитнес-клуб',
+        rating: '4.9',
+        reviews: '312 оценок',
+        distance: '6 мин',
+        address: 'Ленинградский проспект, 45, Москва',
+        adText: 'Персональный тренер в подарок!',
+        buttonText: 'Записаться онлайн',
+        hasCrown: true,
+        isAdvertiser: true,
+        organization: {
+          id: 'advertiser-4',
+          name: 'Премиум Фитнес',
+          address: 'Ленинградский проспект, 45, Москва',
+          coordinates: [37.5900, 55.7600] as [number, number],
+          isAdvertiser: true,
+          rating: 4.9,
+          reviewsCount: 312,
+          category: 'Фитнес-клуб',
+          description:
+            'Элитный фитнес-клуб с премиальным оборудованием и индивидуальным подходом.',
+          phone: '+7 (495) 777-88-99',
+          workingHours: 'Круглосуточно',
+        },
+      },
+    ];
+
+    // Get shared products data
+    const sharedProducts: Product[] = this.cartService?.getSampleProducts() || [
+      {
+        id: 'tommy-hilfiger-pants-blue-s',
+        title: 'Мужские спортивные брюки Tommy Hilfiger, синие, S',
+        description: 'Стильные спортивные брюки Tommy Hilfiger',
+        price: 7349,
+        imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111201494_1.jpg',
+        badges: ['Премиум', 'Быстрая доставка'],
+        brand: 'Tommy Hilfiger',
+        size: 'S',
+        color: 'синие',
+      },
+      {
+        id: 'tommy-hilfiger-pants-black-s',
+        title: 'Мужские спортивные брюки Tommy Hilfiger, чёрные, S',
+        description: 'Элегантные спортивные брюки Tommy Hilfiger',
+        price: 7489,
+        imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111205591_1.jpg',
+        badges: ['Премиум', 'Хит продаж'],
+        brand: 'Tommy Hilfiger',
+        size: 'S',
+        color: 'чёрные',
+      },
+      {
+        id: 'nike-pants-french-terry-gray-s',
+        title: 'Мужские спортивные брюки Nike French Terry, серые, S',
+        description: 'Дышащие спортивные брюки Nike',
+        price: 2455,
+        imageUrl: 'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
+        badges: ['Хит продаж', 'Быстрая доставка'],
+        brand: 'Nike',
+        size: 'S',
+        color: 'серые',
+      },
+      {
+        id: 'nike-pants-repeat-blue-l',
+        title: 'Мужские спортивные брюки Nike Repeat, синие, L',
+        description: 'Удобные спортивные брюки Nike',
+        price: 2438,
+        imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919801_1.jpg',
+        badges: ['Популярные'],
+        brand: 'Nike',
+        size: 'L',
+        color: 'синие',
+      },
+      {
+        id: 'adidas-pants-gm5542-s',
+        title: 'Брюки Adidas GM5542, размер S',
+        description: 'Спортивные брюки Adidas',
+        price: 1632,
+        imageUrl: 'https://cm.samokat.ru/processed/l/product_card/4064044668639_1.jpg',
+        badges: ['Доступные'],
+        brand: 'Adidas',
+        size: 'S',
+        color: 'чёрные',
+      },
     ];
 
     results.forEach((result, index) => {
       const resultCard = this.createResultCard(result);
       resultsContainer.appendChild(resultCard);
 
-      // if (index === 1) {
-      //   const banner = document.createElement('div');
-      //   banner.textContent = 'Promo';
-      //   resultsContainer.appendChild(banner);
-      // }
+      // Inject carousel after every 4th card or at least once near the top
+      if ((index + 1) % 4 === 0 || (index === 1 && results.length > 2)) {
+        const carouselContainer = this.createCarouselContainer(sharedProducts);
+        resultsContainer.appendChild(carouselContainer);
+      }
     });
 
     container.appendChild(resultsContainer);
+  }
+
+  /**
+   * Create carousel container with lazy loading
+   */
+  private createCarouselContainer(products: Product[]): HTMLElement {
+    const carouselContainer = document.createElement('div');
+    carouselContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      background: #FFF;
+      position: relative;
+      margin: 8px 0;
+    `;
+
+    // Create placeholder for lazy loading
+    const placeholder = document.createElement('div');
+    placeholder.style.cssText = `
+      height: 200px;
+      width: 100%;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: flex;
+      alignItems: center;
+      justifyContent: center;
+      color: #898989;
+      font-size: 14px;
+      font-family: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif';
+    `;
+    placeholder.textContent = 'Загрузка товаров...';
+    carouselContainer.appendChild(placeholder);
+
+    // Lazy load the carousel when it comes into view
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Replace placeholder with actual carousel
+              carouselContainer.innerHTML = '';
+                             if (this.cartService) {
+                 const carousel = new ProductCarousel({
+                   container: carouselContainer,
+                   cartService: this.cartService,
+                   products: products,
+                   onProductClick: (product) => {
+                     console.log('Product clicked:', product.title);
+                     // Could navigate to shop or product details
+                   },
+                   onAddToCart: (product) => {
+                     console.log('Product added to cart:', product.title);
+                     // CartService handles the state update automatically
+                   },
+                   onCarouselClick: () => {
+                     console.log('Carousel clicked - opening shop');
+                     // Открываем магазин через SearchFlowManager
+                     this.openShop();
+                   },
+                 });
+               }
+              observer.disconnect();
+            }
+          });
+        },
+        {
+          rootMargin: '50px', // Load 50px before entering viewport
+          threshold: 0.1,
+        }
+      );
+
+      observer.observe(carouselContainer);
+    } else {
+      // Fallback for older browsers - load immediately
+      carouselContainer.innerHTML = '';
+      if (this.cartService) {
+        const carousel = new ProductCarousel({
+          container: carouselContainer,
+          cartService: this.cartService,
+          products: products,
+          onProductClick: (product) => {
+            console.log('Product clicked:', product.title);
+          },
+          onAddToCart: (product) => {
+            console.log('Product added to cart:', product.title);
+          },
+          onCarouselClick: () => {
+            console.log('Carousel clicked - opening shop');
+            this.openShop();
+          },
+        });
+      }
+    }
+
+    return carouselContainer;
+  }
+
+  /**
+   * Открыть магазин через SearchFlowManager
+   */
+  private openShop(): void {
+    // Создаем демо-данные магазина
+    const shopData = {
+      organizationId: 'demo-shop',
+      name: 'Спортивный магазин',
+      categories: [
+        {
+          id: 'sports-pants',
+          name: 'Спортивные брюки',
+          count: 8,
+          products: this.cartService?.getSampleProducts() || [],
+          icon: '🩳',
+        },
+      ],
+      products: this.cartService?.getSampleProducts() || [],
+      type: 'sports' as const,
+      description: 'Магазин спортивной одежды и аксессуаров',
+    };
+
+    // Открываем магазин через SearchFlowManager
+    this.searchFlowManager.goToShop(shopData);
   }
 
   private createResultCard(result: any): HTMLElement {
