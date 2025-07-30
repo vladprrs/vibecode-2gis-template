@@ -10,6 +10,10 @@ export enum ScreenType {
   SEARCH_RESULT = 'search_result',
   /** Карточка организации */
   ORGANIZATION = 'organization',
+  /** Экран магазина/каталога */
+  SHOP = 'shop',
+  /** Экран корзины */
+  CART = 'cart',
 }
 
 /**
@@ -65,6 +69,58 @@ export interface Organization {
 }
 
 /**
+ * Товар в магазине
+ */
+export interface Product {
+  /** Уникальный идентификатор */
+  id: string;
+  /** Название товара */
+  title: string;
+  /** Описание товара */
+  description?: string;
+  /** Цена в рублях */
+  price: number;
+  /** URL изображения товара */
+  imageUrl?: string;
+  /** Бейджи товара */
+  badges?: string[];
+  /** Количество в корзине */
+  quantity?: number;
+}
+
+/**
+ * Категория товаров
+ */
+export interface ProductCategory {
+  /** Уникальный идентификатор */
+  id: string;
+  /** Название категории */
+  name: string;
+  /** Количество товаров в категории */
+  count: number;
+  /** Товары в категории */
+  products: Product[];
+}
+
+/**
+ * Данные магазина
+ */
+export interface Shop {
+  /** Идентификатор организации */
+  organizationId: string;
+  /** Название магазина */
+  name: string;
+  /** Категории товаров */
+  categories: ProductCategory[];
+  /** Все товары */
+  products: Product[];
+  /** Общая сумма корзины */
+  cartTotal?: number;
+  /** Количество товаров в корзине */
+  cartItemsCount?: number;
+}
+
+/**
  * Контекст поиска - данные, передаваемые между экранами
  */
 export interface SearchContext {
@@ -78,6 +134,8 @@ export interface SearchContext {
   suggestions: SearchSuggestion[];
   /** Выбранная организация */
   selectedOrganization?: Organization;
+  /** Данные магазина */
+  selectedShop?: Shop;
   /** История поиска */
   searchHistory: string[];
   /** Состояние загрузки */
@@ -119,6 +177,8 @@ export interface SearchFlowManager {
   goToSuggest: () => void;
   goToSearchResults: (query: string, filters?: SearchFilters) => void;
   goToOrganization: (organization: Organization) => void;
+  goToShop: (shop: Shop) => void;
+  goToCart: () => void;
   goBack: () => void;
   goToDashboard: () => void;
 

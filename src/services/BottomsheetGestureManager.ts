@@ -57,7 +57,12 @@ export class BottomsheetGestureManager {
     const scrollableThreshold = screenHeight * 0.92;
 
     if (currentHeight > scrollableThreshold) {
-      const contentContainer = this.element.querySelector('.dashboard-content');
+      // Find scrollable content container - prioritize known classes, then find overflow auto
+      const contentContainer = this.element.querySelector('.dashboard-content') ||
+                              this.element.querySelector('[style*="overflow-y: auto"]') ||
+                              this.element.querySelector('[style*="overflowY: auto"]') ||
+                              this.findScrollableElement(this.element);
+      
       if (contentContainer) {
         const { scrollTop } = contentContainer;
         const isAtTop = scrollTop <= 0;
@@ -130,6 +135,18 @@ export class BottomsheetGestureManager {
   private handleScrollTouchStart(event: TouchEvent): void {
     if (event.touches.length !== 1) return;
     const touch = event.touches[0];
+    
+    // Check if touch started on the drag handle area
+    const target = event.target as Element;
+    const isDragHandle = target?.closest('.bottomsheet-drag-handle-area') || 
+                        target?.closest('.bottomsheet-drag-handle');
+    
+    // Only allow dragging from the drag handle area
+    if (!isDragHandle) {
+      this.isTouchScrolling = false;
+      return;
+    }
+    
     this.touchStartY = touch.clientY;
     this.touchCurrentY = touch.clientY;
     this.isTouchScrolling = true;
@@ -148,7 +165,12 @@ export class BottomsheetGestureManager {
     const scrollableThreshold = screenHeight * 0.92;
 
     if (currentHeight > scrollableThreshold) {
-      const contentContainer = this.element.querySelector('.dashboard-content');
+      // Find scrollable content container - prioritize known classes, then find overflow auto
+      const contentContainer = this.element.querySelector('.dashboard-content') ||
+                              this.element.querySelector('[style*="overflow-y: auto"]') ||
+                              this.element.querySelector('[style*="overflowY: auto"]') ||
+                              this.findScrollableElement(this.element);
+      
       if (contentContainer) {
         const { scrollTop } = contentContainer;
         const isAtTop = scrollTop <= 0;
@@ -182,5 +204,23 @@ export class BottomsheetGestureManager {
   private handleScrollTouchEnd(_event: TouchEvent): void {
     this.isTouchScrolling = false;
     this.snapToNearestState();
+  }
+
+  /**
+   * Find scrollable element by checking computed styles
+   */
+  private findScrollableElement(container: Element): Element | null {
+    const elements = container.querySelectorAll('*');
+    
+    for (const element of elements) {
+      const computedStyle = getComputedStyle(element);
+      const overflowY = computedStyle.overflowY;
+      
+      if (overflowY === 'auto' || overflowY === 'scroll') {
+        return element;
+      }
+    }
+    
+    return null;
   }
 }

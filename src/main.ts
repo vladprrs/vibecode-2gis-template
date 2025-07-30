@@ -11,7 +11,7 @@ import { ScreenType } from './types/navigation';
 import { BottomsheetConfig, BottomsheetState } from './types/bottomsheet';
 import { SearchFlowManager } from './services/SearchFlowManager';
 import { BottomsheetManager } from './services/BottomsheetManager';
-import { FilterBarManager, MapManager, MapSyncService } from './services';
+import { FilterBarManager, MapManager, MapSyncService, CartService } from './services';
 import { DashboardScreen, DashboardScreenFactory } from './components/Screens/DashboardScreen';
 
 /**
@@ -28,6 +28,7 @@ class App {
   private searchFlowManager?: SearchFlowManager;
   private bottomsheetManager?: BottomsheetManager;
   private filterBarManager?: FilterBarManager;
+  private cartService?: CartService;
   private mapSyncService?: MapSyncService;
   private mapManager?: MapManager;
 
@@ -99,6 +100,19 @@ class App {
     // Initialize FilterBarManager
     this.filterBarManager = new FilterBarManager();
 
+    // Initialize CartService
+    this.cartService = new CartService({
+      onCartUpdated: (state) => {
+        console.log('🛒 Cart updated:', state);
+      },
+      onItemAdded: (item) => {
+        console.log('🛒 Item added to cart:', item);
+      },
+      onItemRemoved: (productId) => {
+        console.log('🛒 Item removed from cart:', productId);
+      },
+    });
+
     // Initialize MapSyncService with dummy ref (will be updated by DashboardScreen)
     this.mapSyncService = new MapSyncService({ current: null });
 
@@ -112,7 +126,7 @@ class App {
    * Create dashboard screen using the modular component
    */
   private createDashboardScreen(): void {
-    if (!this.searchFlowManager || !this.bottomsheetManager || !this.filterBarManager) {
+    if (!this.searchFlowManager || !this.bottomsheetManager || !this.filterBarManager || !this.cartService) {
       throw new Error('Services not initialized');
     }
 
@@ -122,6 +136,7 @@ class App {
       this.searchFlowManager,
       this.bottomsheetManager,
       this.filterBarManager,
+      this.cartService!,
       this.mapManager!
     );
 

@@ -1,4 +1,4 @@
-import { Organization, ScreenType } from '../../types';
+import { Organization, ScreenType, Shop, Product, ProductCategory } from '../../types';
 import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
 import { TabBar } from '../Organization';
 
@@ -94,7 +94,11 @@ export class OrganizationScreen {
     const organizationCardTop = this.createOrganizationCardTop();
     bottomsheetContent.appendChild(organizationCardTop);
 
-    // 2. Создаем прокручиваемое содержимое
+    // 2. Создаем фиксированную панель табов
+    const tabBarContainer = this.createTabBar();
+    bottomsheetContent.appendChild(tabBarContainer);
+
+    // 3. Создаем прокручиваемое содержимое
     const scrollableContent = document.createElement('div');
     Object.assign(scrollableContent.style, {
       flex: '1',
@@ -112,6 +116,36 @@ export class OrganizationScreen {
   }
 
   /**
+   * Создание фиксированной панели табов
+   */
+  private createTabBar(): HTMLElement {
+    const tabBarContainer = document.createElement('div');
+    Object.assign(tabBarContainer.style, {
+      position: 'sticky',
+      top: '0',
+      zIndex: '10',
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+      flexShrink: '0',
+    });
+
+    // Создаем Tab Bar компонент
+    new TabBar({
+      container: tabBarContainer,
+      items: [
+        { label: 'Обзор' },
+        { label: 'Меню', count: 213 },
+        { label: 'Фото', count: 432 },
+        { label: 'Отзывы', count: 232 },
+        { label: 'Инфо' },
+        { label: 'Акции' },
+      ],
+    });
+
+    return tabBarContainer;
+  }
+
+  /**
    * Создание заголовка организации (Organization card top)
    */
   private createOrganizationCardTop(): HTMLElement {
@@ -122,32 +156,7 @@ export class OrganizationScreen {
       position: 'relative',
     });
 
-    // Drag handle
-    const draggerContainer = document.createElement('div');
-    Object.assign(draggerContainer.style, {
-      display: 'flex',
-      height: '0',
-      paddingBottom: '6px',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      alignSelf: 'stretch',
-      position: 'relative',
-      paddingTop: '16px',
-    });
-
-    const dragger = document.createElement('div');
-    Object.assign(dragger.style, {
-      width: '40px',
-      height: '4px',
-      flexShrink: '0',
-      borderRadius: '6px',
-      background: 'rgba(137, 137, 137, 0.25)',
-      cursor: 'grab',
-    });
-
-    draggerContainer.appendChild(dragger);
-    cardTop.appendChild(draggerContainer);
+    // Note: Drag handle is now managed by replaceBottomsheetContent in DashboardScreen
 
     // RD контент контейнер
     const rdContainer = document.createElement('div');
@@ -614,20 +623,7 @@ export class OrganizationScreen {
     const info = this.createInfoSection();
     container.appendChild(info);
 
-    // Панель табов
-    const tabContainer = document.createElement('div');
-    new TabBar({
-      container: tabContainer,
-      items: [
-        { label: 'Обзор' },
-        { label: 'Меню', count: 213 },
-        { label: 'Фото', count: 432 },
-        { label: 'Отзывы', count: 232 },
-        { label: 'Инфо' },
-        { label: 'Акции' },
-      ],
-    });
-    container.appendChild(tabContainer);
+    // Note: Tab Bar moved to fixed position between header and scrollable content
 
     // Нижняя кнопка действия
     const bottomAction = this.createBottomActionBar();
@@ -989,33 +985,310 @@ export class OrganizationScreen {
    */
   private createMenuSection(): HTMLElement {
     const section = document.createElement('div');
-    Object.assign(section.style, { margin: '16px' });
+    Object.assign(section.style, { 
+      margin: '16px',
+      cursor: 'pointer',
+    });
+
+    // Заголовок секции с иконкой перехода
+    const headerContainer = document.createElement('div');
+    Object.assign(headerContainer.style, {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '16px',
+    });
 
     const title = document.createElement('h3');
     Object.assign(title.style, {
-      margin: '0 0 8px 0',
+      margin: '0',
       color: '#141414',
       fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-      fontSize: '18px',
+      fontSize: '16px',
       fontWeight: '600',
-      lineHeight: '22px',
-      letterSpacing: '-0.36px',
+      lineHeight: '20px',
+      letterSpacing: '-0.24px',
     });
     title.textContent = 'Меню';
 
-    const placeholder = document.createElement('div');
-    placeholder.textContent = 'Меню недоступно';
-    Object.assign(placeholder.style, {
+    const arrowIcon = document.createElement('div');
+    Object.assign(arrowIcon.style, {
+      width: '24px',
+      height: '24px',
       color: '#898989',
-      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-      fontSize: '15px',
-      lineHeight: '20px',
+    });
+    arrowIcon.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    headerContainer.appendChild(title);
+    headerContainer.appendChild(arrowIcon);
+
+    // Галерея товаров (горизонтальный скролл)
+    const gallery = document.createElement('div');
+    Object.assign(gallery.style, {
+      display: 'flex',
+      gap: '12px',
+      overflowX: 'auto',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+      paddingBottom: '4px',
     });
 
-    section.appendChild(title);
-    section.appendChild(placeholder);
+    // Скрываем скроллбар webkit
+    const style = document.createElement('style');
+    style.textContent = `
+      .menu-gallery::-webkit-scrollbar {
+        display: none;
+      }
+    `;
+    if (!document.head.querySelector('style[data-menu-gallery]')) {
+      style.setAttribute('data-menu-gallery', 'true');
+      document.head.appendChild(style);
+    }
+    gallery.className = 'menu-gallery';
+
+    // Создаем демо товары для предварительного просмотра
+    const demoProducts = this.getDemoProducts();
+    demoProducts.slice(0, 3).forEach(product => {
+      const item = this.createMenuPreviewItem(product);
+      gallery.appendChild(item);
+    });
+
+    // Если товаров больше 3, добавляем спейсер
+    if (demoProducts.length > 3) {
+      const spacer = document.createElement('div');
+      Object.assign(spacer.style, {
+        width: '16px',
+        flexShrink: '0',
+      });
+      gallery.appendChild(spacer);
+    }
+
+    section.appendChild(headerContainer);
+    section.appendChild(gallery);
+
+    // Обработчик клика для перехода к магазину
+    section.addEventListener('click', () => {
+      this.openShop();
+    });
+
+    // Hover эффекты
+    section.addEventListener('mouseenter', () => {
+      section.style.backgroundColor = 'rgba(20, 20, 20, 0.02)';
+      section.style.borderRadius = '8px';
+      section.style.padding = '8px';
+      section.style.margin = '8px';
+    });
+
+    section.addEventListener('mouseleave', () => {
+      section.style.backgroundColor = 'transparent';
+      section.style.padding = '0';
+      section.style.margin = '16px';
+    });
 
     return section;
+  }
+
+  /**
+   * Создание предварительного просмотра товара в меню
+   */
+  private createMenuPreviewItem(product: Product): HTMLElement {
+    const item = document.createElement('div');
+    Object.assign(item.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '8px',
+      minWidth: '232px',
+      maxWidth: '232px',
+      flexShrink: '0',
+    });
+
+    // Фото товара
+    const photo = document.createElement('div');
+    Object.assign(photo.style, {
+      width: '232px',
+      height: '142px',
+      borderRadius: '8px',
+      overflow: 'hidden',
+      backgroundColor: '#F5F5F5',
+      position: 'relative',
+    });
+
+    if (product.imageUrl) {
+      const img = document.createElement('img');
+      Object.assign(img.style, {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      });
+      img.src = product.imageUrl;
+      img.alt = product.title;
+      photo.appendChild(img);
+    } else {
+      // Плейсхолдер
+      const placeholder = document.createElement('div');
+      Object.assign(placeholder.style, {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#898989',
+        fontSize: '32px',
+      });
+      placeholder.textContent = '🍔';
+      photo.appendChild(placeholder);
+    }
+
+    // Информация о товаре
+    const info = document.createElement('div');
+    Object.assign(info.style, {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+    });
+
+    // Описание товара
+    const description = document.createElement('div');
+    Object.assign(description.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '18px',
+      letterSpacing: '-0.28px',
+    });
+    description.textContent = product.description || product.title;
+
+    // Цена
+    const priceRow = document.createElement('div');
+    const price = document.createElement('div');
+    Object.assign(price.style, {
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '600',
+      lineHeight: '18px',
+      letterSpacing: '-0.28px',
+    });
+    price.textContent = `${product.price} ₽`;
+
+    priceRow.appendChild(price);
+    info.appendChild(description);
+    info.appendChild(priceRow);
+
+    item.appendChild(photo);
+    item.appendChild(info);
+
+    return item;
+  }
+
+  /**
+   * Получение демо товаров для меню
+   */
+  private getDemoProducts(): Product[] {
+    return [
+      {
+        id: '1',
+        title: 'Бургер из мраморной говядины',
+        description: 'Бургер из мраморной говядины',
+        price: 1249,
+        imageUrl: '/figma_export/org/components/menu/assets/images/img-e3ea464a.png',
+      },
+      {
+        id: '2', 
+        title: 'Бургер классический',
+        description: 'Бургер из мраморной говядины',
+        price: 1249,
+        imageUrl: '/figma_export/org/components/menu/assets/images/img-7e5b752f.png',
+      },
+      {
+        id: '3',
+        title: 'Бургер премиум',
+        description: 'Бургер из мраморной говядины', 
+        price: 1249,
+        imageUrl: '/figma_export/org/components/menu/assets/images/img-9be8206d.png',
+      },
+    ];
+  }
+
+  /**
+   * Открытие экрана магазина
+   */
+  private openShop(): void {
+    const shop: Shop = {
+      organizationId: this.props.organization.id,
+      name: this.props.organization.name,
+      categories: [
+        {
+          id: 'burgers',
+          name: 'Бургеры',
+          count: 15,
+          products: [
+            {
+              id: '1',
+              title: 'Бургер из мраморной говядины',
+              description: 'Котлета из мраморной говядины, сыр чеддер, томаты, лук, соус бургер',
+              price: 1249,
+              imageUrl: '/figma_export/shop/state_default/assets/images/img-5e00bc93.png',
+            },
+            {
+              id: '2',
+              title: 'Тако Гранде «Чизбургер»',
+              description: 'Котлета из мраморной говядины, халапеньо, томаты, сыр, соус чипотле...',
+              price: 480,
+              imageUrl: '/figma_export/shop/state_default/assets/images/img-a3dec8a0.png',
+            },
+          ],
+        },
+        {
+          id: 'soups',
+          name: 'Супы',
+          count: 1,
+          products: [
+            {
+              id: '3',
+              title: 'Суп «Позоле»',
+              description: 'Томатно-кукурузный суп на бычьих хвостах. 290 г',
+              price: 440,
+              imageUrl: '/figma_export/shop/state_default/assets/images/img-f9508205.png',
+            },
+          ],
+        },
+        {
+          id: 'street-food',
+          name: 'Стрит-фуд',
+          count: 3,
+          products: [
+            {
+              id: '4',
+              title: 'Гамбургер «Воппер»',
+              description: 'Томленая рваная говядина, соус чипотле, сахар мускавадо, лук. 220 г',
+              price: 380,
+              imageUrl: '/figma_export/shop/state_default/assets/images/img-95094060.png',
+            },
+            {
+              id: '5',
+              title: 'КорнДоги Сандерса (5 шт)',
+              description: 'Котлета из мраморной говядины, много сыра, сальса Пико-де-гальо, ма...',
+              price: 580,
+              imageUrl: '/figma_export/shop/state_default/assets/images/img-f532eee9.png',
+            },
+          ],
+        },
+      ],
+      products: [],
+      cartTotal: 0,
+      cartItemsCount: 0,
+    };
+
+    // Собираем все товары из категорий
+    shop.products = shop.categories.flatMap(category => category.products);
+
+    this.props.searchFlowManager.goToShop(shop);
   }
 
   /**
