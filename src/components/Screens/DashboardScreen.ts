@@ -138,7 +138,7 @@ export class DashboardScreen {
     this.props = props;
     this.element = props.container;
     this.mapManager = props.mapManager;
-    this.contentManager = new ContentManager(this.props.searchFlowManager);
+    this.contentManager = new ContentManager(this.props.searchFlowManager, this.props.cartService);
     this.filterBarManager = props.filterBarManager;
     this.initialize();
   }
