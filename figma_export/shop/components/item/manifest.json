@@ -1,0 +1,56 @@
+{
+  "source": "input/shop/components/item.json",
+  "generatedAt": "2025-07-30T02:58:55.070Z",
+  "pages": [
+    {
+      "index": 1,
+      "file": "pages/0001.html",
+      "images": [
+        {
+          "key": "0",
+          "path": "assets/images/img-146b6831.jpg",
+          "sha256": "146b68311b2363c513e9111521c69cc840543fb76631347b71a27439fc5d87bd",
+          "bytes": 333852,
+          "mime": "image/jpeg",
+          "ext": "jpg"
+        },
+        {
+          "key": "https://api.builder.io/api/v1/image/assets/TEMP/3a07d9a098f2c572870d21dec0eeeb9886740bf6?width=192",
+          "path": "assets/images/img-718ff4a4.png",
+          "sha256": "718ff4a4ca844ec9e7145ceeefa3ea4de8dc53bfd2095cfff02c093fa7821dc2",
+          "bytes": 27792,
+          "mime": "image/png",
+          "ext": "png"
+        }
+      ],
+      "styles": [
+        {
+          "key": "style-tags",
+          "path": "assets/styles/styles-ed4f7f7c.css",
+          "bytes": 218,
+          "type": "css"
+        },
+        {
+          "key": "inline-styles",
+          "path": "assets/styles/styles-26c306ed.css",
+          "bytes": 2482,
+          "type": "css"
+        },
+        {
+          "key": "embedded-styles",
+          "path": "assets/styles/styles-c6954627.css",
+          "bytes": 1240,
+          "type": "css"
+        }
+      ]
+    }
+  ],
+  "images": {
+    "written": 2,
+    "deduped": 0
+  },
+  "styles": {
+    "written": 3,
+    "deduped": 0
+  }
+}
