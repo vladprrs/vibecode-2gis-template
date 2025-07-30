@@ -1,5 +1,5 @@
-import { SearchFilters as ISearchFilters, Organization, ScreenType } from '../../types';
-import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
+import { SearchFilters as ISearchFilters, Organization, ScreenType, Product } from '../../types';
+import { BottomsheetManager, MapSyncService, SearchFlowManager, CartService } from '../../services';
 import {
   BottomsheetContainer,
   BottomsheetContainerProps,
@@ -8,6 +8,7 @@ import {
 } from '../Bottomsheet';
 import { FilterItem, SearchBar, SearchBarState, SearchFilters } from '../Search';
 import { CardSize, OrganizationCard } from '../Cards';
+import { ProductCarousel } from '../Content/ProductCarousel';
 
 /**
  * Пропсы для SearchResultScreen
@@ -21,6 +22,8 @@ export interface SearchResultScreenProps {
   bottomsheetManager: BottomsheetManager;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
+  /** Сервис корзины */
+  cartService: CartService;
   /** Поисковый запрос */
   searchQuery: string;
   /** Активные фильтры */
@@ -70,8 +73,69 @@ export class SearchResultScreen {
   private currentFilters: ISearchFilters = {};
   private organizations: Organization[] = [];
   private organizationCards: OrganizationCard[] = [];
+  private productCarousels: ProductCarousel[] = [];
   private loadingState: LoadingState = LoadingState.LOADING;
   private resultsCount: number = 0;
+
+  // Общие товары для карусели (те же что и в Shop/Organization)
+  private sharedProducts: Product[] = [
+    {
+      id: 'prod-001',
+      title: 'Мужские спортивные брюки Tommy Hilfiger, синие, S',
+      description: 'Мужские спортивные брюки Tommy Hilfiger, синие, S',
+      price: 7349,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111201494_1.jpg',
+    },
+    {
+      id: 'prod-002',
+      title: 'Мужские спортивные брюки Tommy Hilfiger, чёрные, S',
+      description: 'Мужские спортивные брюки Tommy Hilfiger, чёрные, S',
+      price: 7489,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111205591_1.jpg',
+    },
+    {
+      id: 'prod-003',
+      title: 'Брюки Tommy Hilfiger спортивные, зелёные, XL',
+      description: 'Брюки Tommy Hilfiger спортивные, зелёные, XL',
+      price: 10529,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720646433131_1.jpg',
+    },
+    {
+      id: 'prod-004',
+      title: 'Мужские спортивные брюки Nike French Terry, серые, S',
+      description: 'Мужские спортивные брюки Nike French Terry, серые, S',
+      price: 2455,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
+    },
+    {
+      id: 'prod-005',
+      title: 'Мужские спортивные брюки Nike Repeat, синие, L',
+      description: 'Мужские спортивные брюки Nike Repeat, синие, L',
+      price: 2438,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919801_1.jpg',
+    },
+    {
+      id: 'prod-006',
+      title: 'Мужские спортивные брюки Nike Yoga Dri‑Fit, серые, L',
+      description: 'Мужские спортивные брюки Nike Yoga Dri‑Fit, серые, L',
+      price: 2629,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/0194501845649_1.jpg',
+    },
+    {
+      id: 'prod-007',
+      title: 'Мужские спортивные брюки Nike Repeat, белые, L',
+      description: 'Мужские спортивные брюки Nike Repeat, белые, L',
+      price: 2438,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919740_1.jpg',
+    },
+    {
+      id: 'prod-008',
+      title: 'Брюки Adidas GM5542, размер S',
+      description: 'Брюки Adidas GM5542, размер S',
+      price: 1632,
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/4064044668639_1.jpg',
+    },
+  ];
 
   constructor(props: SearchResultScreenProps) {
     this.props = props;
@@ -369,9 +433,13 @@ export class SearchResultScreen {
   private renderResultsState(): void {
     if (!this.resultsContainer) return;
 
-    // Очищаем контейнер
+    // Очищаем контейнер и существующие компоненты
     this.resultsContainer.innerHTML = '';
     this.organizationCards = [];
+    
+    // Очищаем карусели товаров
+    this.productCarousels.forEach(carousel => carousel.destroy());
+    this.productCarousels = [];
 
     switch (this.loadingState) {
       case LoadingState.LOADING:
@@ -494,7 +562,7 @@ export class SearchResultScreen {
   }
 
   /**
-   * Создание списка организаций
+   * Создание списка организаций с интегрированными каруселями товаров
    */
   private createOrganizationsList(): void {
     if (!this.resultsContainer) return;
@@ -507,7 +575,7 @@ export class SearchResultScreen {
       backgroundColor: '#F5F5F5',
     });
 
-    // Создаем карточки организаций
+    // Создаем карточки организаций с интегрированными каруселями
     this.organizations.forEach((organization, index) => {
       const cardContainer = document.createElement('div');
       cardContainer.style.backgroundColor = '#ffffff';
@@ -543,9 +611,66 @@ export class SearchResultScreen {
 
       this.organizationCards.push(organizationCard);
       listContainer.appendChild(cardContainer);
+
+      // Добавляем карусель товаров после каждой 4-й карточки или в начале (если индекс 3)
+      if (index === 3 || (index > 3 && (index + 1) % 4 === 0)) {
+        const carouselContainer = this.createProductCarouselContainer();
+        listContainer.appendChild(carouselContainer);
+      }
     });
 
+    // Если у нас меньше 4 организаций, добавляем карусель в конце
+    if (this.organizations.length > 0 && this.organizations.length < 4) {
+      const carouselContainer = this.createProductCarouselContainer();
+      listContainer.appendChild(carouselContainer);
+    }
+
     this.resultsContainer.appendChild(listContainer);
+  }
+
+  /**
+   * Создание контейнера для карусели товаров
+   */
+  private createProductCarouselContainer(): HTMLElement {
+    const carouselContainer = document.createElement('div');
+    Object.assign(carouselContainer.style, {
+      backgroundColor: '#ffffff',
+      margin: '16px 0',
+    });
+
+    // Создаем карусель товаров
+    const productCarousel = new ProductCarousel({
+      container: carouselContainer,
+      cartService: this.props.cartService,
+      products: this.sharedProducts.slice(0, 6), // Показываем первые 6 товаров
+      onProductClick: (product) => {
+        this.handleProductClick(product);
+      },
+      onAddToCart: (product) => {
+        this.handleAddToCart(product);
+      },
+    });
+
+    this.productCarousels.push(productCarousel);
+
+    return carouselContainer;
+  }
+
+  /**
+   * Обработчик клика по товару в карусели (опционально)
+   */
+  private handleProductClick(product: Product): void {
+    // Можно перейти в магазин и выделить товар
+    console.log('Product clicked:', product.title);
+    // TODO: Реализовать переход в Shop с выделением товара
+  }
+
+  /**
+   * Обработчик добавления товара в корзину
+   */
+  private handleAddToCart(product: Product): void {
+    // Логика уже в ProductCarousel через CartService
+    console.log('Product added to cart:', product.title);
   }
 
   /**
@@ -1021,6 +1146,10 @@ export class SearchResultScreen {
     this.organizationCards.forEach(card => card.destroy());
     this.organizationCards = [];
 
+    // Очищаем карусели товаров
+    this.productCarousels.forEach(carousel => carousel.destroy());
+    this.productCarousels = [];
+
     this.headerContainer = undefined;
     this.contentContainer = undefined;
     this.filtersContainer = undefined;
@@ -1040,6 +1169,7 @@ export class SearchResultScreenFactory {
     container: HTMLElement,
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
+    cartService: CartService,
     searchQuery: string,
     searchFilters?: ISearchFilters
   ): SearchResultScreen {
@@ -1047,6 +1177,7 @@ export class SearchResultScreenFactory {
       container,
       searchFlowManager,
       bottomsheetManager,
+      cartService,
       searchQuery,
       searchFilters,
     });
