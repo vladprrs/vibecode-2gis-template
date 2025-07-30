@@ -1,7 +1,14 @@
 import { ScreenType } from '../../types';
-import { BottomsheetManager, CartService, CartState, MapSyncService, SearchFlowManager } from '../../services';
+import {
+  BottomsheetManager,
+  CartService,
+  CartState,
+  GlobalBottomActionBar,
+  MapSyncService,
+  SearchFlowManager,
+  globalBottomActionBar,
+} from '../../services';
 import { ShopCategory, ShopProduct } from '../Shop';
-import { BottomActionBar, BottomActionBarContent } from '../Shared';
 
 /**
  * Пропсы для ShopScreen
@@ -33,96 +40,66 @@ export class ShopScreen {
   private props: ShopScreenProps;
   private element: HTMLElement;
   private shopCategories: ShopCategory[] = [];
-  private bottomActionBar?: BottomActionBar;
   private cartSubscription?: () => void;
 
-  // Моковые данные для демонстрации
+  // Новые товары с актуальными данными
   private mockProducts: ShopProduct[] = [
     {
-      id: '1',
-      title: 'Микробиота (Microbiota) Декуссата Карнавал d9 h20',
-      price: 799,
-      category: 'Саженцы',
-      imageUrl: 'https://via.placeholder.com/96x96/BCD7AF/141414?text=🌱',
+      id: 'prod-001',
+      title: 'Мужские спортивные брюки Tommy Hilfiger, синие, S',
+      price: 7349,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111201494_1.jpg',
     },
     {
-      id: '2',
-      title: 'Ель (Picea) колючая Супер Грин 2л h50-70',
-      price: 799,
-      category: 'Саженцы',
-      imageUrl: 'https://via.placeholder.com/96x96/B9D6A9/141414?text=🌲',
+      id: 'prod-002',
+      title: 'Мужские спортивные брюки Tommy Hilfiger, чёрные, S',
+      price: 7489,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111205591_1.jpg',
     },
     {
-      id: '3',
-      title: 'Букеты',
-      description: 'Композиции в корзине от 3000 ₽\nСтоимость доставки по г. Новосибирск от 350 ₽',
-      price: 3000,
-      category: 'Букеты',
-      imageUrl: 'https://via.placeholder.com/96x96/D9DBB6/141414?text=💐',
+      id: 'prod-003',
+      title: 'Брюки Tommy Hilfiger спортивные, зелёные, XL',
+      price: 10529,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720646433131_1.jpg',
     },
     {
-      id: '4',
-      title: 'Тако Гранде «Чизбургер»',
-      description: 'Котлета из мраморной говядины, халапеньо, томаты, сыр, соус чипотле...',
-      price: 480,
-      category: 'Букеты',
-      imageUrl: 'https://via.placeholder.com/96x96/E2E0CE/141414?text=🌮',
+      id: 'prod-004',
+      title: 'Мужские спортивные брюки Nike French Terry, серые, S',
+      price: 2455,
+      category: 'Спортивная одежда',
+      imageUrl:
+        'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
     },
     {
-      id: '5',
-      title: 'Тако Гранде «Эль Чопсо»',
-      description: 'Котлета из мраморной говядины, халапеньо, томаты, сыр, соус чипотле...',
-      price: 440,
-      category: 'Букеты',
-      imageUrl: 'https://via.placeholder.com/96x96/DBDBB7/141414?text=🌮',
+      id: 'prod-005',
+      title: 'Мужские спортивные брюки Nike Repeat, синие, L',
+      price: 2438,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919801_1.jpg',
     },
     {
-      id: '6',
-      title: 'Суп «Позоле»',
-      description: 'Томатно-кукурузный суп на бычьих хвостах. 290 г',
-      price: 440,
-      category: 'Супы',
-      imageUrl: 'https://via.placeholder.com/96x96/DEDBBB/141414?text=🍲',
+      id: 'prod-006',
+      title: 'Мужские спортивные брюки Nike Yoga Dri‑Fit, серые, L',
+      price: 2629,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/0194501845649_1.jpg',
     },
     {
-      id: '7',
-      title: 'Гамбургер «Воппер»',
-      description: 'Томленая рваная говядина, соус чипотле, сахар мускавадо, лук. 220 г',
-      price: 380,
-      category: 'Стрит-фуд',
-      imageUrl: 'https://via.placeholder.com/96x96/BCD7AF/141414?text=🍔',
+      id: 'prod-007',
+      title: 'Мужские спортивные брюки Nike Repeat, белые, L',
+      price: 2438,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919740_1.jpg',
     },
     {
-      id: '8',
-      title: 'КорнДоги Сандерса (5 шт)',
-      description: 'Котлета из мраморной говядины, много сыра, сальса Пико-де-гальо, ма...',
-      price: 580,
-      category: 'Стрит-фуд',
-      imageUrl: 'https://via.placeholder.com/96x96/B9D6A9/141414?text=🌭',
-    },
-    {
-      id: '9',
-      title: 'КорнДоги Сандерса (3 шт)',
-      description: 'Большие сосиски в кляре с соусами Тартар и Барбакоа. 220 г',
-      price: 420,
-      category: 'Стрит-фуд',
-      imageUrl: 'https://via.placeholder.com/96x96/D9DBB6/141414?text=🌭',
-    },
-    {
-      id: '10',
-      title: 'Нада Добле',
-      description: 'Два вида сыра, домашний сливочно-пряный соус, лук. 180 г',
-      price: 330,
-      category: 'Кесадилья',
-      imageUrl: 'https://via.placeholder.com/96x96/E2E0CE/141414?text=🧀',
-    },
-    {
-      id: '11',
-      title: 'Пойо 2.0',
-      description: 'Домашняя пшеничная лепёшка, куриные стрипсы, кукуруза, сыр, зелёный лу...',
-      price: 580,
-      category: 'Кесадилья',
-      imageUrl: 'https://via.placeholder.com/96x96/DBDBB7/141414?text=🌯',
+      id: 'prod-008',
+      title: 'Брюки Adidas GM5542, размер S',
+      price: 1632,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/4064044668639_1.jpg',
     },
   ];
 
@@ -141,6 +118,8 @@ export class ShopScreen {
     this.setupEventListeners();
     this.syncWithServices();
     this.subscribeToCartUpdates();
+    // Show action bar based on initial cart state
+    this.updateActionBarContent();
   }
 
   /**
@@ -207,8 +186,7 @@ export class ShopScreen {
 
     shopContent.appendChild(scrollableContent);
 
-    // 4. Создаем нижнюю панель действий с новым компонентом
-    this.createBottomActionBar(shopContent);
+    // 4. Initialize global action bar (will be shown when cart has items)
 
     this.element.appendChild(shopContent);
   }
@@ -351,45 +329,25 @@ export class ShopScreen {
   }
 
   /**
-   * Создание нижней панели действий используя новый BottomActionBar компонент
-   */
-  private createBottomActionBar(container: HTMLElement): void {
-    // Create the action bar using the shared component
-    this.bottomActionBar = new BottomActionBar({
-      container: container,
-      className: 'shop-bottom-action-bar',
-      visible: true,
-    });
-
-    // Update the content
-    this.updateActionBarContent();
-  }
-
-  /**
-   * Обновление содержимого панели действий
+   * Обновление содержимого глобальной панели действий
    */
   private updateActionBarContent(): void {
-    if (!this.bottomActionBar) return;
-
     const cartState = this.props.cartService.getState();
 
     if (cartState.totalItems === 0) {
-      // Hide action bar when cart is empty
-      this.bottomActionBar.hide();
+      // Hide global action bar when cart is empty
+      globalBottomActionBar.hide();
       return;
     }
 
-    // Show action bar and set content
-    this.bottomActionBar.show();
-
-    // Create cart info
-    const cartInfo = BottomActionBar.createCartInfo(
+    // Create cart info using static method
+    const cartInfo = GlobalBottomActionBar.createCartInfo(
       this.props.cartService.getFormattedItemCount(),
       this.props.cartService.getFormattedSubtotal()
     );
 
-    // Create view cart button
-    const viewCartButton = BottomActionBar.createButton(
+    // Create view cart button using static method
+    const viewCartButton = GlobalBottomActionBar.createButton(
       'Корзина',
       () => {
         this.props.onCartClick?.();
@@ -398,10 +356,11 @@ export class ShopScreen {
       'primary'
     );
 
-    // Set the content
-    this.bottomActionBar.setContent({
+    // Show global action bar with content
+    globalBottomActionBar.show({
       leftContent: cartInfo,
       rightContent: viewCartButton,
+      className: 'shop-bottom-action-bar',
     });
   }
 
@@ -443,16 +402,13 @@ export class ShopScreen {
    * Очистка ресурсов при уничтожении экрана
    */
   public destroy(): void {
+    // Hide global action bar when leaving shop screen
+    globalBottomActionBar.hide();
+
     // Отписываемся от обновлений корзины
     if (this.cartSubscription) {
       this.cartSubscription();
       this.cartSubscription = undefined;
-    }
-
-    // Очищаем компонент действий
-    if (this.bottomActionBar) {
-      this.bottomActionBar.destroy();
-      this.bottomActionBar = undefined;
     }
 
     // Очищаем компоненты категорий

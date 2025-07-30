@@ -1,6 +1,7 @@
 import { Organization, Product, ProductCategory, ScreenType, Shop } from '../../types';
-import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
+import { BottomsheetManager, CartService, MapSyncService, SearchFlowManager } from '../../services';
 import { TabBar } from '../Organization';
+import { ShopProduct } from '../Shop';
 
 /**
  * Пропсы для OrganizationScreen
@@ -14,6 +15,8 @@ export interface OrganizationScreenProps {
   bottomsheetManager: BottomsheetManager;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
+  /** Сервис корзины */
+  cartService: CartService;
   /** Данные организации */
   organization: Organization;
   /** CSS класс */
@@ -36,6 +39,68 @@ export class OrganizationScreen {
   private props: OrganizationScreenProps;
   private element: HTMLElement;
   private isFavorite: boolean = false;
+  private cartSubscription?: () => void;
+
+  // Спортивные товары - те же, что и в Shop
+  private shopProducts: ShopProduct[] = [
+    {
+      id: 'prod-001',
+      title: 'Мужские спортивные брюки Tommy Hilfiger, синие, S',
+      price: 7349,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111201494_1.jpg',
+    },
+    {
+      id: 'prod-002',
+      title: 'Мужские спортивные брюки Tommy Hilfiger, чёрные, S',
+      price: 7489,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720111205591_1.jpg',
+    },
+    {
+      id: 'prod-003',
+      title: 'Брюки Tommy Hilfiger спортивные, зелёные, XL',
+      price: 10529,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/8720646433131_1.jpg',
+    },
+    {
+      id: 'prod-004',
+      title: 'Мужские спортивные брюки Nike French Terry, серые, S',
+      price: 2455,
+      category: 'Спортивная одежда',
+      imageUrl:
+        'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
+    },
+    {
+      id: 'prod-005',
+      title: 'Мужские спортивные брюки Nike Repeat, синие, L',
+      price: 2438,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919801_1.jpg',
+    },
+    {
+      id: 'prod-006',
+      title: 'Мужские спортивные брюки Nike Yoga Dri‑Fit, серые, L',
+      price: 2629,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/0194501845649_1.jpg',
+    },
+    {
+      id: 'prod-007',
+      title: 'Мужские спортивные брюки Nike Repeat, белые, L',
+      price: 2438,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/195870919740_1.jpg',
+    },
+    {
+      id: 'prod-008',
+      title: 'Брюки Adidas GM5542, размер S',
+      price: 1632,
+      category: 'Спортивная одежда',
+      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/4064044668639_1.jpg',
+    },
+  ];
 
   constructor(props: OrganizationScreenProps) {
     this.props = props;
@@ -51,6 +116,7 @@ export class OrganizationScreen {
     this.createNonAdvertiserLayout();
     this.setupEventListeners();
     this.syncWithServices();
+    this.subscribeToCartUpdates();
   }
 
   /**
@@ -574,10 +640,6 @@ export class OrganizationScreen {
       paddingBottom: '80px', // Место для нижней кнопки
     });
 
-    // Временное уведомление
-    const alert = this.createAlert();
-    container.appendChild(alert);
-
     // Блок "О компании"
     const about = this.createAboutSection();
     container.appendChild(about);
@@ -627,66 +689,6 @@ export class OrganizationScreen {
     container.appendChild(bottomAction);
 
     return container;
-  }
-
-  /**
-   * Создание уведомления
-   */
-  private createAlert(): HTMLElement {
-    const alert = document.createElement('div');
-    Object.assign(alert.style, {
-      margin: '16px',
-      padding: '16px',
-      backgroundColor: '#FFF8E1',
-      borderRadius: '12px',
-      border: '1px solid #FFE082',
-    });
-
-    const header = document.createElement('div');
-    Object.assign(header.style, {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      marginBottom: '8px',
-    });
-
-    const icon = document.createElement('div');
-    icon.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="#F57C00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-
-    const title = document.createElement('span');
-    Object.assign(title.style, {
-      color: '#141414',
-      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-      fontSize: '16px',
-      fontWeight: '600',
-      lineHeight: '20px',
-      letterSpacing: '-0.24px',
-    });
-    title.textContent = 'Временно не работает';
-
-    header.appendChild(icon);
-    header.appendChild(title);
-
-    const description = document.createElement('div');
-    Object.assign(description.style, {
-      color: '#141414',
-      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-      fontSize: '14px',
-      fontWeight: '400',
-      lineHeight: '18px',
-      letterSpacing: '-0.28px',
-    });
-    description.textContent =
-      'Сейчас этот филиал временно закрыт, но вернется к работе через некоторое время. Уточняйте информацию у компании';
-
-    alert.appendChild(header);
-    alert.appendChild(description);
-
-    return alert;
   }
 
   /**
@@ -1045,22 +1047,20 @@ export class OrganizationScreen {
     }
     gallery.className = 'menu-gallery';
 
-    // Создаем демо товары для предварительного просмотра
-    const demoProducts = this.getDemoProducts();
-    demoProducts.slice(0, 3).forEach(product => {
-      const item = this.createMenuPreviewItem(product);
+    // Показываем все 8 спортивных товаров
+    const products = this.convertShopProductsToProducts();
+    products.forEach(product => {
+      const item = this.createMenuPreviewItemWithCart(product);
       gallery.appendChild(item);
     });
 
-    // Если товаров больше 3, добавляем спейсер
-    if (demoProducts.length > 3) {
-      const spacer = document.createElement('div');
-      Object.assign(spacer.style, {
-        width: '16px',
-        flexShrink: '0',
-      });
-      gallery.appendChild(spacer);
-    }
+    // Добавляем спейсер в конце
+    const spacer = document.createElement('div');
+    Object.assign(spacer.style, {
+      width: '16px',
+      flexShrink: '0',
+    });
+    gallery.appendChild(spacer);
 
     section.appendChild(headerContainer);
     section.appendChild(gallery);
@@ -1085,6 +1085,43 @@ export class OrganizationScreen {
     });
 
     return section;
+  }
+
+  /**
+   * Создание превью товара с кнопкой добавления в корзину
+   */
+  private createMenuPreviewItemWithCart(product: Product): HTMLElement {
+    const item = this.createMenuPreviewItem(product);
+    
+    // Добавляем кнопку или stepper для работы с корзиной
+    const actionContainer = document.createElement('div');
+    Object.assign(actionContainer.style, {
+      position: 'absolute',
+      bottom: '8px',
+      right: '8px',
+      zIndex: '2',
+    });
+    
+    const quantity = this.props.cartService.getProductQuantity(product.id);
+    
+    if (quantity > 0) {
+      // Товар в корзине - показываем stepper
+      const stepper = this.createStepper(product, quantity);
+      actionContainer.appendChild(stepper);
+    } else {
+      // Товар не в корзине - показываем кнопку добавления
+      const addButton = this.createAddButton(product);
+      actionContainer.appendChild(addButton);
+    }
+    
+    // Настраиваем позиционирование для фото
+    const photo = item.querySelector('div') as HTMLElement;
+    if (photo) {
+      photo.style.position = 'relative';
+      photo.appendChild(actionContainer);
+    }
+    
+    return item;
   }
 
   /**
@@ -1182,32 +1219,156 @@ export class OrganizationScreen {
   }
 
   /**
-   * Получение демо товаров для меню
+   * Создание кнопки добавления в корзину
    */
-  private getDemoProducts(): Product[] {
-    return [
-      {
-        id: 'sport-shirt-1',
-        title: 'Спортивная футболка Nike',
-        description: 'Дышащая футболка для тренировок',
-        price: 2500,
-        imageUrl: '/assets/images/products/sport-shirt.jpg',
-      },
-      {
-        id: 'sport-pants-1',
-        title: 'Спортивные штаны Adidas',
-        description: 'Удобные штаны для фитнеса',
-        price: 3200,
-        imageUrl: '/assets/images/products/sport-pants.jpg',
-      },
-      {
-        id: 'sport-shoes-1',
-        title: 'Кроссовки Nike Air Max',
-        description: 'Профессиональные кроссовки для бега',
-        price: 8900,
-        imageUrl: '/assets/images/products/sport-shoes.jpg',
-      },
-    ];
+  private createAddButton(product: Product): HTMLElement {
+    const button = document.createElement('button');
+    Object.assign(button.style, {
+      width: '32px',
+      height: '32px',
+      borderRadius: '16px',
+      border: 'none',
+      backgroundColor: '#1976D2',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+      transition: 'all 0.2s ease',
+    });
+    
+    button.innerHTML = '+';
+    
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      // Конвертируем Product обратно в ShopProduct формат для CartService
+      const shopProduct = this.shopProducts.find(p => p.id === product.id);
+      if (shopProduct) {
+        // Преобразуем в формат Product для CartService
+        const cartProduct = {
+          id: shopProduct.id,
+          title: shopProduct.title,
+          description: shopProduct.title,
+          price: shopProduct.price,
+          imageUrl: shopProduct.imageUrl,
+        };
+        this.props.cartService.addToCart(cartProduct);
+      }
+    });
+    
+    button.addEventListener('mouseenter', () => {
+      button.style.backgroundColor = '#1565C0';
+      button.style.transform = 'scale(1.05)';
+    });
+    
+    button.addEventListener('mouseleave', () => {
+      button.style.backgroundColor = '#1976D2';
+      button.style.transform = 'scale(1)';
+    });
+    
+    return button;
+  }
+
+  /**
+   * Создание stepper для управления количеством
+   */
+  private createStepper(product: Product, quantity: number): HTMLElement {
+    const stepper = document.createElement('div');
+    Object.assign(stepper.style, {
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+      overflow: 'hidden',
+    });
+    
+    // Кнопка уменьшения
+    const decreaseButton = document.createElement('button');
+    Object.assign(decreaseButton.style, {
+      width: '32px',
+      height: '32px',
+      border: 'none',
+      backgroundColor: 'transparent',
+      color: '#1976D2',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      fontSize: '18px',
+      fontWeight: 'bold',
+    });
+    
+    decreaseButton.innerHTML = '−';
+    
+    // Количество
+    const quantityDisplay = document.createElement('div');
+    Object.assign(quantityDisplay.style, {
+      minWidth: '24px',
+      textAlign: 'center',
+      color: '#141414',
+      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
+      fontSize: '14px',
+      fontWeight: '600',
+    });
+    quantityDisplay.textContent = quantity.toString();
+    
+    // Кнопка увеличения
+    const increaseButton = document.createElement('button');
+    Object.assign(increaseButton.style, {
+      width: '32px',
+      height: '32px',
+      border: 'none',
+      backgroundColor: 'transparent',
+      color: '#1976D2',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      fontSize: '18px',
+      fontWeight: 'bold',
+    });
+    
+    increaseButton.innerHTML = '+';
+    
+    // Обработчики событий
+    decreaseButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const newQuantity = quantity - 1;
+      this.props.cartService.updateQuantity(product.id, newQuantity);
+    });
+    
+    increaseButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const newQuantity = quantity + 1;
+      this.props.cartService.updateQuantity(product.id, newQuantity);
+    });
+    
+    stepper.appendChild(decreaseButton);
+    stepper.appendChild(quantityDisplay);
+    stepper.appendChild(increaseButton);
+    
+    return stepper;
+  }
+
+  /**
+   * Конвертация ShopProduct в Product для совместимости
+   */
+  private convertShopProductsToProducts(): Product[] {
+    return this.shopProducts.map(shopProduct => ({
+      id: shopProduct.id,
+      title: shopProduct.title,
+      description: shopProduct.title, // Короткое описание
+      price: shopProduct.price,
+      imageUrl: shopProduct.imageUrl,
+    }));
   }
 
   /**
@@ -1575,7 +1736,49 @@ export class OrganizationScreen {
     };
   }
 
+  /**
+   * Подписка на обновления корзины
+   */
+  private subscribeToCartUpdates(): void {
+    this.cartSubscription = this.props.cartService.subscribe(() => {
+      // Обновляем карусель при изменении корзины
+      this.refreshCarousel();
+    });
+  }
+
+  /**
+   * Обновление карусели при изменении корзины
+   */
+  private refreshCarousel(): void {
+    const gallery = this.element.querySelector('.menu-gallery');
+    if (gallery) {
+      // Очищаем содержимое
+      gallery.innerHTML = '';
+      
+      // Пересоздаем элементы
+      const products = this.convertShopProductsToProducts();
+      products.forEach(product => {
+        const item = this.createMenuPreviewItemWithCart(product);
+        gallery.appendChild(item);
+      });
+      
+      // Добавляем спейсер
+      const spacer = document.createElement('div');
+      Object.assign(spacer.style, {
+        width: '16px',
+        flexShrink: '0',
+      });
+      gallery.appendChild(spacer);
+    }
+  }
+
   public destroy(): void {
+    // Отписываемся от обновлений корзины
+    if (this.cartSubscription) {
+      this.cartSubscription();
+      this.cartSubscription = undefined;
+    }
+    
     window.removeEventListener('resize', this.handleResize.bind(this));
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
 
@@ -1599,12 +1802,14 @@ export class OrganizationScreenFactory {
     container: HTMLElement,
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
+    cartService: CartService,
     organization: Organization
   ): OrganizationScreen {
     return new OrganizationScreen({
       container,
       searchFlowManager,
       bottomsheetManager,
+      cartService,
       organization,
     });
   }

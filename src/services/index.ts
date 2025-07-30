@@ -26,3 +26,7 @@ export type { CartItem, CartState, CartEvents } from './CartService';
 // Экспорт сервиса оформления заказа
 export { CheckoutService } from './CheckoutService';
 export type { CheckoutState, CheckoutEvents } from './CheckoutService';
+
+// Экспорт глобального оверлея панели действий
+export { GlobalBottomActionBar, globalBottomActionBar } from './GlobalBottomActionBar';
+export type { ActionBarConfig } from './GlobalBottomActionBar';

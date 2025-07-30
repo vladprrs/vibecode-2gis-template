@@ -18,6 +18,7 @@ import {
   FilterBarManager,
   MapManager,
   MapSyncService,
+  globalBottomActionBar,
 } from './services';
 import { DashboardScreen, DashboardScreenFactory } from './components/Screens/DashboardScreen';
 
@@ -69,6 +70,9 @@ class App {
    * Initialize all services
    */
   private initializeServices(): void {
+    // Initialize global bottom action bar overlay
+    globalBottomActionBar.initialize();
+
     // Initialize SearchFlowManager with navigation events
     this.searchFlowManager = new SearchFlowManager(ScreenType.DASHBOARD, {
       onScreenChange: (from, to, context) => {

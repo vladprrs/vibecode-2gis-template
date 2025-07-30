@@ -4,10 +4,11 @@ import {
   CartItem,
   CartService,
   CartState,
+  GlobalBottomActionBar,
   MapSyncService,
   SearchFlowManager,
+  globalBottomActionBar,
 } from '../../services';
-import { BottomActionBar, BottomActionBarContent } from '../Shared';
 
 /**
  * Пропсы для CartScreen
@@ -41,7 +42,6 @@ export class CartScreen {
   private element: HTMLElement;
   private cartState: CartState;
   private cartSubscription?: () => void;
-  private bottomActionBar?: BottomActionBar;
 
   constructor(props: CartScreenProps) {
     this.props = props;
@@ -59,6 +59,8 @@ export class CartScreen {
     this.setupEventListeners();
     this.syncWithServices();
     this.subscribeToCartUpdates();
+    // Show action bar based on initial cart state
+    this.updateActionBarContent();
   }
 
   /**
@@ -95,7 +97,7 @@ export class CartScreen {
     Object.assign(bottomsheetContent.style, {
       position: 'relative',
       width: '100%',
-      // Remove height: 100% - let it size naturally within bottomsheet container  
+      // Remove height: 100% - let it size naturally within bottomsheet container
       backgroundColor: '#ffffff',
       borderRadius: '16px 16px 0 0',
       overflow: 'hidden',
@@ -125,8 +127,7 @@ export class CartScreen {
 
     bottomsheetContent.appendChild(scrollableContent);
 
-    // 4. Создаем нижнюю панель действий с новым компонентом
-    this.createBottomActionBar(bottomsheetContent);
+    // 4. Initialize global action bar (will be shown when cart has items)
 
     this.element.appendChild(bottomsheetContent);
   }
@@ -442,43 +443,23 @@ export class CartScreen {
   }
 
   /**
-   * Создание нижней панели действий используя новый BottomActionBar компонент
-   */
-  private createBottomActionBar(container: HTMLElement): void {
-    // Create the action bar using the shared component
-    this.bottomActionBar = new BottomActionBar({
-      container: container,
-      className: 'shop-bottom-action-bar',
-      visible: true,
-    });
-
-    // Update the content
-    this.updateActionBarContent();
-  }
-
-  /**
-   * Обновление содержимого панели действий
+   * Обновление глобальной панели действий
    */
   private updateActionBarContent(): void {
-    if (!this.bottomActionBar) return;
-
     if (this.cartState.totalItems === 0) {
-      // Hide action bar when cart is empty
-      this.bottomActionBar.hide();
+      // Hide global action bar when cart is empty
+      globalBottomActionBar.hide();
       return;
     }
 
-    // Show action bar and set content
-    this.bottomActionBar.show();
-
     // Create cart info
-    const cartInfo = BottomActionBar.createCartInfo(
+    const cartInfo = GlobalBottomActionBar.createCartInfo(
       this.props.cartService.getFormattedItemCount(),
       this.props.cartService.getFormattedSubtotal()
     );
 
     // Create checkout button
-    const checkoutButton = BottomActionBar.createButton(
+    const checkoutButton = GlobalBottomActionBar.createButton(
       `К оплате — ${this.props.cartService.getFormattedSubtotal()}`,
       () => {
         this.props.onOrderClick?.(this.cartState);
@@ -488,10 +469,11 @@ export class CartScreen {
       'primary'
     );
 
-    // Set the content
-    this.bottomActionBar.setContent({
+    // Show global action bar with content
+    globalBottomActionBar.show({
       leftContent: cartInfo,
       rightContent: checkoutButton,
+      className: 'shop-bottom-action-bar',
     });
   }
 
@@ -544,11 +526,8 @@ export class CartScreen {
    * Очистка ресурсов при уничтожении экрана
    */
   public destroy(): void {
-    // Очищаем компонент действий
-    if (this.bottomActionBar) {
-      this.bottomActionBar.destroy();
-      this.bottomActionBar = undefined;
-    }
+    // Hide global action bar when leaving cart screen
+    globalBottomActionBar.hide();
 
     // Отписываемся от обновлений корзины
     if (this.cartSubscription) {

@@ -3,11 +3,12 @@ import {
   BottomsheetManager,
   CartService,
   CartState,
+  GlobalBottomActionBar,
   MapSyncService,
   SearchFlowManager,
+  globalBottomActionBar,
 } from '../../services';
 import { CheckoutService, CheckoutState } from '../../services/CheckoutService';
-import { BottomActionBar, BottomActionBarContent } from '../Shared';
 
 /**
  * Пропсы для CheckoutScreen
@@ -45,7 +46,6 @@ export class CheckoutScreen {
   private checkoutState: CheckoutState;
   private cartSubscription?: () => void;
   private checkoutSubscription?: () => void;
-  private bottomActionBar?: BottomActionBar;
 
   constructor(props: CheckoutScreenProps) {
     this.props = props;
@@ -64,6 +64,8 @@ export class CheckoutScreen {
     this.setupEventListeners();
     this.syncWithServices();
     this.subscribeToUpdates();
+    // Show action bar for checkout
+    this.updateActionBarContent();
   }
 
   /**
@@ -130,8 +132,7 @@ export class CheckoutScreen {
 
     bottomsheetContent.appendChild(scrollableContent);
 
-    // 4. Создаем нижнюю панель действий с новым компонентом
-    this.createBottomActionBar(bottomsheetContent);
+    // 4. Initialize global action bar (will be shown when checkout is active)
 
     this.element.appendChild(bottomsheetContent);
   }
@@ -918,31 +919,11 @@ export class CheckoutScreen {
   }
 
   /**
-   * Создание нижней панели действий используя новый BottomActionBar компонент
-   */
-  private createBottomActionBar(container: HTMLElement): void {
-    // Create the action bar using the shared component
-    this.bottomActionBar = new BottomActionBar({
-      container: container,
-      className: 'shop-bottom-action-bar',
-      visible: true,
-    });
-
-    // Update the content
-    this.updateActionBarContent();
-  }
-
-  /**
-   * Обновление содержимого панели действий
+   * Обновление глобальной панели действий
    */
   private updateActionBarContent(): void {
-    if (!this.bottomActionBar) return;
-
-    // Show action bar and set content
-    this.bottomActionBar.show();
-
     // Create payment button
-    const paymentButton = BottomActionBar.createButton(
+    const paymentButton = GlobalBottomActionBar.createButton(
       `К оплате — ${this.props.checkoutService.getFormattedTotal()}`,
       () => {
         this.props.onProcessPayment?.(this.checkoutState);
@@ -957,9 +938,10 @@ export class CheckoutScreen {
       backgroundColor: '#8B5CF6',
     });
 
-    // Set the content as full-width button
-    this.bottomActionBar.setContent({
+    // Show global action bar with full-width button
+    globalBottomActionBar.show({
       fullWidthContent: paymentButton,
+      className: 'shop-bottom-action-bar',
     });
   }
 
@@ -1020,11 +1002,8 @@ export class CheckoutScreen {
    * Очистка ресурсов при уничтожении экрана
    */
   public destroy(): void {
-    // Очищаем компонент действий
-    if (this.bottomActionBar) {
-      this.bottomActionBar.destroy();
-      this.bottomActionBar = undefined;
-    }
+    // Hide global action bar when leaving checkout screen
+    globalBottomActionBar.hide();
 
     // Отписываемся от обновлений
     if (this.cartSubscription) {

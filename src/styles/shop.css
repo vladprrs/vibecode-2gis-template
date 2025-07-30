@@ -188,16 +188,26 @@
   background: #333333;
 }
 
-/* ===== BOTTOM ACTION BAR ===== */
-.shop-bottom-action-bar {
-  /* Use flexbox positioning instead of absolute for better sheet attachment */
-  flex-shrink: 0;
+/* ===== GLOBAL BOTTOM ACTION BAR ===== */
+.global-bottom-action-bar {
+  /* Fixed overlay above bottomsheet */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; /* Above bottomsheet but below modals */
   background: var(--shop-background);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
-  z-index: 10;
-  /* Ensure the bar is always attached to the sheet bottom */
-  position: relative;
+  pointer-events: auto;
+}
+
+/* Legacy support for existing classes */
+.shop-bottom-action-bar {
+  /* Use same styling as global bar when used as class */
+  background: var(--shop-background);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .shop-action-bar-content {

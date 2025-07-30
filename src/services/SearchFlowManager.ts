@@ -1,4 +1,5 @@
 import {
+  BottomsheetState,
   SearchFlowManager as ISearchFlowManager,
   NavigationEvents,
   Organization,
@@ -7,7 +8,6 @@ import {
   SearchFilters,
   SearchSuggestion,
   Shop,
-  BottomsheetState,
 } from '../types';
 
 /**

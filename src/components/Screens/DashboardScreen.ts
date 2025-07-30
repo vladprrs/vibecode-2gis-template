@@ -1077,6 +1077,7 @@ export class DashboardScreen {
         searchFlowManager: this.props.searchFlowManager,
         bottomsheetManager: this.props.bottomsheetManager,
         mapSyncService: this.props.mapSyncService,
+        cartService: this.props.cartService,
         organization: context.selectedOrganization!,
         previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(
           ScreenType.SEARCH_RESULT

@@ -427,11 +427,11 @@ export class ContentManager {
       const resultCard = this.createResultCard(result);
       resultsContainer.appendChild(resultCard);
 
-      if (index === 1) {
-        const banner = document.createElement('div');
-        banner.textContent = 'Promo';
-        resultsContainer.appendChild(banner);
-      }
+      // if (index === 1) {
+      //   const banner = document.createElement('div');
+      //   banner.textContent = 'Promo';
+      //   resultsContainer.appendChild(banner);
+      // }
     });
 
     container.appendChild(resultsContainer);

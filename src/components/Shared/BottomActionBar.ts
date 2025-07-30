@@ -34,7 +34,7 @@ export class BottomActionBar {
     this.element = this.createElement();
     this.contentContainer = this.createContentContainer();
     this.setupLayout();
-    
+
     if (props.container) {
       props.container.appendChild(this.element);
     }
@@ -46,7 +46,7 @@ export class BottomActionBar {
   private createElement(): HTMLElement {
     const actionBar = document.createElement('div');
     actionBar.className = this.props.className || 'shop-bottom-action-bar';
-    
+
     // Ensure consistent positioning
     Object.assign(actionBar.style, {
       flexShrink: '0',
@@ -65,7 +65,7 @@ export class BottomActionBar {
   private createContentContainer(): HTMLElement {
     const content = document.createElement('div');
     content.className = 'shop-action-bar-content';
-    
+
     Object.assign(content.style, {
       display: 'flex',
       alignItems: 'center',
@@ -175,7 +175,7 @@ export class BottomActionBar {
   static createCartInfo(itemCount: string, totalPrice: string): HTMLElement {
     const cartInfo = document.createElement('div');
     cartInfo.className = 'shop-cart-info';
-    
+
     Object.assign(cartInfo.style, {
       display: 'flex',
       flexDirection: 'column',
@@ -200,7 +200,11 @@ export class BottomActionBar {
   /**
    * Create action button for action bars
    */
-  static createButton(text: string, onClick: () => void, style: 'primary' | 'secondary' = 'primary'): HTMLElement {
+  static createButton(
+    text: string,
+    onClick: () => void,
+    style: 'primary' | 'secondary' = 'primary'
+  ): HTMLElement {
     const button = document.createElement('button');
     button.className = style === 'primary' ? 'shop-order-button' : 'shop-secondary-button';
     button.textContent = text;
@@ -214,7 +218,7 @@ export class BottomActionBar {
       });
     }
 
-    button.addEventListener('click', (event) => {
+    button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       onClick();
