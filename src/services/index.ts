@@ -18,3 +18,7 @@ export { ContentManager } from './ContentManager';
 
 // Экспорт менеджера панели фильтров
 export { FilterBarManager } from './FilterBarManager';
+
+// Экспорт сервиса корзины
+export { CartService } from './CartService';
+export type { CartItem, CartState, CartEvents } from './CartService';

@@ -9,6 +9,7 @@ import {
   MapManager,
   MapSyncService,
   SearchFlowManager,
+  CartService,
 } from '../../services';
 
 import {
@@ -19,6 +20,8 @@ import {
 } from '../Bottomsheet';
 import { SearchBar, SearchBarState } from '../Search';
 import { OrganizationScreen } from './OrganizationScreen';
+import { ShopScreen } from './ShopScreen';
+import { CartScreen } from './CartScreen';
 import { ButtonRow, ButtonRowItem, StoriesCarousel } from '../Dashboard';
 
 /**
@@ -33,6 +36,8 @@ export interface DashboardScreenProps {
   bottomsheetManager: BottomsheetManager;
   /** Менеджер панели фильтров */
   filterBarManager: FilterBarManager;
+  /** Сервис корзины */
+  cartService: CartService;
   /** Сервис синхронизации карты */
   mapSyncService?: MapSyncService;
   /** Менеджер карты */
@@ -118,6 +123,8 @@ export class DashboardScreen {
   private currentScreen: ScreenType = ScreenType.DASHBOARD;
   private contentManager: ContentManager;
   private organizationScreen?: OrganizationScreen;
+  private shopScreen?: ShopScreen;
+  private cartScreen?: CartScreen;
 
   // Filter bar management
   private fixedFilterBar?: HTMLElement;
@@ -214,10 +221,14 @@ export class DashboardScreen {
   private createOriginalBottomsheet(): void {
     this.bottomsheetElement = document.createElement('div');
     this.bottomsheetElement.className = 'dashboard-bottomsheet bs-default';
+    
+    // Set fixed height and use transform for positioning
+    const screenHeight = window.innerHeight;
     this.bottomsheetElement.style.cssText = `
       display: flex;
       width: 375px;
       max-width: 100%;
+      height: 100vh;
       flex-direction: column;
       align-items: flex-start;
       border-radius: 16px 16px 0 0;
@@ -225,13 +236,13 @@ export class DashboardScreen {
       position: absolute;
       left: 0;
       bottom: 0;
-      transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      transform-origin: top center;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
       box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
       z-index: 1000;
     `;
 
     // Инициализируем текущую высоту
-    const screenHeight = window.innerHeight;
     this.currentHeight = screenHeight * 0.55; // default состояние
 
     this.updateBottomsheetHeight();
@@ -802,6 +813,18 @@ export class DashboardScreen {
       this.organizationScreen.destroy();
       this.organizationScreen = undefined;
     }
+    
+    // Clean up shop screen if it exists
+    if (this.shopScreen) {
+      this.shopScreen.destroy();
+      this.shopScreen = undefined;
+    }
+    
+    // Clean up cart screen if it exists
+    if (this.cartScreen) {
+      this.cartScreen.destroy();
+      this.cartScreen = undefined;
+    }
   }
 
   /**
@@ -830,9 +853,13 @@ export class DashboardScreen {
     const maxHeight = screenHeight * 0.95;
 
     const clampedHeight = Math.max(minHeight, Math.min(maxHeight, height));
+    
+    // Calculate translateY to show only the desired height
+    // Bottom edge stays at screen bottom, top edge moves
+    const translateY = screenHeight - clampedHeight;
 
     this.currentHeight = clampedHeight;
-    this.bottomsheetElement.style.height = `${clampedHeight}px`;
+    this.bottomsheetElement.style.transform = `translateY(${translateY}px)`;
 
     this.updateScrollBehaviorByHeight(clampedHeight);
   }
@@ -938,6 +965,12 @@ export class DashboardScreen {
       case ScreenType.ORGANIZATION:
         this.showOrganizationContent(context);
         break;
+      case ScreenType.SHOP:
+        this.showShopContent(context);
+        break;
+      case ScreenType.CART:
+        this.showCartContent();
+        break;
     }
 
     this.currentScreen = to;
@@ -1021,44 +1054,237 @@ export class DashboardScreen {
       this.organizationScreen = undefined;
     }
 
-    // Create a container for the organization screen
-    const orgContainer = document.createElement('div');
-    orgContainer.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #ffffff;
-      z-index: 100;
-    `;
-
-    // Add the container to the bottomsheet element
-    this.bottomsheetElement.appendChild(orgContainer);
-
-    // Create the organization screen
-    this.organizationScreen = new OrganizationScreen({
-      container: orgContainer,
-      searchFlowManager: this.props.searchFlowManager,
-      bottomsheetManager: this.props.bottomsheetManager,
-      mapSyncService: this.props.mapSyncService,
-      organization: context.selectedOrganization,
-      previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(ScreenType.SEARCH_RESULT),
-      onBack: () => {
-        // Clean up organization screen when going back
-        if (this.organizationScreen) {
-          this.organizationScreen.destroy();
-          this.organizationScreen = undefined;
+    // Replace bottomsheet content while preserving gesture handling
+    this.replaceBottomsheetContent((container: HTMLElement) => {
+      // Create the organization screen in the content container
+      this.organizationScreen = new OrganizationScreen({
+        container: container,
+        searchFlowManager: this.props.searchFlowManager,
+        bottomsheetManager: this.props.bottomsheetManager,
+        mapSyncService: this.props.mapSyncService,
+        organization: context.selectedOrganization!,
+        previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(ScreenType.SEARCH_RESULT),
+        onBack: () => {
+          // Clean up organization screen when going back
+          if (this.organizationScreen) {
+            this.organizationScreen.destroy();
+            this.organizationScreen = undefined;
+          }
+          // Restore the original dashboard content
+          this.restoreDashboardBottomsheet();
         }
-        // Remove the organization container
-        if (orgContainer && orgContainer.parentNode) {
-          orgContainer.parentNode.removeChild(orgContainer);
+      });
+
+      // Activate the organization screen
+      this.organizationScreen!.activate();
+    });
+  }
+
+  /**
+   * Show shop content in the bottomsheet
+   */
+  private showShopContent(context: SearchContext): void {
+    if (!this.bottomsheetElement || !context.selectedShop) return;
+
+    // Clean up any existing shop screen
+    if (this.shopScreen) {
+      this.shopScreen.destroy();
+      this.shopScreen = undefined;
+    }
+
+    // Replace bottomsheet content while preserving gesture handling
+    this.replaceBottomsheetContent((container: HTMLElement) => {
+      // Create the shop screen in the content container
+      this.shopScreen = new ShopScreen({
+        container: container,
+        searchFlowManager: this.props.searchFlowManager,
+        bottomsheetManager: this.props.bottomsheetManager,
+        mapSyncService: this.props.mapSyncService,
+        cartService: this.props.cartService,
+        shop: context.selectedShop!,
+        previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(ScreenType.ORGANIZATION),
+        onBack: () => {
+          // Clean up shop screen when going back
+          if (this.shopScreen) {
+            this.shopScreen.destroy();
+            this.shopScreen = undefined;
+          }
+          // Go back to organization screen instead of dashboard
+          this.props.searchFlowManager.goBack();
+        },
+        onAddToCart: (product) => {
+          console.log('Added to cart:', product);
+        },
+        onRemoveFromCart: (product) => {
+          console.log('Removed from cart:', product);
+        },
+        onUpdateQuantity: (product, quantity) => {
+          console.log('Updated quantity:', product, quantity);
+        },
+        onCartClick: () => {
+          // Navigate to cart screen
+          this.props.searchFlowManager.goToCart();
         }
-      }
+      });
+
+      // Activate the shop screen
+      this.shopScreen!.activate();
     });
 
-    // Activate the organization screen
-    this.organizationScreen.activate();
+    // Snap to mid height for shop screen (55%)
+    this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
+    this.snapToState(BottomsheetState.DEFAULT);
+  }
+
+  /**
+   * Show cart content in the bottomsheet
+   */
+  private showCartContent(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Clean up any existing cart screen
+    if (this.cartScreen) {
+      this.cartScreen.destroy();
+      this.cartScreen = undefined;
+    }
+
+    // Replace bottomsheet content while preserving gesture handling
+    this.replaceBottomsheetContent((container: HTMLElement) => {
+      // Create the cart screen in the content container
+      this.cartScreen = new CartScreen({
+        container: container,
+        searchFlowManager: this.props.searchFlowManager,
+        bottomsheetManager: this.props.bottomsheetManager,
+        mapSyncService: this.props.mapSyncService,
+        cartService: this.props.cartService,
+        previousScrollPosition: this.props.searchFlowManager.getSavedScrollPosition?.(ScreenType.SHOP),
+        onBack: () => {
+          // Clean up cart screen when going back
+          if (this.cartScreen) {
+            this.cartScreen.destroy();
+            this.cartScreen = undefined;
+          }
+          // Go back to shop screen
+          this.props.searchFlowManager.goBack();
+        },
+        onOrderClick: (cartState) => {
+          console.log('Order clicked from cart:', cartState);
+          // TODO: Implement order functionality
+        }
+      });
+
+      // Activate the cart screen
+      this.cartScreen!.activate();
+    });
+
+    // Snap to mid height for cart screen (55%)
+    this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
+    this.snapToState(BottomsheetState.DEFAULT);
+  }
+
+  /**
+   * Replace bottomsheet content while preserving structure and gesture handling
+   */
+  private replaceBottomsheetContent(contentCreator: (container: HTMLElement) => void): void {
+    if (!this.bottomsheetElement) return;
+
+    // Clear the entire bottomsheet content
+    this.bottomsheetElement.innerHTML = '';
+
+    // Create a wrapper for drag-handle at the top
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'bottomsheet-drag-handle-area';
+    dragHandle.style.cssText = `
+      display: flex;
+      height: 20px;
+      padding: 16px 0 6px 0;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      align-self: stretch;
+      position: relative;
+      flex-shrink: 0;
+    `;
+
+    const dragger = document.createElement('div');
+    dragger.className = 'bottomsheet-drag-handle';
+    dragger.style.cssText = `
+      width: 40px;
+      height: 4px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      background: rgba(137, 137, 137, 0.25);
+      cursor: grab;
+    `;
+
+    dragHandle.appendChild(dragger);
+    this.bottomsheetElement.appendChild(dragHandle);
+
+    // Create content container that fills remaining space
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'bottomsheet-content-area';
+    contentContainer.style.cssText = `
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      pointer-events: auto;
+    `;
+
+    this.bottomsheetElement.appendChild(contentContainer);
+
+    // Let the content creator populate the container
+    contentCreator(contentContainer);
+
+    // Re-setup gesture handling on the drag handle
+    if (this.gestureManager) {
+      this.gestureManager.setupBottomsheetEventListeners();
+    }
+  }
+
+  /**
+   * Restore the original dashboard bottomsheet content
+   */
+  private restoreDashboardBottomsheet(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Clear the bottomsheet
+    this.bottomsheetElement.innerHTML = '';
+
+    // Recreate the original Figma header and content
+    this.createFigmaHeader();
+
+    // Create content container
+    const content = document.createElement('div');
+    content.className = 'dashboard-content';
+    content.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    `;
+
+    this.bottomsheetElement.appendChild(content);
+
+    // Restore dashboard content based on current screen
+    switch (this.currentScreen) {
+      case ScreenType.DASHBOARD:
+        this.showDashboardContent();
+        break;
+      case ScreenType.SEARCH_RESULT:
+        this.showSearchResultContent(this.props.searchFlowManager.searchContext);
+        break;
+      case ScreenType.SUGGEST:
+        this.showSuggestContent();
+        break;
+      default:
+        this.showDashboardContent();
+        break;
+    }
   }
 
   /**
@@ -1799,6 +2025,7 @@ export class DashboardScreenFactory {
     searchFlowManager: SearchFlowManager,
     bottomsheetManager: BottomsheetManager,
     filterBarManager: FilterBarManager,
+    cartService: CartService,
     mapManager: MapManager
   ): DashboardScreen {
     return new DashboardScreen({
@@ -1806,6 +2033,7 @@ export class DashboardScreenFactory {
       searchFlowManager,
       bottomsheetManager,
       filterBarManager,
+      cartService,
       mapManager,
     });
   }

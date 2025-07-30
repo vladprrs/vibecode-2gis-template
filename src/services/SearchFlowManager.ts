@@ -6,6 +6,7 @@ import {
   SearchContext,
   SearchFilters,
   SearchSuggestion,
+  Shop,
 } from '../types';
 
 /**
@@ -84,6 +85,38 @@ export class SearchFlowManager implements ISearchFlowManager {
     // Аналитика
     const position = this.searchContext.results.findIndex(org => org.id === organization.id);
     this.events.onOrganizationSelected?.(organization, position);
+  }
+
+  /**
+   * Переход к экрану магазина
+   */
+  goToShop(shop: Shop): void {
+    // Сохраняем позицию скролла текущего экрана
+    this.saveCurrentScrollPosition();
+
+    // Сохраняем данные магазина в контекст
+    this.searchContext = {
+      ...this.searchContext,
+      selectedShop: shop,
+    };
+
+    this.navigateToScreen(ScreenType.SHOP);
+
+    // Аналитика
+    this.events.onScreenChange?.(this.currentScreen, ScreenType.SHOP, { shop });
+  }
+
+  /**
+   * Переход к экрану корзины
+   */
+  goToCart(): void {
+    // Сохраняем позицию скролла текущего экрана
+    this.saveCurrentScrollPosition();
+
+    this.navigateToScreen(ScreenType.CART);
+
+    // Аналитика
+    this.events.onScreenChange?.(this.currentScreen, ScreenType.CART, {});
   }
 
   /**
@@ -264,6 +297,7 @@ export class SearchFlowManager implements ISearchFlowManager {
       results: [],
       suggestions: [],
       selectedOrganization: undefined,
+      selectedShop: undefined,
       searchHistory: [],
       isLoading: false,
       error: undefined,
