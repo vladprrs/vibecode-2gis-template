@@ -293,8 +293,8 @@ export class DashboardScreen {
     // 3. Stories carousel
     this.createStoriesCarousel(greySectionContainer);
 
-    // 4. "Советы к месту" heading
-    this.createSectionHeading(greySectionContainer, 'Советы к месту');
+    // 4. "Вам может пригодиться" heading
+    this.createSectionHeading(greySectionContainer, 'Вам может пригодиться');
 
     // 5. Content masonry grid (AdviceGrid component) and promo banner
     this.createContentMasonryGrid(greySectionContainer);
@@ -532,7 +532,7 @@ export class DashboardScreen {
       line-height: 20px;
       letter-spacing: -0.24px;
     `;
-    titleText.textContent = 'Суши Маке';
+    titleText.textContent = 'Фитнес Хаус';
 
     // Subtitle
     const subtitle = document.createElement('div');
@@ -555,7 +555,7 @@ export class DashboardScreen {
       letter-spacing: -0.28px;
     `;
     subtitleText.textContent =
-      'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
+      'Скидка 20% на спортивную одежду при покупке абонемента на 3 месяца!';
 
     // CTA button
     const ctaButton = document.createElement('div');
@@ -576,7 +576,7 @@ export class DashboardScreen {
       line-height: 18px;
       letter-spacing: -0.28px;
     `;
-    ctaText.textContent = 'Получить подарок';
+    ctaText.textContent = 'Получить скидку';
 
     // Footer
     const footer = document.createElement('div');
@@ -613,7 +613,7 @@ export class DashboardScreen {
       line-height: 14px;
       letter-spacing: -0.176px;
     `;
-    footerTextContent.textContent = 'Реклама • Условия проведения акции смотрите на sushi-make.ru';
+    footerTextContent.textContent = 'Реклама • Условия проведения акции смотрите на fitness-house.ru';
 
     // Assemble the banner
     title.appendChild(titleText);
@@ -1958,7 +1958,7 @@ export class DashboardScreen {
     `;
 
     const title = document.createElement('h4');
-    title.textContent = 'Суши Маке';
+    title.textContent = 'Фитнес Хаус';
     title.style.cssText = `
       color: #141414;
       font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
@@ -1971,7 +1971,7 @@ export class DashboardScreen {
 
     const description = document.createElement('p');
     description.textContent =
-      'Подарок «Филадельфия с лососем» за первый заказ по промокоду «FILA2»';
+      'Скидка 20% на спортивную одежду при покупке абонемента на 3 месяца!';
     description.style.cssText = `
       color: #141414;
       font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
@@ -1983,7 +1983,7 @@ export class DashboardScreen {
     `;
 
     const ctaText = document.createElement('p');
-    ctaText.textContent = 'Получить подарок';
+    ctaText.textContent = 'Получить скидку';
     ctaText.style.cssText = `
       color: #1BA136;
       font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;

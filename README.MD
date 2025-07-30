@@ -52,7 +52,9 @@ src/
 │   │   ├── DashboardScreen.ts    # Main dashboard with map
 │   │   ├── SearchResultScreen.ts # Search results display
 │   │   ├── SuggestScreen.ts     # Search suggestions
-│   │   └── OrganizationScreen.ts # Organization details
+│   │   ├── OrganizationScreen.ts # Organization details
+│   │   ├── ShopScreen.ts        # Product catalog
+│   │   └── CartScreen.ts        # Shopping cart
 │   ├── Bottomsheet/     # Bottomsheet components
 │   │   ├── BottomsheetContainer.ts
 │   │   ├── BottomsheetHeader.ts
@@ -64,11 +66,26 @@ src/
 │   ├── Cards/           # Card components
 │   │   └── OrganizationCard.ts
 │   ├── Dashboard/       # Dashboard-specific components
-│   └── Map/            # Map components
+│   │   ├── ButtonRow.ts
+│   │   ├── StoriesCarousel.ts
+│   │   └── AdviceGrid.ts
+│   ├── Filter/          # Filter components
+│   │   └── FilterBar.ts
+│   ├── Map/            # Map components
+│   │   ├── MapContainer.ts
+│   │   └── MapGLComponent.ts
+│   └── Organization/   # Organization components
+│       └── TabBar.ts
 ├── services/           # Business logic services
 │   ├── SearchFlowManager.ts     # Navigation & search flow
 │   ├── BottomsheetManager.ts    # Bottomsheet state management
 │   ├── BottomsheetScrollManager.ts # Scroll behavior
+│   ├── BottomsheetGestureManager.ts # Gesture handling
+│   ├── BottomsheetAnimationManager.ts # Animation management
+│   ├── ContentManager.ts        # Dynamic content management
+│   ├── FilterBarManager.ts      # Filter UI management
+│   ├── CartService.ts           # Shopping cart management
+│   ├── MapManager.ts            # Map operations
 │   └── MapSyncService.ts        # Map synchronization
 ├── types/              # TypeScript type definitions
 │   ├── bottomsheet.ts  # Bottomsheet types
@@ -85,11 +102,12 @@ src/
 #### 1. DashboardScreen (`src/components/Screens/DashboardScreen.ts`)
 - Main application screen with 2GIS map integration
 - Bottomsheet with multiple snap states (small/default/fullscreen/scroll)
-- Modular component architecture
+- Modular component architecture with factory pattern
 - Interactive map with marker support
+- Screen state management (Dashboard/Suggest/SearchResult/Organization/Shop/Cart)
 
 #### 2. SearchFlowManager (`src/services/SearchFlowManager.ts`)
-- Navigation between screens (Dashboard → Suggest → SearchResult → Organization)
+- Navigation between screens (Dashboard → Suggest → SearchResult → Organization → Shop → Cart)
 - Search context management
 - History tracking
 - Event handling for search interactions
@@ -98,15 +116,30 @@ src/
 - Bottomsheet state management
 - Smooth transitions between states
 - Gesture handling for drag interactions
+- Promise-based animations
 
-#### 4. MapSyncService (`src/services/MapSyncService.ts`)
-- Synchronization between map and UI components
-- Viewport adjustments based on bottomsheet state
+#### 4. CartService (`src/services/CartService.ts`)
+- Shopping cart state management
+- Product operations (add/remove/update quantity)
+- Cart events and subscriptions
+- Immutable state updates
+
+#### 5. ContentManager (`src/services/ContentManager.ts`)
+- Dynamic content management for different screen states
+- Suggestion rendering
+- Search result display
+- Organization details content
+
+#### 6. MapManager (`src/services/MapManager.ts`)
+- 2GIS MapGL integration
+- Map initialization and operations
+- Marker management
+- Graceful fallback handling
 
 ## 🎪 Key Features
 
 ### Interactive Map
-- Real 2GIS MapGL integration
+- Real 2GIS MapGL integration via MapManager
 - Interactive markers and click events
 - Moscow-centered by default
 - Fallback display when MapGL unavailable
@@ -116,12 +149,21 @@ src/
 - **Default** (55%) - Normal content display
 - **Fullscreen** (90%) - Expanded view
 - **Fullscreen Scroll** (95%) - Scrollable content mode
+- Promise-based animations for better control flow
 
 ### Search Flow
 - **Dashboard** → Main screen with map and content
 - **Suggest** → Search suggestions and history
 - **Search Results** → Organization listings with filters
 - **Organization** → Detailed organization view
+- **Shop** → Product catalog and shopping interface
+- **Cart** → Shopping cart management
+
+### Shopping Cart
+- Product management (add/remove/update quantity)
+- Cart state persistence
+- Event-driven updates
+- Immutable state operations
 
 ### UI Components
 - Responsive design (375px max-width)
@@ -172,16 +214,24 @@ Get your API key from [2GIS Developer Portal](https://dev.2gis.com/)
 import { DashboardScreen, DashboardScreenFactory } from '@/components/Screens';
 import { SearchFlowManager } from '@/services/SearchFlowManager';
 import { BottomsheetManager } from '@/services/BottomsheetManager';
+import { FilterBarManager } from '@/services/FilterBarManager';
+import { CartService } from '@/services/CartService';
+import { MapManager } from '@/services/MapManager';
 
 const container = document.getElementById('app')!;
 const searchFlowManager = new SearchFlowManager();
 const bottomsheetManager = new BottomsheetManager();
+const filterBarManager = new FilterBarManager();
+const cartService = new CartService();
+const mapManager = new MapManager({ mapApiKey: 'your-key' });
 
 const dashboardScreen = DashboardScreenFactory.createDefault(
   container,
   searchFlowManager,
   bottomsheetManager,
-  'your-mapgl-api-key'
+  filterBarManager,
+  cartService,
+  mapManager
 );
 ```
 
@@ -203,20 +253,58 @@ searchManager.goToSuggest();
 
 // Perform search
 searchManager.goToSearchResults('кафе', { category: 'food' });
+
+// Navigate to shop
+searchManager.goToShop(shopData);
+
+// Navigate to cart
+searchManager.goToCart();
 ```
 
 ### Managing Bottomsheet States
 ```typescript
 import { BottomsheetManager, BottomsheetState } from '@/services';
 
-const bottomsheetManager = new BottomsheetManager();
+const bottomsheetManager = new BottomsheetManager({
+  state: BottomsheetState.DEFAULT,
+  snapPoints: [0.2, 0.55, 0.9, 0.95],
+  isDraggable: true,
+  hasScrollableContent: true
+});
 
-// Snap to different states
-bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
+// Snap to different states (promise-based)
+await bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
 
 // Listen to state changes
-bottomsheetManager.onStateChange((newState) => {
-  console.log(`Bottomsheet state: ${newState}`);
+bottomsheetManager.onStateChange((fromState, toState) => {
+  console.log(`Bottomsheet: ${fromState} → ${toState}`);
+});
+```
+
+### Shopping Cart Operations
+```typescript
+import { CartService } from '@/services';
+
+const cartService = new CartService({
+  onCartUpdated: (state) => {
+    console.log('Cart updated:', state);
+  },
+  onItemAdded: (item) => {
+    console.log('Item added:', item);
+  }
+});
+
+// Add product to cart
+const product = { id: '1', title: 'Coffee', price: 150 };
+cartService.addToCart(product, 2);
+
+// Get cart state
+const cartState = cartService.getState();
+console.log(`Total: ${cartState.totalItems} items, ${cartState.totalPrice}₽`);
+
+// Subscribe to cart changes
+const unsubscribe = cartService.subscribe((state) => {
+  updateCartUI(state);
 });
 ```
 
@@ -275,6 +363,7 @@ Main application screen with map and bottomsheet.
 - `activate()` - Show screen
 - `deactivate()` - Hide screen  
 - `snapToState(state)` - Change bottomsheet state
+- `handleScreenChange(from, to, context)` - Handle screen navigation
 - `centerMoscow()` - Center map on Moscow
 - `destroy()` - Clean up resources
 
@@ -285,6 +374,8 @@ Navigation and search state management.
 - `goToSuggest()` - Navigate to suggestions
 - `goToSearchResults(query, filters?)` - Navigate to results
 - `goToOrganization(organization)` - Navigate to org details
+- `goToShop(shop)` - Navigate to shop
+- `goToCart()` - Navigate to cart
 - `goBack()` - Navigate back
 - `updateQuery(query)` - Update search query
 
@@ -292,9 +383,22 @@ Navigation and search state management.
 Bottomsheet state and gesture management.
 
 **Methods:**
-- `snapToState(state)` - Change bottomsheet state
+- `snapToState(state)` - Change bottomsheet state (promise-based)
 - `getCurrentState()` - Get current state info
+- `startDrag(startY)` - Start drag gesture
+- `handleDrag(deltaY)` - Handle drag updates
+- `endDrag(velocity, height)` - End drag and snap
 - `onStateChange(callback)` - Listen to state changes
+
+#### `CartService`
+Shopping cart state management.
+
+**Methods:**
+- `addToCart(product, quantity?)` - Add product to cart
+- `removeFromCart(productId)` - Remove product
+- `updateQuantity(productId, quantity)` - Update quantity
+- `getState()` - Get cart state
+- `subscribe(callback)` - Subscribe to cart changes
 
 ### Type Definitions
 
@@ -304,7 +408,9 @@ enum ScreenType {
   DASHBOARD = 'dashboard',
   SUGGEST = 'suggest',
   SEARCH_RESULT = 'search_result',
-  ORGANIZATION = 'organization'
+  ORGANIZATION = 'organization',
+  SHOP = 'shop',
+  CART = 'cart'
 }
 ```
 
@@ -315,6 +421,16 @@ enum BottomsheetState {
   DEFAULT = 'default', 
   FULLSCREEN = 'fullscreen',
   FULLSCREEN_SCROLL = 'fullscreen_scroll'
+}
+```
+
+#### `CartState`
+```typescript
+interface CartState {
+  items: CartItem[];
+  totalItems: number;
+  totalPrice: number;
+  lastUpdated: Date;
 }
 ```
 

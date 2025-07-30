@@ -17,8 +17,10 @@ interface DashboardScreenProps {
   container: HTMLElement;
   searchFlowManager: SearchFlowManager;
   bottomsheetManager: BottomsheetManager;
+  filterBarManager: FilterBarManager;
+  cartService: CartService;
+  mapManager: MapManager;
   mapSyncService?: MapSyncService;
-  mapApiKey?: string;
   className?: string;
   onSearchFocus?: () => void;
   onStoryClick?: (storyId: string) => void;
@@ -49,6 +51,13 @@ Changes bottomsheet to specified state.
 import { BottomsheetState } from '@/types';
 
 dashboardScreen.snapToState(BottomsheetState.FULLSCREEN);
+```
+
+##### `handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void`
+Handles navigation between different screen states.
+
+```typescript
+dashboardScreen.handleScreenChange(ScreenType.DASHBOARD, ScreenType.SUGGEST, searchContext);
 ```
 
 ##### `centerMoscow(): void`
@@ -84,11 +93,13 @@ const screen = DashboardScreenFactory.create({
   container: document.getElementById('app')!,
   searchFlowManager,
   bottomsheetManager,
-  mapApiKey: 'your-api-key'
+  filterBarManager,
+  cartService,
+  mapManager
 });
 ```
 
-##### `DashboardScreenFactory.createDefault(container, searchFlowManager, bottomsheetManager, mapApiKey?): DashboardScreen`
+##### `DashboardScreenFactory.createDefault(container, searchFlowManager, bottomsheetManager, filterBarManager, cartService, mapManager): DashboardScreen`
 Creates dashboard screen with default settings.
 
 ```typescript
@@ -96,7 +107,9 @@ const screen = DashboardScreenFactory.createDefault(
   container,
   searchFlowManager,
   bottomsheetManager,
-  'your-api-key'
+  filterBarManager,
+  cartService,
+  mapManager
 );
 ```
 
@@ -146,6 +159,21 @@ Navigate to organization details screen.
 ```typescript
 const organization = searchContext.results[0];
 searchFlowManager.goToOrganization(organization);
+```
+
+##### `goToShop(shop: Shop): void`
+Navigate to shop/catalog screen.
+
+```typescript
+const shop = { organizationId: '123', name: 'Shop Name', categories: [], products: [] };
+searchFlowManager.goToShop(shop);
+```
+
+##### `goToCart(): void`
+Navigate to shopping cart screen.
+
+```typescript
+searchFlowManager.goToCart();
 ```
 
 ##### `goBack(): void`
@@ -252,23 +280,24 @@ Manages bottomsheet state transitions and gestures.
 #### Constructor
 ```typescript
 constructor(
-  initialState: BottomsheetState = BottomsheetState.DEFAULT,
-  config: Partial<BottomsheetConfig> = {}
+  initialConfig: BottomsheetConfig,
+  events: Partial<BottomsheetEvents> = {},
+  screenHeight: number = window.innerHeight
 )
 ```
 
 #### Methods
 
-##### `snapToState(state: BottomsheetState): void`
+##### `snapToState(state: BottomsheetState): Promise<void>`
 Animate bottomsheet to specified state.
 
 ```typescript
 import { BottomsheetState } from '@/types';
 
-bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
+await bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
 ```
 
-##### `getCurrentState(): BottomsheetStateInfo`
+##### `getCurrentState(): BottomsheetStateData`
 Get current bottomsheet state information.
 
 ```typescript
@@ -276,22 +305,33 @@ const stateInfo = bottomsheetManager.getCurrentState();
 console.log(`State: ${stateInfo.currentState}, Height: ${stateInfo.height}px`);
 ```
 
-##### `getScrollState(): ScrollState | null`
-Get current scroll state information.
+##### `startDrag(startY: number): void`
+Start drag gesture.
 
 ```typescript
-const scrollState = bottomsheetManager.getScrollState();
-if (scrollState?.canScrollContent) {
-  enableContentScroll();
-}
+bottomsheetManager.startDrag(event.clientY);
 ```
 
-##### `onStateChange(callback: (state: BottomsheetState) => void): () => void`
+##### `handleDrag(deltaY: number): void`
+Handle drag gesture updates.
+
+```typescript
+bottomsheetManager.handleDrag(deltaY);
+```
+
+##### `endDrag(velocity: number, currentHeight: number): Promise<void>`
+End drag gesture and snap to nearest state.
+
+```typescript
+await bottomsheetManager.endDrag(velocity, currentHeight);
+```
+
+##### `onStateChange(callback: (fromState: BottomsheetState, toState: BottomsheetState) => void): () => void`
 Subscribe to state changes.
 
 ```typescript
-const unsubscribe = bottomsheetManager.onStateChange((newState) => {
-  console.log(`Bottomsheet state: ${newState}`);
+const unsubscribe = bottomsheetManager.onStateChange((fromState, toState) => {
+  console.log(`Bottomsheet: ${fromState} → ${toState}`);
 });
 ```
 
@@ -300,6 +340,122 @@ Clean up resources and event listeners.
 
 ```typescript
 bottomsheetManager.destroy();
+```
+
+---
+
+### CartService
+
+Manages shopping cart state and operations.
+
+#### Constructor
+```typescript
+constructor(events: Partial<CartEvents> = {})
+```
+
+#### Methods
+
+##### `addToCart(product: Product, quantity?: number): void`
+Add product to cart or increase quantity.
+
+```typescript
+const product = { id: '1', title: 'Product', price: 100 };
+cartService.addToCart(product, 2);
+```
+
+##### `removeFromCart(productId: string): void`
+Remove product completely from cart.
+
+```typescript
+cartService.removeFromCart('product-id');
+```
+
+##### `updateQuantity(productId: string, newQuantity: number): void`
+Update quantity of specific product.
+
+```typescript
+cartService.updateQuantity('product-id', 3);
+```
+
+##### `getState(): CartState`
+Get current cart state.
+
+```typescript
+const cartState = cartService.getState();
+console.log(`Total items: ${cartState.totalItems}, Total price: ${cartState.totalPrice}`);
+```
+
+##### `getProductQuantity(productId: string): number`
+Get quantity of specific product.
+
+```typescript
+const quantity = cartService.getProductQuantity('product-id');
+```
+
+##### `isInCart(productId: string): boolean`
+Check if product is in cart.
+
+```typescript
+if (cartService.isInCart('product-id')) {
+  showRemoveButton();
+}
+```
+
+##### `clearCart(): void`
+Remove all items from cart.
+
+```typescript
+cartService.clearCart();
+```
+
+##### `subscribe(callback: (state: CartState) => void): () => void`
+Subscribe to cart state changes.
+
+```typescript
+const unsubscribe = cartService.subscribe((state) => {
+  updateCartUI(state);
+});
+```
+
+---
+
+### ContentManager
+
+Manages dynamic content for different screen states.
+
+#### Constructor
+```typescript
+constructor(searchFlowManager: SearchFlowManager)
+```
+
+#### Methods
+
+##### `updateContentForSuggest(contentContainer: HTMLElement): void`
+Update content for search suggestions screen.
+
+```typescript
+contentManager.updateContentForSuggest(container);
+```
+
+##### `updateContentForDashboard(contentContainer: HTMLElement): void`
+Update content for main dashboard screen.
+
+```typescript
+contentManager.updateContentForDashboard(container);
+```
+
+##### `updateContentForSearchResult(contentContainer: HTMLElement, context: SearchContext): void`
+Update content for search results screen.
+
+```typescript
+contentManager.updateContentForSearchResult(container, searchContext);
+```
+
+##### `updateContentForOrganization(contentContainer: HTMLElement, organization: Organization): void`
+Update content for organization details screen.
+
+```typescript
+contentManager.updateContentForOrganization(container, organization);
 ```
 
 ---
@@ -332,10 +488,11 @@ interface BottomsheetConfig {
 }
 
 interface BottomsheetEvents {
-  onStateChange?: (newState: BottomsheetState) => void;
+  onStateChange?: (fromState: BottomsheetState, toState: BottomsheetState) => void;
   onDragStart?: (height: number) => void;
   onDrag?: (height: number, progress: number) => void;
   onDragEnd?: (startHeight: number, endHeight: number) => void;
+  onSnapToState?: (targetState: BottomsheetState) => void;
 }
 ```
 
@@ -356,7 +513,7 @@ Animate to specified state.
 bottomsheetContainer.snapToState(BottomsheetState.SMALL);
 ```
 
-##### `getCurrentState(): BottomsheetStateInfo`
+##### `getCurrentState(): BottomsheetStateData`
 Get current state information.
 
 ```typescript
@@ -516,7 +673,9 @@ enum ScreenType {
   DASHBOARD = 'dashboard',
   SUGGEST = 'suggest', 
   SEARCH_RESULT = 'search_result',
-  ORGANIZATION = 'organization'
+  ORGANIZATION = 'organization',
+  SHOP = 'shop',
+  CART = 'cart'
 }
 ```
 
@@ -529,16 +688,12 @@ enum BottomsheetState {
   FULLSCREEN_SCROLL = 'fullscreen_scroll'  // 95% height
 }
 
-interface BottomsheetStateInfo {
+interface BottomsheetStateData {
   currentState: BottomsheetState;
   height: number;               // Current height in pixels
-  progress: number;             // Animation progress 0-1
-}
-
-interface ScrollState {
-  canScrollContent: boolean;    // Whether content scrolling is enabled
-  scrollTop: number;           // Current scroll position
-  scrollHeight: number;        // Total scrollable height
+  isDragging: boolean;          // Whether currently dragging
+  isAnimating: boolean;         // Whether animating
+  openProgress: number;         // Animation progress 0-1
 }
 ```
 
@@ -550,24 +705,28 @@ interface SearchContext {
   results: Organization[];
   suggestions: SearchSuggestion[];
   selectedOrganization?: Organization;
+  selectedShop?: Shop;
   searchHistory: string[];
   isLoading: boolean;
   error?: string;
 }
 
 interface SearchFilters {
-  category?: string;
-  priceRange?: 'low' | 'medium' | 'high';
-  rating?: number;
+  categories?: string[];
+  ratingFrom?: number;
   distance?: number;
-  isOpen?: boolean;
+  openNow?: boolean;
+  withReviews?: boolean;
+  advertisersOnly?: boolean;
+  sortBy?: 'relevance' | 'distance' | 'rating' | 'reviews';
 }
 
 interface SearchSuggestion {
   id: string;
   text: string;
-  type: 'history' | 'popular' | 'category' | 'address' | 'organization';
+  type: 'history' | 'popular' | 'organization' | 'address' | 'category';
   subtitle?: string;
+  coordinates?: [number, number];
   organizationId?: string;
 }
 
@@ -579,12 +738,47 @@ interface Organization {
   isAdvertiser: boolean;
   rating?: number;
   reviewsCount?: number;
-  category?: string;
+  category: string;
   description?: string;
   phone?: string;
-  website?: string;
   workingHours?: string;
-  photos?: string[];
+  photoUrl?: string;
+  distance?: number;
+}
+```
+
+### Cart Types
+```typescript
+interface CartItem {
+  product: Product;
+  quantity: number;
+  addedAt: Date;
+}
+
+interface CartState {
+  items: CartItem[];
+  totalItems: number;
+  totalPrice: number;
+  lastUpdated: Date;
+}
+
+interface Product {
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  imageUrl?: string;
+  badges?: string[];
+  quantity?: number;
+}
+
+interface Shop {
+  organizationId: string;
+  name: string;
+  categories: ProductCategory[];
+  products: Product[];
+  cartTotal?: number;
+  cartItemsCount?: number;
 }
 ```
 
@@ -601,6 +795,21 @@ interface NavigationEvents {
   onOrganizationSelected?: (organization: Organization, position: number) => void;
   onFilterApplied?: (filters: SearchFilters) => void;
 }
+
+interface BottomsheetEvents {
+  onStateChange?: (fromState: BottomsheetState, toState: BottomsheetState) => void;
+  onDragStart?: (height: number) => void;
+  onDrag?: (height: number, progress: number) => void;
+  onDragEnd?: (startHeight: number, endHeight: number) => void;
+  onSnapToState?: (targetState: BottomsheetState) => void;
+}
+
+interface CartEvents {
+  onCartUpdated?: (state: CartState) => void;
+  onItemAdded?: (item: CartItem) => void;
+  onItemRemoved?: (productId: string) => void;
+  onQuantityChanged?: (productId: string, newQuantity: number) => void;
+}
 ```
 
 ---
@@ -613,6 +822,9 @@ import {
   DashboardScreenFactory,
   SearchFlowManager,
   BottomsheetManager,
+  FilterBarManager,
+  CartService,
+  MapManager,
   ScreenType
 } from '@/components';
 
@@ -627,7 +839,23 @@ const searchFlowManager = new SearchFlowManager(ScreenType.DASHBOARD, {
   }
 });
 
-const bottomsheetManager = new BottomsheetManager();
+const bottomsheetManager = new BottomsheetManager({
+  state: BottomsheetState.DEFAULT,
+  snapPoints: [0.2, 0.55, 0.9, 0.95],
+  isDraggable: true,
+  hasScrollableContent: true
+});
+
+const filterBarManager = new FilterBarManager();
+const cartService = new CartService({
+  onCartUpdated: (state) => {
+    console.log('Cart updated:', state);
+  }
+});
+
+const mapManager = new MapManager({
+  mapApiKey: process.env.VITE_MAPGL_KEY
+});
 
 // Create dashboard screen
 const container = document.getElementById('app')!;
@@ -635,12 +863,14 @@ const dashboardScreen = DashboardScreenFactory.createDefault(
   container,
   searchFlowManager,
   bottomsheetManager,
-  process.env.VITE_MAPGL_KEY
+  filterBarManager,
+  cartService,
+  mapManager
 );
 
 // Listen to bottomsheet changes
-bottomsheetManager.onStateChange((state) => {
-  console.log(`Bottomsheet state: ${state}`);
+bottomsheetManager.onStateChange((fromState, toState) => {
+  console.log(`Bottomsheet: ${fromState} → ${toState}`);
 });
 
 // Navigate programmatically
@@ -678,17 +908,22 @@ const customSearchFlow = new SearchFlowManager(ScreenType.DASHBOARD, {
 ```typescript
 // Create bottomsheet with custom configuration
 const bottomsheetManager = new BottomsheetManager(
-  BottomsheetState.SMALL,
   {
+    state: BottomsheetState.SMALL,
     snapPoints: [0.15, 0.4, 0.85, 0.95],  // Custom snap points
     isDraggable: true,
     hasScrollableContent: true
+  },
+  {
+    onStateChange: (fromState, toState) => {
+      console.log(`Bottomsheet: ${fromState} → ${toState}`);
+    }
   }
 );
 
 // React to state changes
-bottomsheetManager.onStateChange((state) => {
-  switch (state) {
+bottomsheetManager.onStateChange((fromState, toState) => {
+  switch (toState) {
     case BottomsheetState.SMALL:
       hideMapControls();
       break;
@@ -704,6 +939,39 @@ setTimeout(() => {
 }, 2000);
 ```
 
+### Shopping Cart Integration
+```typescript
+// Initialize cart service
+const cartService = new CartService({
+  onCartUpdated: (state) => {
+    updateCartBadge(state.totalItems);
+    updateCartTotal(state.totalPrice);
+  },
+  onItemAdded: (item) => {
+    showNotification(`Added ${item.product.title} to cart`);
+  }
+});
+
+// Add products to cart
+const product = {
+  id: '1',
+  title: 'Coffee',
+  price: 150,
+  imageUrl: '/images/coffee.jpg'
+};
+
+cartService.addToCart(product, 2);
+
+// Get cart state
+const cartState = cartService.getState();
+console.log(`Cart has ${cartState.totalItems} items, total: ${cartState.totalPrice}₽`);
+
+// Subscribe to cart changes
+const unsubscribe = cartService.subscribe((state) => {
+  updateCartUI(state);
+});
+```
+
 ---
 
 ## 📝 Notes
@@ -713,5 +981,7 @@ setTimeout(() => {
 - Memory cleanup is **automatic** when calling `destroy()` methods
 - TypeScript **strict mode** is enabled - all types are required
 - Component lifecycle follows **create → use → destroy** pattern
+- Cart operations are **immutable** - state updates create new objects
+- Bottomsheet animations are **promise-based** for better control flow
 
 For more examples and advanced usage, see the demo files in `/test/` directory.
