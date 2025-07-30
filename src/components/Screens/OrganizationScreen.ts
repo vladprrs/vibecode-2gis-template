@@ -1,6 +1,6 @@
 import { Organization, ScreenType } from '../../types';
 import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
-import { TabBar } from '../Organization';
+import { TabBar, createHeaderNotAdvertiser } from '../Organization';
 
 /**
  * Пропсы для OrganizationScreen
@@ -58,14 +58,6 @@ export class OrganizationScreen {
    */
   private setupElement(): void {
     this.element.innerHTML = '';
-    Object.assign(this.element.style, {
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      backgroundColor: '#ffffff',
-      borderRadius: '16px 16px 0 0',
-      overflow: 'hidden',
-    });
 
     if (this.props.className) {
       this.element.className = this.props.className;
@@ -79,16 +71,7 @@ export class OrganizationScreen {
   private createNonAdvertiserLayout(): void {
     // Основной контейнер шторки
     const bottomsheetContent = document.createElement('div');
-    Object.assign(bottomsheetContent.style, {
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      backgroundColor: '#ffffff',
-      borderRadius: '16px 16px 0 0',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-    });
+    bottomsheetContent.className = 'bottomsheet-content';
 
     // 1. Создаем заголовок организации (Organization card top)
     const organizationCardTop = this.createOrganizationCardTop();
@@ -96,11 +79,7 @@ export class OrganizationScreen {
 
     // 2. Создаем прокручиваемое содержимое
     const scrollableContent = document.createElement('div');
-    Object.assign(scrollableContent.style, {
-      flex: '1',
-      overflowY: 'auto',
-      backgroundColor: '#ffffff',
-    });
+    scrollableContent.className = 'scrollable-content';
 
     // 4. Создаем основное содержимое (Content-non-RD)
     const contentContainer = this.createContentContainer();
@@ -115,101 +94,13 @@ export class OrganizationScreen {
    * Создание заголовка организации (Organization card top)
    */
   private createOrganizationCardTop(): HTMLElement {
-    const cardTop = document.createElement('div');
-    Object.assign(cardTop.style, {
-      backgroundColor: '#ffffff',
-      borderRadius: '16px 16px 0 0',
-      position: 'relative',
+    return createHeaderNotAdvertiser({
+      name: this.props.organization.name,
+      category: this.props.organization.category,
+      rating: this.props.organization.rating || 4.6,
+      reviews: this.props.organization.reviewsCount || 0,
+      time: '3 мин',
     });
-
-    // Drag handle
-    const draggerContainer = document.createElement('div');
-    Object.assign(draggerContainer.style, {
-      display: 'flex',
-      height: '0',
-      paddingBottom: '6px',
-      flexDirection: 'column',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      alignSelf: 'stretch',
-      position: 'relative',
-      paddingTop: '16px',
-    });
-
-    const dragger = document.createElement('div');
-    Object.assign(dragger.style, {
-      width: '40px',
-      height: '4px',
-      flexShrink: '0',
-      borderRadius: '6px',
-      background: 'rgba(137, 137, 137, 0.25)',
-      cursor: 'grab',
-    });
-
-    draggerContainer.appendChild(dragger);
-    cardTop.appendChild(draggerContainer);
-
-    // RD контент контейнер
-    const rdContainer = document.createElement('div');
-    Object.assign(rdContainer.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      alignSelf: 'stretch',
-      borderRadius: '16px 16px 0 0',
-      background: '#FFF',
-    });
-
-    // Контент с padding
-    const contentContainer = document.createElement('div');
-    Object.assign(contentContainer.style, {
-      display: 'flex',
-      padding: '0 16px 16px 16px',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      alignSelf: 'stretch',
-    });
-
-    // Верхняя секция с контентом и кнопкой закрытия
-    const topSection = document.createElement('div');
-    Object.assign(topSection.style, {
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: '8px',
-      alignSelf: 'stretch',
-    });
-
-    // Левая секция с друзьями и заголовком
-    const leftContent = document.createElement('div');
-    Object.assign(leftContent.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-      flex: '1 0 0',
-    });
-
-
-
-    // Заголовок карточки
-    const cardHeader = this.createCardHeader();
-    leftContent.appendChild(cardHeader);
-
-    topSection.appendChild(leftContent);
-
-    // Кнопка закрытия
-    const closeButton = this.createCloseButton();
-    topSection.appendChild(closeButton);
-
-    contentContainer.appendChild(topSection);
-
-    // Секция с рейтингом и временем поездки
-    const ratingSection = this.createRatingSection();
-    contentContainer.appendChild(ratingSection);
-
-    rdContainer.appendChild(contentContainer);
-    cardTop.appendChild(rdContainer);
-
-    return cardTop;
   }
 
   /**
@@ -1161,41 +1052,11 @@ export class OrganizationScreen {
    */
   private createBottomActionBar(): HTMLElement {
     const actionBar = document.createElement('div');
-    Object.assign(actionBar.style, {
-      position: 'fixed',
-      bottom: '0',
-      left: '0',
-      right: '0',
-      padding: '16px',
-      backgroundColor: '#ffffff',
-      borderTop: '1px solid rgba(137, 137, 137, 0.15)',
-      zIndex: '100',
-    });
+    actionBar.className = 'bottom-action';
 
     const button = document.createElement('button');
-    Object.assign(button.style, {
-      width: '100%',
-      padding: '16px',
-      backgroundColor: '#1976D2',
-      color: '#ffffff',
-      border: 'none',
-      borderRadius: '12px',
-      fontFamily: 'SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif',
-      fontSize: '16px',
-      fontWeight: '600',
-      lineHeight: '20px',
-      letterSpacing: '-0.24px',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s ease',
-    });
     button.textContent = 'Написать отзыв';
 
-    button.addEventListener('mouseenter', () => {
-      button.style.backgroundColor = '#1565C0';
-    });
-    button.addEventListener('mouseleave', () => {
-      button.style.backgroundColor = '#1976D2';
-    });
 
     actionBar.appendChild(button);
 
@@ -1271,7 +1132,7 @@ export class OrganizationScreen {
   public updateOrganization(organization: Organization): void {
     this.props.organization = organization;
     // Обновляем заголовок и другие элементы
-    const title = this.element.querySelector('span[style*="font-size: 19px"]');
+    const title = this.element.querySelector('.inline-element-31');
     if (title) {
       title.textContent = organization.name;
     }
