@@ -234,11 +234,5 @@ export class CartService {
     }
   }
 
-  /**
-   * Get sample sports products for demo
-   * @deprecated Use ProductRepository.getSportsClothing() directly for new code
-   */
-  getSampleProducts(): Product[] {
-    return getProductRepository().getSportsClothing();
-  }
+
 }

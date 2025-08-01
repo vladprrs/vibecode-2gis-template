@@ -42,7 +42,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Синхронизация пинов с содержимым экрана
    */
   syncPinsWithContent(contentType: MapContentType, data: any): void {
-    console.log('MapSyncService: Syncing pins for', contentType, data);
 
     let newPins: MapPin[] = [];
 
@@ -244,7 +243,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Выделение пина организации
    */
   highlightOrganizationPin(organizationId: string): void {
-    console.log('MapSyncService: Highlighting organization pin', organizationId);
 
     // Обновляем состояние пинов
     this.currentPins = this.currentPins.map(pin => ({
@@ -268,7 +266,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Снятие выделения со всех пинов
    */
   clearHighlights(): void {
-    console.log('MapSyncService: Clearing all highlights');
 
     this.currentPins = this.currentPins.map(pin => ({
       ...pin,
@@ -282,7 +279,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Адаптация видимой области карты под высоту шторки
    */
   adjustMapViewport(bottomsheetHeight: number): void {
-    console.log('MapSyncService: Adjusting viewport for bottomsheet height', bottomsheetHeight);
 
     if (!this.mapRef.current) return;
 
@@ -305,7 +301,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Центрирование карты на организации
    */
   centerOnOrganization(organization: Organization): void {
-    console.log('MapSyncService: Centering on organization', organization.name);
 
     if (!this.mapRef.current) return;
 
@@ -326,7 +321,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Подгонка карты под результаты поиска
    */
   fitToSearchResults(organizations: Organization[]): void {
-    console.log('MapSyncService: Fitting to search results', organizations.length);
 
     if (!this.mapRef.current || organizations.length === 0) return;
 
@@ -351,7 +345,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Обновление местоположения пользователя
    */
   updateUserLocation(coordinates: [number, number]): void {
-    console.log('MapSyncService: Updating user location', coordinates);
 
     // Удаляем старый пин пользователя
     this.currentPins = this.currentPins.filter(pin => pin.type !== 'user_location');
@@ -374,7 +367,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Получение видимых организаций в области карты
    */
   getVisibleOrganizations(): Organization[] {
-    console.log('MapSyncService: Getting visible organizations');
 
     // Фильтруем пины организаций из текущих пинов
     const organizationPins = this.currentPins.filter(

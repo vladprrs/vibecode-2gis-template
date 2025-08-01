@@ -43,7 +43,6 @@ export class MapManager {
       const checkMapGL = () => {
         attempts++;
         if ((window as any).mapgl && (window as any).mapgl.Map) {
-          console.log(`✅ MapGL API v1 загружен (попытка ${attempts})`);
           resolve((window as any).mapgl);
         } else if (attempts >= maxAttempts) {
           reject(new Error('MapGL API v1 не загрузился'));

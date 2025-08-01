@@ -173,7 +173,6 @@ export class MapGLComponent {
         attempts++;
 
         if (window.mapgl && window.mapgl.Map) {
-          console.log(`✅ MapGL API v1 загружен (попытка ${attempts})`);
           resolve();
         } else if (attempts >= maxAttempts) {
           reject(
@@ -182,7 +181,6 @@ export class MapGLComponent {
             )
           );
         } else {
-          console.log(`⏳ Ожидание MapGL API... (попытка ${attempts}/${maxAttempts})`);
           setTimeout(checkMapGL, 200);
         }
       };
@@ -213,8 +211,6 @@ export class MapGLComponent {
     };
 
     try {
-      console.log('Создание карты с конфигурацией:', mapConfig);
-
       // Создаем карту - используем ID контейнера, не элемент
       this.map = new window.mapgl.Map(this.container.id, mapConfig);
 
@@ -225,7 +221,6 @@ export class MapGLComponent {
         this.map!.on('styleload', () => {
           if (!resolved) {
             resolved = true;
-            console.log('✅ Стиль карты загружен');
             resolve();
           }
         });
@@ -254,8 +249,6 @@ export class MapGLComponent {
 
       // Notify parent
       this.props.onLoad?.(this.map);
-
-      console.log('✅ MapGL карта успешно создана');
     } catch (error) {
       console.error('Failed to create map:', error);
       this.showError('Не удалось создать карту 2GIS');
@@ -287,9 +280,7 @@ export class MapGLComponent {
 
     // Click events
     this.map.on('click', (event: any) => {
-      if (event.lngLat) {
-        console.log('Map clicked:', event.lngLat);
-      }
+      // Map clicked
     });
   }
 
@@ -349,7 +340,7 @@ export class MapGLComponent {
       marker.addTo(this.map);
       this.markers.set(id, marker);
 
-      console.log(`✅ Маркер "${id}" добавлен`);
+      // Marker added successfully
     } catch (error) {
       console.error('Failed to add marker:', error);
     }
@@ -424,7 +415,6 @@ export class MapGLComponent {
    */
   public resize(): void {
     // MapGL автоматически подстраивается под размер контейнера
-    console.log('Map resize requested');
   }
 
   /**
@@ -485,7 +475,7 @@ export class MapGLComponentFactory {
       center: [37.620393, 55.75396], // Moscow
       zoom: 12,
       onLoad: map => {
-        console.log('Dashboard map loaded:', map);
+        // Dashboard map loaded
       },
       onError: error => {
         console.error('Dashboard map error:', error);

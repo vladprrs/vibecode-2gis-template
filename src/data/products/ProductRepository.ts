@@ -151,13 +151,7 @@ export class ProductRepository {
     return Array.from(brands).sort();
   }
 
-  /**
-   * Legacy method for backward compatibility with CartService.getSampleProducts()
-   * @deprecated Use getSportsClothing() instead
-   */
-  getSampleProducts(): Product[] {
-    return this.getSportsClothing();
-  }
+
 }
 
 /**
