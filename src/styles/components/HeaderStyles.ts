@@ -50,7 +50,7 @@ export const UNIFIED_HEADER_STYLES = {
     position: relative;
   `,
 
-  // Unified search input container - consistent across all screens  
+  // Unified search input container - consistent across all screens
   SEARCH_INPUT_UNIFIED: `
     display: flex;
     height: 40px;
@@ -79,7 +79,7 @@ export const UNIFIED_HEADER_STYLES = {
     transition: opacity 0.2s ease;
   `,
 
-  // Unified clear button - best from SearchResult screen  
+  // Unified clear button - best from SearchResult screen
   CLEAR_BUTTON_UNIFIED: `
     width: 24px;
     height: 24px;
@@ -153,7 +153,7 @@ export const UNIFIED_HEADER_STYLES = {
     background: transparent;
     border-top: 1px solid rgba(137, 137, 137, 0.15);
     margin-top: 8px;
-  `
+  `,
 } as const;
 
 /**
@@ -344,7 +344,7 @@ export class HeaderStyles {
   }
 
   /**
-   * Unified clear button SVG - optimized from SearchResult screen  
+   * Unified clear button SVG - optimized from SearchResult screen
    */
   static getUnifiedClearButtonSVG(): string {
     return `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -426,7 +426,7 @@ export class HeaderStyles {
       clearButton.style.cssText = UNIFIED_HEADER_STYLES.CLEAR_BUTTON_UNIFIED;
       clearButton.innerHTML = this.getUnifiedClearButtonSVG();
 
-      // Add hover effects  
+      // Add hover effects
       clearButton.addEventListener('mouseenter', () => {
         clearButton.style.opacity = '1';
         clearButton.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';

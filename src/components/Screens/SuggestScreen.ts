@@ -74,7 +74,7 @@ export class SuggestScreen {
    */
   private initialize(): void {
     this.setupElement();
-    this.createBottomsheet();
+    // Skip createBottomsheet() - use existing bottomsheet from DashboardScreen
     this.createContent();
     this.setupEventListeners();
     this.syncWithServices();
@@ -123,9 +123,10 @@ export class SuggestScreen {
           this.props.bottomsheetManager.snapToState(newState);
 
           // Синхронизируем с картой если есть сервис
-          if (this.props.mapSyncService && this.bottomsheetContainer) {
-            const currentStateData = this.bottomsheetContainer.getCurrentState();
-            this.props.mapSyncService.adjustMapViewport(currentStateData.height);
+          if (this.props.mapSyncService) {
+            // Map sync is handled by the main bottomsheet manager
+            const currentHeight = window.innerHeight * 0.95; // Fullscreen height
+            this.props.mapSyncService.adjustMapViewport(currentHeight);
           }
         },
       },
@@ -138,12 +139,10 @@ export class SuggestScreen {
    * Создание содержимого шторки
    */
   private createContent(): void {
-    if (!this.bottomsheetContainer) return;
-
-    // Создаем заголовок
+    // Создаем заголовок и добавляем его в контейнер
     this.createHeader();
 
-    // Создаем контентную область
+    // Создаем контентную область и добавляем её в контейнер
     this.createContentArea();
   }
 
@@ -186,6 +185,12 @@ export class SuggestScreen {
     if (searchContainer) {
       HeaderStyles.applyUnifiedSearchInputStyles(searchContainer);
     }
+
+    // Add the header to the main screen element as the first child
+    // This follows the same pattern as DashboardScreen
+    if (this.headerContainer) {
+      this.element.appendChild(this.headerContainer);
+    }
   }
 
   /**
@@ -206,28 +211,28 @@ export class SuggestScreen {
    */
   private createContentArea(): void {
     this.contentContainer = document.createElement('div');
-
-    this.bottomsheetContent = new BottomsheetContent(this.contentContainer, {
-      scrollable: true,
-      scrollType: 'vertical',
-      showScrollIndicator: false,
-      padding: {
-        top: 0,
-        right: 0,
-        bottom: 16,
-        left: 0,
-      },
-    });
+    this.contentContainer.style.cssText = `
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      align-self: stretch;
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 0 16px 0;
+    `;
 
     // Создаем содержимое с подсказками
     this.createSuggestionsContent();
+
+    // Добавляем контентную область в основной элемент
+    this.element.appendChild(this.contentContainer);
   }
 
   /**
    * Создание содержимого с подсказками
    */
   private createSuggestionsContent(): void {
-    if (!this.bottomsheetContent) return;
+    if (!this.contentContainer) return;
 
     // Создаем контейнер для подсказок
     this.suggestionsContainer = document.createElement('div');
@@ -248,8 +253,8 @@ export class SuggestScreen {
       },
     });
 
-    // Добавляем контейнер в контент
-    this.bottomsheetContent.setContent([this.suggestionsContainer]);
+    // Добавляем контейнер подсказок в контентную область
+    this.contentContainer.appendChild(this.suggestionsContainer);
   }
 
   /**
@@ -520,10 +525,8 @@ export class SuggestScreen {
    */
   private handleResize(): void {
     // Обновляем высоты и адаптируем интерфейс
-    if (this.bottomsheetContainer) {
-      const newHeight = window.innerHeight;
-      // Можно обновить конфигурацию шторки при необходимости
-    }
+    const newHeight = window.innerHeight;
+    // Resize handling is managed by the main bottomsheet manager
   }
 
   /**
@@ -587,7 +590,7 @@ export class SuggestScreen {
       screen: ScreenType.SUGGEST,
       query: this.currentQuery,
       suggestions: this.suggestions,
-      bottomsheetState: this.bottomsheetContainer?.getCurrentState(),
+      bottomsheetState: this.props.bottomsheetManager.getCurrentState(),
     };
   }
 
@@ -600,9 +603,7 @@ export class SuggestScreen {
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
 
     // Очищаем компоненты
-    this.bottomsheetContainer?.destroy();
     this.bottomsheetHeader?.destroy();
-    this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
     this.searchSuggestions?.destroy();
 

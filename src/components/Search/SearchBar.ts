@@ -524,7 +524,12 @@ export class SearchBar {
   private updateClearButtonVisibility(value: string): void {
     if (!this.clearButton) return;
 
-    if (value.length > 0 && this.props.state !== SearchBarState.INACTIVE) {
+    // Always show clear button for SearchResult screen (FILLED state)
+    // For other screens, show only when there's text and not inactive
+    if (
+      this.props.state === SearchBarState.FILLED ||
+      (value.length > 0 && this.props.state !== SearchBarState.INACTIVE)
+    ) {
       this.clearButton.style.display = 'flex';
     } else {
       this.clearButton.style.display = 'none';

@@ -1,4 +1,5 @@
 import { BottomsheetState, ScreenType, SearchContext } from '../../types';
+import { SuggestScreen } from './SuggestScreen';
 
 import {
   BottomsheetAnimationManager,
@@ -112,6 +113,7 @@ export class DashboardScreen {
   private bottomsheetHeader?: BottomsheetHeader;
   private bottomsheetContent?: BottomsheetContent;
   private searchBar?: SearchBar;
+  private suggestScreen?: SuggestScreen;
   private filterBarManager: FilterBarManager;
 
   // Оригинальные параметры bottomsheet
@@ -151,7 +153,7 @@ export class DashboardScreen {
     this.setupElement();
     await this.props.mapManager.createMapContainer(this.element);
     this.createBottomsheet();
-    
+
     // Set initial dashboard content and correct height (55%)
     this.showDashboardContent();
   }
@@ -318,6 +320,12 @@ export class DashboardScreen {
    * Создание горизонтального ряда быстрых действий
    */
   private createQuickActionButtons(container: HTMLElement): void {
+    // Check if button row already exists to prevent duplication
+    const existingButtonRow = container.querySelector('.buttons-row');
+    if (existingButtonRow) {
+      return;
+    }
+
     const buttonRowContainer = document.createElement('div');
     buttonRowContainer.style.cssText = `
       padding: 0;
@@ -365,6 +373,12 @@ export class DashboardScreen {
    * Создание карусели историй
    */
   private createStoriesCarousel(container: HTMLElement): void {
+    // Check if stories carousel already exists to prevent duplication
+    const existingStories = container.querySelector('.stories-section');
+    if (existingStories) {
+      return;
+    }
+
     const storiesContainer = document.createElement('div');
     storiesContainer.className = 'stories-section';
 
@@ -384,6 +398,12 @@ export class DashboardScreen {
    * Создание заголовка секции
    */
   private createSectionHeading(container: HTMLElement, title: string): void {
+    // Check if section heading already exists to prevent duplication
+    const existingHeading = container.querySelector('.section-header');
+    if (existingHeading) {
+      return;
+    }
+
     const heading = document.createElement('div');
     heading.className = 'section-header';
     heading.style.cssText = `
@@ -416,6 +436,14 @@ export class DashboardScreen {
    * Создание масонри сетки контента
    */
   private createContentMasonryGrid(container: HTMLElement): void {
+    // Check if AdviceGrid already exists to prevent duplication
+    const existingAdviceGrid = container.querySelector('.advice-grid');
+    if (existingAdviceGrid) {
+      // AdviceGrid already exists, just create promo banner
+      this.createPromoBanner(container);
+      return;
+    }
+
     // Use the new AdviceGrid component directly
     import('./../Dashboard/AdviceGrid')
       .then(({ AdviceGrid }) => {
@@ -454,6 +482,12 @@ export class DashboardScreen {
    * Создание промо баннера
    */
   private createPromoBanner(container: HTMLElement): void {
+    // Check if promo banner already exists to prevent duplication
+    const existingBanner = container.querySelector('.promo-banner');
+    if (existingBanner) {
+      return;
+    }
+
     const banner = document.createElement('div');
     banner.className = 'promo-banner';
     banner.style.cssText = `
@@ -818,6 +852,7 @@ export class DashboardScreen {
     this.bottomsheetHeader?.destroy();
     this.bottomsheetContent?.destroy();
     this.searchBar?.destroy();
+    this.suggestScreen?.destroy();
     this.filterBarManager.hide();
 
     // Clean up organization screen if it exists
@@ -906,7 +941,11 @@ export class DashboardScreen {
     if (!this.bottomsheetElement) return;
 
     // Use unified header structure
-    const { container: headerContainer, dragSection, searchBarContainer } = HeaderStyles.createUnifiedHeader();
+    const {
+      container: headerContainer,
+      dragSection,
+      searchBarContainer,
+    } = HeaderStyles.createUnifiedHeader();
 
     // Create unified SearchBar with burger menu variant
     this.searchBar = SearchBarFactory.createDashboard(searchBarContainer, () => {
@@ -945,6 +984,16 @@ export class DashboardScreen {
   public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
     console.log(`📱 DashboardScreen handling navigation: ${from} → ${to}`);
 
+    // Clear dashboard content when leaving dashboard screen
+    if (from === ScreenType.DASHBOARD && to !== ScreenType.DASHBOARD) {
+      this.clearDashboardContent();
+    }
+
+    // Clear search result content when going to dashboard
+    if (to === ScreenType.DASHBOARD && from === ScreenType.SEARCH_RESULT) {
+      this.clearSearchResultContent();
+    }
+
     // Hide filter bar when leaving search result screen
     if (from === ScreenType.SEARCH_RESULT && to !== ScreenType.SEARCH_RESULT) {
       this.filterBarManager.hide();
@@ -952,7 +1001,7 @@ export class DashboardScreen {
 
     switch (to) {
       case ScreenType.SUGGEST:
-        this.showSuggestContent();
+        this.showSuggestScreen();
         break;
       case ScreenType.DASHBOARD:
         this.showDashboardContent();
@@ -979,7 +1028,46 @@ export class DashboardScreen {
   }
 
   /**
-   * Show suggest content in the bottomsheet
+   * Очистка контента дашборда при переходе на другие экраны
+   */
+  private clearDashboardContent(): void {
+    if (!this.bottomsheetElement) return;
+
+    const contentContainer = this.bottomsheetElement.querySelector('.dashboard-content');
+    if (contentContainer) {
+      // Clear only the grey section content, preserve the container structure
+      const greySection = contentContainer.querySelector('.dashboard-grey-section');
+      if (greySection) {
+        greySection.remove();
+      }
+    }
+  }
+
+  /**
+   * Очистка контента поисковой выдачи при переходе на дашборд
+   */
+  private clearSearchResultContent(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Clear search result content
+    const contentContainer = this.bottomsheetElement.querySelector('.dashboard-content');
+    if (contentContainer) {
+      // Clear all search result content
+      contentContainer.innerHTML = '';
+    }
+
+    // Clear header content
+    const header = this.bottomsheetElement.querySelector('.bottomsheet-header');
+    if (header) {
+      header.innerHTML = '';
+    }
+
+    // Hide filter bar
+    this.filterBarManager.hide();
+  }
+
+  /**
+   * Show suggest content in the bottomsheet (DEPRECATED - use showSuggestScreen instead)
    */
   private showSuggestContent(): void {
     if (!this.bottomsheetElement) return;
@@ -991,12 +1079,75 @@ export class DashboardScreen {
     // Update header to suggest state FIRST to ensure proper search bar positioning
     this.updateHeaderForSuggest();
 
-    // Update content to suggest content AFTER header is fixed
-    const contentContainer = this.bottomsheetElement?.querySelector(
-      '.dashboard-content'
-    ) as HTMLElement;
-    if (contentContainer) {
-      this.contentManager.updateContentForSuggest(contentContainer);
+    // Note: Content is now managed by SuggestScreen directly, not ContentManager
+    // The SuggestScreen creates its own unified SearchBar component and suggestions
+  }
+
+  /**
+   * Show SuggestScreen with unified SearchBar component
+   */
+  private showSuggestScreen(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Clean up any existing suggest screen
+    if (this.suggestScreen) {
+      this.suggestScreen.destroy();
+      this.suggestScreen = undefined;
+    }
+
+    // Clear bottomsheet content to prepare for SuggestScreen
+    this.bottomsheetElement.innerHTML = '';
+
+    // Create and activate SuggestScreen
+    this.suggestScreen = new SuggestScreen({
+      container: this.bottomsheetElement,
+      searchFlowManager: this.props.searchFlowManager,
+      bottomsheetManager: this.props.bottomsheetManager,
+      mapSyncService: this.props.mapSyncService,
+      initialQuery: this.props.searchFlowManager.searchContext.query,
+      onSuggestionSelect: suggestion => {
+        console.log('Suggestion selected:', suggestion);
+      },
+      onBackToDashboard: () => {
+        this.props.searchFlowManager.goToDashboard();
+      },
+      onQueryChange: query => {
+        this.props.searchFlowManager.updateQuery(query);
+      },
+    });
+
+    // Activate the suggest screen
+    this.suggestScreen.activate();
+  }
+
+  /**
+   * Ensure the standard bottomsheet structure exists for content management
+   */
+  private ensureStandardBottomsheetStructure(): void {
+    if (!this.bottomsheetElement) return;
+
+    // Check if we already have the standard structure
+    const existingHeader = this.bottomsheetElement.querySelector('.bottomsheet-header');
+    const existingContent = this.bottomsheetElement.querySelector('.dashboard-content');
+
+    if (!existingHeader || !existingContent) {
+      // Clear and rebuild the standard structure
+      this.bottomsheetElement.innerHTML = '';
+
+      // Recreate the header
+      this.createFigmaHeader();
+
+      // Recreate the content container
+      const content = document.createElement('div');
+      content.className = 'dashboard-content';
+      content.style.cssText = `
+        flex: 1;
+        width: 100%;
+        overflow-y: auto;
+        padding-top: 16px;
+      `;
+
+      this.bottomsheetElement.appendChild(content);
     }
   }
 
@@ -1006,9 +1157,18 @@ export class DashboardScreen {
   private showDashboardContent(): void {
     if (!this.bottomsheetElement) return;
 
+    // Clean up any existing suggest screen first
+    if (this.suggestScreen) {
+      this.suggestScreen.destroy();
+      this.suggestScreen = undefined;
+    }
+
     // Snap to default height (55%) - call both manager and screen snapToState
     this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
     this.snapToState(BottomsheetState.DEFAULT);
+
+    // Recreate the standard bottomsheet structure if it doesn't exist
+    this.ensureStandardBottomsheetStructure();
 
     // Update header to dashboard state FIRST to ensure proper search bar positioning
     this.updateHeaderForDashboard();
@@ -1018,7 +1178,13 @@ export class DashboardScreen {
       '.dashboard-content'
     ) as HTMLElement;
     if (contentContainer) {
-      this.contentManager.updateContentForDashboard(contentContainer);
+      // Check if content already exists to prevent duplication
+      const existingContent = contentContainer.querySelector('.dashboard-grey-section');
+
+      if (!existingContent) {
+        // Only create content if it doesn't exist
+        this.createDashboardContent(contentContainer);
+      }
     }
   }
 
@@ -1028,9 +1194,18 @@ export class DashboardScreen {
   private showSearchResultContent(context: SearchContext): void {
     if (!this.bottomsheetElement) return;
 
+    // Clean up any existing suggest screen first
+    if (this.suggestScreen) {
+      this.suggestScreen.destroy();
+      this.suggestScreen = undefined;
+    }
+
     // Snap to fullscreen
     this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
     this.snapToState(BottomsheetState.FULLSCREEN);
+
+    // Recreate the standard bottomsheet structure if it doesn't exist
+    this.ensureStandardBottomsheetStructure();
 
     // Update header to search result state FIRST to ensure proper search bar positioning
     this.updateHeaderForSearchResult(context);
@@ -1077,9 +1252,16 @@ export class DashboardScreen {
             this.organizationScreen = undefined;
           }
 
-          // Use SearchFlowManager's built-in goBack() method for proper navigation
-          // This ensures proper state management and header restoration
-          this.props.searchFlowManager.goBack();
+          // Always return to search results if we have a query in context
+          // This ensures we go back to search results instead of suggest screen
+          if (this.props.searchFlowManager.searchContext.query) {
+            this.props.searchFlowManager.goToSearchResults(
+              this.props.searchFlowManager.searchContext.query
+            );
+          } else {
+            // Fallback to goBack if no query exists
+            this.props.searchFlowManager.goBack();
+          }
         },
       });
 
@@ -1336,7 +1518,7 @@ export class DashboardScreen {
         this.showSearchResultContent(this.props.searchFlowManager.searchContext);
         break;
       case ScreenType.SUGGEST:
-        this.showSuggestContent();
+        this.showSuggestScreen();
         break;
       default:
         this.showDashboardContent();
@@ -1644,7 +1826,7 @@ export class DashboardScreen {
 
     // Focus the search input
     setTimeout(() => searchInput.focus(), 100);
-    
+
     // Force the header to be the first child of the bottomsheet for correct positioning
     const contentArea = this.bottomsheetElement?.querySelector('.dashboard-content');
     if (header && contentArea && this.bottomsheetElement) {
@@ -1664,14 +1846,16 @@ export class DashboardScreen {
     }
 
     // Remove ALL existing header elements to prevent duplicates
-    const existingHeaders = this.bottomsheetElement?.querySelectorAll('.bottomsheet-header, .inline-element-1, [class*="inline-element"]');
+    const existingHeaders = this.bottomsheetElement?.querySelectorAll(
+      '.bottomsheet-header, .inline-element-1, [class*="inline-element"]'
+    );
     existingHeaders?.forEach(header => {
       header.remove();
     });
 
     // Recreate dashboard header with unified SearchBar - ensure it's at the TOP
     this.createFigmaHeader();
-    
+
     // Force the header to be the first child of the bottomsheet
     const header = this.bottomsheetElement?.querySelector('.bottomsheet-header');
     const contentArea = this.bottomsheetElement?.querySelector('.dashboard-content');
@@ -1686,15 +1870,16 @@ export class DashboardScreen {
    */
   private updateHeaderForSearchResult(context: SearchContext): void {
     // Find header element regardless of its current class name (could be .bottomsheet-header or .inline-element-1)
-    const header = (this.bottomsheetElement?.querySelector('.bottomsheet-header') || 
-                   this.bottomsheetElement?.querySelector('.inline-element-1') ||
-                   this.bottomsheetElement?.querySelector('[class*="bottomsheet-header"]') ||
-                   this.bottomsheetElement?.querySelector('[class*="inline-element-1"]')) as HTMLElement;
-    
+    const header = (this.bottomsheetElement?.querySelector('.bottomsheet-header') ||
+      this.bottomsheetElement?.querySelector('.inline-element-1') ||
+      this.bottomsheetElement?.querySelector('[class*="bottomsheet-header"]') ||
+      this.bottomsheetElement?.querySelector('[class*="inline-element-1"]')) as HTMLElement;
+
     if (!header) {
       // Header is missing - this can happen after Organization screen cleanup issues
       // Try to recreate the header structure by finding any existing header-like container
-      const bottomsheetContainer = this.bottomsheetElement?.querySelector('.dashboard-content')?.parentElement;
+      const bottomsheetContainer =
+        this.bottomsheetElement?.querySelector('.dashboard-content')?.parentElement;
       if (bottomsheetContainer) {
         // Create a new header element
         const newHeader = document.createElement('div');
@@ -1750,11 +1935,14 @@ export class DashboardScreen {
         }
       },
       onClear: () => {
-        this.props.searchFlowManager.updateQuery('');
+        // Clear query and navigate back to Dashboard
+        this.handleClearAndNavigateBack();
       },
       onFocus: () => {
-        // Navigate to suggest screen on focus
-        this.props.searchFlowManager.goToSuggest();
+        // Don't navigate to suggest screen from SearchResult - user should stay in SearchResult
+        // Only navigate to suggest if coming from Dashboard
+        // (This prevents unwanted navigation when returning from Organization screen)
+        // No action needed - user stays in SearchResult screen
       },
     });
 
@@ -1768,7 +1956,7 @@ export class DashboardScreen {
 
     header.appendChild(dragSection);
     header.appendChild(searchBarContainer);
-    
+
     // Force the header to be the first child of the bottomsheet for correct positioning
     const contentArea = this.bottomsheetElement?.querySelector('.dashboard-content');
     if (header && contentArea && this.bottomsheetElement) {
