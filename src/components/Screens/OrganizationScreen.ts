@@ -1643,7 +1643,17 @@ export class OrganizationScreen {
       }, 100);
     }
 
-    this.props.searchFlowManager.goBack();
+    // Always return to search results if we have a query in context
+    // This ensures we go back to search results instead of suggest screen
+    if (this.props.searchFlowManager.searchContext.query) {
+      this.props.searchFlowManager.goToSearchResults(
+        this.props.searchFlowManager.searchContext.query
+      );
+    } else {
+      // Fallback to goBack if no query exists
+      this.props.searchFlowManager.goBack();
+    }
+
     this.props.onBack?.();
   }
 

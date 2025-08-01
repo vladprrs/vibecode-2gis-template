@@ -17,7 +17,7 @@ export class ContentManager {
     if (!this.dashboardContent) {
       this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
     }
-    
+
     // Clear only the content, preserve any header elements that might exist
     contentContainer.innerHTML = '';
     contentContainer.style.cssText = `
@@ -303,15 +303,22 @@ export class ContentManager {
     return row;
   }
 
-  updateContentForDashboard(contentContainer: HTMLElement): void {
-    if (!contentContainer || !this.dashboardContent) return;
-    
-    // Clear only the content, preserve any header elements that might exist
-    contentContainer.innerHTML = '';
-    const restoredContent = this.dashboardContent.cloneNode(true) as HTMLElement;
-    while (restoredContent.firstChild) {
-      contentContainer.appendChild(restoredContent.firstChild);
+  updateContentForDashboard(contentContainer: HTMLElement): boolean {
+    if (!contentContainer) return false;
+
+    // Check if content already exists to prevent duplication
+    const existingContent = contentContainer.querySelector('.dashboard-grey-section');
+
+    if (!existingContent) {
+      // If no content exists, save the current state for future restoration
+      if (!this.dashboardContent) {
+        this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
+      }
+      return false; // Indicate that content needs to be created
     }
+
+    // Content already exists, no need to recreate
+    return true;
   }
 
   updateContentForSearchResult(contentContainer: HTMLElement, context: SearchContext): void {
@@ -319,7 +326,7 @@ export class ContentManager {
     if (!this.dashboardContent) {
       this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
     }
-    
+
     // Clear only the content, preserve any header elements that might exist
     contentContainer.innerHTML = '';
     contentContainer.style.cssText = `

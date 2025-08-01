@@ -276,7 +276,7 @@ export class SearchResultScreen {
 
     // Create filters panel and add directly to bottomsheet header
     this.createFiltersPanel();
-    
+
     // Add filters after the search bar container
     if (this.filtersContainer) {
       this.headerContainer.appendChild(this.filtersContainer);
@@ -1021,7 +1021,8 @@ export class SearchResultScreen {
 
   private handleClearSearch(): void {
     this.currentQuery = '';
-    this.props.searchFlowManager.goToSuggest();
+    this.props.searchFlowManager.updateQuery('');
+    this.props.searchFlowManager.goToDashboard();
   }
 
   private handleSearchFocus(): void {
