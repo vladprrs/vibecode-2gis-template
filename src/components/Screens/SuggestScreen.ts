@@ -6,7 +6,14 @@ import {
   BottomsheetContent,
   BottomsheetHeader,
 } from '../Bottomsheet';
-import { SearchBar, SearchBarState, SearchSuggestions } from '../Search';
+import {
+  SearchBar,
+  SearchBarFactory,
+  SearchBarState,
+  SearchBarVariant,
+  SearchSuggestions,
+} from '../Search';
+import { HeaderStyles, UNIFIED_HEADER_STYLES } from '../../styles/components/HeaderStyles';
 
 /**
  * Пропсы для SuggestScreen
@@ -144,66 +151,54 @@ export class SuggestScreen {
    * Создание заголовка с активной поисковой строкой
    */
   private createHeader(): void {
-    this.headerContainer = document.createElement('div');
+    // Use unified header structure
+    const { container, dragSection, searchBarContainer } = HeaderStyles.createUnifiedHeader();
+    this.headerContainer = container;
 
-    this.bottomsheetHeader = new BottomsheetHeader(this.headerContainer, {
-      placeholder: 'Введите запрос...',
-      showDragger: true,
-      isSearchActive: true,
-      searchQuery: this.currentQuery,
-      onSearchChange: query => {
-        this.handleQueryChange(query);
-      },
-      onSearchSubmit: query => {
-        this.handleQuerySubmit(query);
-      },
-      onClearSearch: () => {
-        this.handleClearSearch();
-      },
+    // Create unified SearchBar with cross icon for clearing and navigation
+    this.searchBar = SearchBarFactory.createSuggest(searchBarContainer, () => {
+      // Clear query and navigate back to Dashboard
+      this.handleClearAndNavigateBack();
     });
 
-    // Настраиваем кастомную поисковую строку
-    this.setupSearchBar();
-  }
+    // Set initial query if provided
+    if (this.currentQuery) {
+      this.searchBar.setValue(this.currentQuery);
+    }
 
-  /**
-   * Настройка поисковой строки
-   */
-  private setupSearchBar(): void {
-    if (!this.headerContainer) return;
-
-    // Находим контейнер поисковой строки в заголовке
-    const searchContainer = this.headerContainer.querySelector('.search-container') as HTMLElement;
-    if (!searchContainer) return;
-
-    // Создаем активную поисковую строку
-    const searchBarContainer = document.createElement('div');
-    searchContainer.parentNode?.replaceChild(searchBarContainer, searchContainer);
-
-    this.searchBar = new SearchBar(searchBarContainer, {
-      placeholder: 'Введите запрос...',
-      state: SearchBarState.ACTIVE,
-      value: this.currentQuery,
-      showSearchIcon: true,
-      showClearButton: true,
-      autoFocus: true,
-      debounceMs: 300,
-      onChange: query => {
+    // Set up event handlers
+    this.searchBar.updateProps({
+      onChange: (query: string) => {
         this.handleQueryChange(query);
       },
-      onSubmit: query => {
+      onSubmit: (query: string) => {
         this.handleQuerySubmit(query);
       },
       onClear: () => {
         this.handleClearSearch();
       },
-      onBlur: () => {
-        // Если поисковая строка пустая, возвращаемся к дашборду
-        if (!this.currentQuery.trim()) {
-          this.handleBackToDashboard();
-        }
-      },
     });
+
+    // Apply unified search input styles (consistent across all screens)
+    const searchContainer = searchBarContainer.querySelector(
+      '.search-bar-container'
+    ) as HTMLElement;
+    if (searchContainer) {
+      HeaderStyles.applyUnifiedSearchInputStyles(searchContainer);
+    }
+  }
+
+  /**
+   * Обработка очистки запроса и навигации назад
+   */
+  private handleClearAndNavigateBack(): void {
+    // Clear the search query first
+    this.currentQuery = '';
+    this.props.searchFlowManager.updateQuery('');
+
+    // Navigate back to dashboard
+    this.props.searchFlowManager.goToDashboard();
+    this.props.onBackToDashboard?.();
   }
 
   /**

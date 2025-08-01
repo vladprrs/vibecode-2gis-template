@@ -82,7 +82,7 @@ export class PriceFormatter {
   static formatSavings(originalPrice: number, discountedPrice: number): string {
     const savings = originalPrice - discountedPrice;
     if (savings <= 0) return '';
-    
+
     const savingsPercent = Math.round((savings / originalPrice) * 100);
     return `Экономия ${this.formatPrice(savings)} (${savingsPercent}%)`;
   }
@@ -121,7 +121,10 @@ export class PriceFormatter {
   /**
    * Format price with original and discounted amounts
    */
-  static formatDiscountedPrice(originalPrice: number, discountedPrice: number): {
+  static formatDiscountedPrice(
+    originalPrice: number,
+    discountedPrice: number
+  ): {
     current: string;
     original?: string;
     savings?: string;

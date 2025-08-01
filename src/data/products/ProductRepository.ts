@@ -1,8 +1,8 @@
 import { Product, ProductCategory } from '../../types';
-import { 
-  SPORTS_CLOTHING_PRODUCTS, 
-  SPORTS_EQUIPMENT_PRODUCTS, 
-  FITNESS_ACCESSORIES_PRODUCTS 
+import {
+  FITNESS_ACCESSORIES_PRODUCTS,
+  SPORTS_CLOTHING_PRODUCTS,
+  SPORTS_EQUIPMENT_PRODUCTS,
 } from './MockProducts';
 
 /**
@@ -70,9 +70,7 @@ export class ProductRepository {
    * Get products by price range
    */
   getByPriceRange(minPrice: number, maxPrice: number): Product[] {
-    return this.products.filter(product => 
-      product.price >= minPrice && product.price <= maxPrice
-    );
+    return this.products.filter(product => product.price >= minPrice && product.price <= maxPrice);
   }
 
   /**
@@ -80,10 +78,11 @@ export class ProductRepository {
    */
   search(query: string): Product[] {
     const lowerQuery = query.toLowerCase();
-    return this.products.filter(product =>
-      product.title.toLowerCase().includes(lowerQuery) ||
-      product.description?.toLowerCase().includes(lowerQuery) ||
-      product.brand?.toLowerCase().includes(lowerQuery)
+    return this.products.filter(
+      product =>
+        product.title.toLowerCase().includes(lowerQuery) ||
+        product.description?.toLowerCase().includes(lowerQuery) ||
+        product.brand?.toLowerCase().includes(lowerQuery)
     );
   }
 
@@ -92,7 +91,7 @@ export class ProductRepository {
    */
   getCategories(): ProductCategory[] {
     const categoryMap = new Map<string, Product[]>();
-    
+
     this.products.forEach(product => {
       const category = product.category || 'Разное';
       if (!categoryMap.has(category)) {

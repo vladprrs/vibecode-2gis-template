@@ -169,9 +169,7 @@ export class LayoutStyles {
   /**
    * Scrollable content layouts
    */
-  static scrollable(
-    variant: 'vertical' | 'horizontal' | 'both' = 'vertical'
-  ): StyleObject {
+  static scrollable(variant: 'vertical' | 'horizontal' | 'both' = 'vertical'): StyleObject {
     const base: StyleObject = {
       ...StyleBuilder.container('scrollable'),
     };
@@ -329,11 +327,7 @@ export class LayoutStyles {
   /**
    * Create responsive breakpoints
    */
-  static responsive(
-    mobile: StyleObject,
-    tablet?: StyleObject,
-    desktop?: StyleObject
-  ): StyleObject {
+  static responsive(mobile: StyleObject, tablet?: StyleObject, desktop?: StyleObject): StyleObject {
     // For now, return mobile styles
     // In a full implementation, this would handle media queries
     return mobile;

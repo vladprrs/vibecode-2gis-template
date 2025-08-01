@@ -1,229 +1,207 @@
 /**
- * Shared BottomActionBar component for Shop, Cart, and Checkout screens
- * Provides consistent positioning and safe-area handling
+ * Content for bottom action bar
  */
-
-export interface BottomActionBarProps {
-  /** Container element to append the action bar to */
-  container: HTMLElement;
-  /** CSS class name for the action bar */
-  className?: string;
-  /** Whether the bar should be visible */
-  visible?: boolean;
-}
-
 export interface BottomActionBarContent {
-  /** Left side content (e.g., cart info) */
-  leftContent?: HTMLElement;
-  /** Right side content (e.g., buttons) */
-  rightContent?: HTMLElement;
-  /** Full width content (e.g., single button) */
-  fullWidthContent?: HTMLElement;
+  /** Left content */
+  left?: HTMLElement;
+  /** Center content (usually button) */
+  center?: HTMLElement;
+  /** Right content */
+  right?: HTMLElement;
 }
 
 /**
- * Shared BottomActionBar component with consistent positioning and safe-area handling
+ * Props for BottomActionBar component
+ */
+export interface BottomActionBarProps {
+  /** Container element */
+  container: HTMLElement;
+  /** Initial content */
+  content?: BottomActionBarContent;
+  /** CSS class name */
+  className?: string;
+  /** Whether to show the bar */
+  visible?: boolean;
+}
+
+/**
+ * Global bottom action bar component
+ * Provides a fixed bottom bar for actions across different screens
  */
 export class BottomActionBar {
   private element: HTMLElement;
-  private contentContainer: HTMLElement;
   private props: BottomActionBarProps;
+  private leftContainer: HTMLElement;
+  private centerContainer: HTMLElement;
+  private rightContainer: HTMLElement;
 
   constructor(props: BottomActionBarProps) {
     this.props = props;
-    this.element = this.createElement();
-    this.contentContainer = this.createContentContainer();
-    this.setupLayout();
+    this.element = document.createElement('div');
+    this.leftContainer = document.createElement('div');
+    this.centerContainer = document.createElement('div');
+    this.rightContainer = document.createElement('div');
 
-    if (props.container) {
-      props.container.appendChild(this.element);
+    this.initialize();
+  }
+
+  private initialize(): void {
+    this.setupElement();
+    this.createContent();
+    this.props.container.appendChild(this.element);
+  }
+
+  private setupElement(): void {
+    this.element.className = `bottom-action-bar ${this.props.className || ''}`;
+
+    Object.assign(this.element.style, {
+      position: 'fixed',
+      bottom: '0',
+      left: '0',
+      right: '0',
+      height: '80px',
+      backgroundColor: '#ffffff',
+      borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+      display: this.props.visible !== false ? 'flex' : 'none',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '12px 16px',
+      zIndex: '1000',
+      boxSizing: 'border-box',
+    });
+  }
+
+  private createContent(): void {
+    // Left container
+    this.leftContainer.className = 'left-content';
+    Object.assign(this.leftContainer.style, {
+      flex: '1',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+    });
+
+    // Center container
+    this.centerContainer.className = 'center-content';
+    Object.assign(this.centerContainer.style, {
+      flex: '2',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    });
+
+    // Right container
+    this.rightContainer.className = 'right-content';
+    Object.assign(this.rightContainer.style, {
+      flex: '1',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+    });
+
+    this.element.appendChild(this.leftContainer);
+    this.element.appendChild(this.centerContainer);
+    this.element.appendChild(this.rightContainer);
+
+    // Set initial content if provided
+    if (this.props.content) {
+      this.updateContent(this.props.content);
     }
   }
 
   /**
-   * Create the main action bar element
+   * Update bar content
    */
-  private createElement(): HTMLElement {
-    const actionBar = document.createElement('div');
-    actionBar.className = this.props.className || 'shop-bottom-action-bar';
-
-    // Ensure consistent positioning
-    Object.assign(actionBar.style, {
-      flexShrink: '0',
-      backgroundColor: '#ffffff',
-      borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-      boxShadow: '0 -4px 24px rgba(0, 0, 0, 0.08)',
-      zIndex: '10',
-    });
-
-    return actionBar;
-  }
-
-  /**
-   * Create the content container with proper padding and safe-area handling
-   */
-  private createContentContainer(): HTMLElement {
-    const content = document.createElement('div');
-    content.className = 'shop-action-bar-content';
-
-    Object.assign(content.style, {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: '16px',
-      padding: '16px',
-      paddingBottom: 'calc(16px + env(safe-area-inset-bottom))', // iOS safe area
-      minHeight: '72px', // Consistent minimum height
-      boxSizing: 'border-box',
-    });
-
-    return content;
-  }
-
-  /**
-   * Setup the layout structure
-   */
-  private setupLayout(): void {
-    this.element.appendChild(this.contentContainer);
-  }
-
-  /**
-   * Update the content of the action bar
-   */
-  setContent(content: BottomActionBarContent): void {
+  public updateContent(content: BottomActionBarContent): void {
     // Clear existing content
-    this.contentContainer.innerHTML = '';
+    this.leftContainer.innerHTML = '';
+    this.centerContainer.innerHTML = '';
+    this.rightContainer.innerHTML = '';
 
-    if (content.fullWidthContent) {
-      // Single full-width element (e.g., checkout button)
-      Object.assign(this.contentContainer.style, {
-        justifyContent: 'center',
-      });
-      this.contentContainer.appendChild(content.fullWidthContent);
-    } else {
-      // Left and right content layout
-      Object.assign(this.contentContainer.style, {
-        justifyContent: 'space-between',
-      });
+    // Add new content
+    if (content.left) {
+      this.leftContainer.appendChild(content.left);
+    }
 
-      if (content.leftContent) {
-        this.contentContainer.appendChild(content.leftContent);
-      }
+    if (content.center) {
+      this.centerContainer.appendChild(content.center);
+    }
 
-      if (content.rightContent) {
-        this.contentContainer.appendChild(content.rightContent);
-      }
+    if (content.right) {
+      this.rightContainer.appendChild(content.right);
     }
   }
 
   /**
    * Show the action bar
    */
-  show(): void {
-    this.element.style.display = 'block';
+  public show(): void {
+    this.element.style.display = 'flex';
     this.props.visible = true;
   }
 
   /**
-   * Hide the action bar completely
+   * Hide the action bar
    */
-  hide(): void {
+  public hide(): void {
     this.element.style.display = 'none';
     this.props.visible = false;
   }
 
   /**
-   * Get the action bar element
+   * Toggle visibility
    */
-  getElement(): HTMLElement {
-    return this.element;
+  public toggle(): void {
+    if (this.props.visible) {
+      this.hide();
+    } else {
+      this.show();
+    }
   }
 
   /**
-   * Get the content container element
+   * Check if bar is visible
    */
-  getContentContainer(): HTMLElement {
-    return this.contentContainer;
-  }
-
-  /**
-   * Check if the action bar is visible
-   */
-  isVisible(): boolean {
+  public isVisible(): boolean {
     return this.props.visible !== false;
   }
 
   /**
-   * Destroy the action bar and clean up
+   * Get the root element
    */
-  destroy(): void {
+  public getElement(): HTMLElement {
+    return this.element;
+  }
+
+  /**
+   * Update bar properties
+   */
+  public updateProps(newProps: Partial<BottomActionBarProps>): void {
+    this.props = { ...this.props, ...newProps };
+
+    if (newProps.className) {
+      this.element.className = `bottom-action-bar ${newProps.className}`;
+    }
+
+    if (newProps.visible !== undefined) {
+      if (newProps.visible) {
+        this.show();
+      } else {
+        this.hide();
+      }
+    }
+
+    if (newProps.content) {
+      this.updateContent(newProps.content);
+    }
+  }
+
+  /**
+   * Destroy the component
+   */
+  public destroy(): void {
     if (this.element.parentNode) {
       this.element.parentNode.removeChild(this.element);
     }
-  }
-
-  /**
-   * Update the action bar height calculation for scrollable content padding
-   */
-  getHeight(): number {
-    return this.element.getBoundingClientRect().height;
-  }
-
-  /**
-   * Create cart info content for Shop and Cart screens
-   */
-  static createCartInfo(itemCount: string, totalPrice: string): HTMLElement {
-    const cartInfo = document.createElement('div');
-    cartInfo.className = 'shop-cart-info';
-
-    Object.assign(cartInfo.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px',
-    });
-
-    // Item count
-    const countElement = document.createElement('div');
-    countElement.className = 'shop-cart-count';
-    countElement.textContent = itemCount;
-    cartInfo.appendChild(countElement);
-
-    // Total price
-    const totalElement = document.createElement('div');
-    totalElement.className = 'shop-cart-total';
-    totalElement.textContent = totalPrice;
-    cartInfo.appendChild(totalElement);
-
-    return cartInfo;
-  }
-
-  /**
-   * Create action button for action bars
-   */
-  static createButton(
-    text: string,
-    onClick: () => void,
-    style: 'primary' | 'secondary' = 'primary'
-  ): HTMLElement {
-    const button = document.createElement('button');
-    button.className = style === 'primary' ? 'shop-order-button' : 'shop-secondary-button';
-    button.textContent = text;
-
-    // Ensure consistent button styling
-    if (style === 'primary') {
-      Object.assign(button.style, {
-        backgroundColor: '#8B5CF6',
-        color: '#ffffff',
-        minWidth: '120px',
-      });
-    }
-
-    button.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      onClick();
-    });
-
-    return button;
   }
 }

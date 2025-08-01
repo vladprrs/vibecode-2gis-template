@@ -1,14 +1,22 @@
-import { SearchFilters as ISearchFilters, Organization, ScreenType, Product } from '../../types';
-import { BottomsheetManager, MapSyncService, SearchFlowManager, CartService } from '../../services';
+import { SearchFilters as ISearchFilters, Organization, Product, ScreenType } from '../../types';
+import { BottomsheetManager, CartService, MapSyncService, SearchFlowManager } from '../../services';
 import {
   BottomsheetContainer,
   BottomsheetContainerProps,
   BottomsheetContent,
   BottomsheetHeader,
 } from '../Bottomsheet';
-import { FilterItem, SearchBar, SearchBarState, SearchFilters } from '../Search';
+import {
+  FilterItem,
+  SearchBar,
+  SearchBarFactory,
+  SearchBarState,
+  SearchBarVariant,
+  SearchFilters,
+} from '../Search';
 import { CardSize, OrganizationCard } from '../Cards';
 import { ProductCarousel } from '../Content/ProductCarousel';
+import { HeaderStyles, UNIFIED_HEADER_STYLES } from '../../styles/components/HeaderStyles';
 
 /**
  * Пропсы для SearchResultScreen
@@ -105,7 +113,8 @@ export class SearchResultScreen {
       title: 'Мужские спортивные брюки Nike French Terry, серые, S',
       description: 'Мужские спортивные брюки Nike French Terry, серые, S',
       price: 2455,
-      imageUrl: 'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
+      imageUrl:
+        'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
     },
     {
       id: 'prod-005',
@@ -228,66 +237,25 @@ export class SearchResultScreen {
    * Создание заголовка с поисковой строкой
    */
   private createHeader(): void {
-    const headerWrapper = document.createElement('div');
+    // Use unified header structure (remove wrapper for consistency)
+    const { container, dragSection, searchBarContainer } = HeaderStyles.createUnifiedHeader();
+    this.headerContainer = container;
 
-    // Создаем заголовок шторки
-    this.headerContainer = document.createElement('div');
-
-    this.bottomsheetHeader = new BottomsheetHeader(this.headerContainer, {
-      placeholder: 'Поиск в Москве',
-      showDragger: true,
-      isSearchActive: true,
-      searchQuery: this.currentQuery,
-      onSearchFocus: () => {
-        this.handleSearchFocus();
-      },
-      onSearchChange: query => {
-        this.handleQueryChange(query);
-      },
-      onSearchSubmit: query => {
-        this.handleQuerySubmit(query);
-      },
-      onClearSearch: () => {
-        this.handleClearSearch();
-      },
+    // Create unified SearchBar with cross icon for clearing and navigation
+    // Ensure we always use the latest query from SearchFlowManager context
+    const latestQuery = this.props.searchFlowManager.searchContext.query || this.currentQuery;
+    this.currentQuery = latestQuery; // Update our local query to match
+    this.searchBar = SearchBarFactory.createSearchResult(searchBarContainer, latestQuery, () => {
+      // Clear query and navigate back to Dashboard
+      this.handleClearAndNavigateBack();
     });
 
-    // Настраиваем поисковую строку
-    this.setupSearchBar();
-
-    // Создаем панель фильтров
-    this.createFiltersPanel();
-
-    headerWrapper.appendChild(this.headerContainer);
-    headerWrapper.appendChild(this.filtersContainer!);
-  }
-
-  /**
-   * Настройка поисковой строки
-   */
-  private setupSearchBar(): void {
-    if (!this.headerContainer) return;
-
-    // Находим контейнер поисковой строки в заголовке
-    const searchContainer = this.headerContainer.querySelector('.search-container') as HTMLElement;
-    if (!searchContainer) return;
-
-    // Создаем заполненную поисковую строку
-    const searchBarContainer = document.createElement('div');
-    searchContainer.parentNode?.replaceChild(searchBarContainer, searchContainer);
-
-    this.searchBar = new SearchBar(searchBarContainer, {
-      placeholder: 'Поиск в Москве',
-      state: SearchBarState.FILLED,
-      value: this.currentQuery,
-      showSearchIcon: true,
-      showClearButton: true,
-      autoFocus: false,
-      debounceMs: 500,
-      onChange: query => {
+    // Set up event handlers
+    this.searchBar.updateProps({
+      onChange: (query: string) => {
         this.handleQueryChange(query);
       },
-      onSubmit: query => {
+      onSubmit: (query: string) => {
         this.handleQuerySubmit(query);
       },
       onClear: () => {
@@ -297,6 +265,35 @@ export class SearchResultScreen {
         this.handleSearchFocus();
       },
     });
+
+    // Apply unified search input styles (consistent across all screens)
+    const searchContainer = searchBarContainer.querySelector(
+      '.search-bar-container'
+    ) as HTMLElement;
+    if (searchContainer) {
+      HeaderStyles.applyUnifiedSearchInputStyles(searchContainer);
+    }
+
+    // Create filters panel and add directly to bottomsheet header
+    this.createFiltersPanel();
+    
+    // Add filters after the search bar container
+    if (this.filtersContainer) {
+      this.headerContainer.appendChild(this.filtersContainer);
+    }
+  }
+
+  /**
+   * Обработка очистки запроса и навигации назад
+   */
+  private handleClearAndNavigateBack(): void {
+    // Clear the search query first
+    this.currentQuery = '';
+    this.props.searchFlowManager.updateQuery('');
+
+    // Navigate back to dashboard
+    this.props.searchFlowManager.goToDashboard();
+    this.props.onBackToSuggests?.();
   }
 
   /**
@@ -304,6 +301,7 @@ export class SearchResultScreen {
    */
   private createFiltersPanel(): void {
     this.filtersContainer = document.createElement('div');
+    this.filtersContainer.style.cssText = UNIFIED_HEADER_STYLES.FILTERS_PANEL;
 
     // Создаем доступные фильтры
     const availableFilters = this.generateAvailableFilters();
@@ -436,7 +434,7 @@ export class SearchResultScreen {
     // Очищаем контейнер и существующие компоненты
     this.resultsContainer.innerHTML = '';
     this.organizationCards = [];
-    
+
     // Очищаем карусели товаров
     this.productCarousels.forEach(carousel => carousel.destroy());
     this.productCarousels = [];
@@ -643,10 +641,10 @@ export class SearchResultScreen {
       container: carouselContainer,
       cartService: this.props.cartService,
       products: this.sharedProducts.slice(0, 6), // Показываем первые 6 товаров
-      onProductClick: (product) => {
+      onProductClick: product => {
         this.handleProductClick(product);
       },
-      onAddToCart: (product) => {
+      onAddToCart: product => {
         this.handleAddToCart(product);
       },
     });
