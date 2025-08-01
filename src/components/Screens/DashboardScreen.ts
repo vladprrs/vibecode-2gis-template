@@ -19,12 +19,13 @@ import {
   BottomsheetContent,
   BottomsheetHeader,
 } from '../Bottomsheet';
-import { SearchBar, SearchBarState } from '../Search';
+import { SearchBar, SearchBarFactory, SearchBarState, SearchBarVariant } from '../Search';
 import { OrganizationScreen } from './OrganizationScreen';
 import { ShopScreen } from './ShopScreen';
 import { CartScreen } from './CartScreen';
 import { CheckoutScreen } from './CheckoutScreen';
 import { ButtonRow, ButtonRowItem, StoriesCarousel } from '../Dashboard';
+import { HeaderStyles, UNIFIED_HEADER_STYLES } from '../../styles/components/HeaderStyles';
 
 /**
  * Пропсы для DashboardScreen
@@ -150,6 +151,9 @@ export class DashboardScreen {
     this.setupElement();
     await this.props.mapManager.createMapContainer(this.element);
     this.createBottomsheet();
+    
+    // Set initial dashboard content and correct height (55%)
+    this.showDashboardContent();
   }
 
   /**
@@ -231,8 +235,7 @@ export class DashboardScreen {
     const screenHeight = window.innerHeight;
     this.bottomsheetElement.style.cssText = `
       display: flex;
-      width: 375px;
-      max-width: 100%;
+      width: 100%;
       height: 100vh;
       flex-direction: column;
       align-items: flex-start;
@@ -240,6 +243,7 @@ export class DashboardScreen {
       background: #FFF;
       position: absolute;
       left: 0;
+      right: 0;
       bottom: 0;
       transform-origin: top center;
       transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
@@ -266,6 +270,8 @@ export class DashboardScreen {
     // Add the new dashboard content
     this.createDashboardContent(content);
 
+    // Ensure proper DOM order: header first, then content
+    // The header was already added by createFigmaHeader()
     this.bottomsheetElement.appendChild(content);
     this.element.appendChild(this.bottomsheetElement);
   }
@@ -899,47 +905,27 @@ export class DashboardScreen {
   private createFigmaHeader(): void {
     if (!this.bottomsheetElement) return;
 
-    const header = document.createElement('div');
-    header.className = 'bottomsheet-header';
+    // Use unified header structure
+    const { container: headerContainer, dragSection, searchBarContainer } = HeaderStyles.createUnifiedHeader();
 
-    // Dragger
-    const dragger = document.createElement('div');
-    dragger.className = 'dragger';
-    const draggerHandle = document.createElement('div');
-    draggerHandle.className = 'dragger-handle';
-    dragger.appendChild(draggerHandle);
+    // Create unified SearchBar with burger menu variant
+    this.searchBar = SearchBarFactory.createDashboard(searchBarContainer, () => {
+      this.handleSearchFieldClick();
+    });
 
-    // Search bar
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-nav-bar';
-    searchContainer.innerHTML = `
-      <div class="search-nav-content">
-        <div class="search-field-container">
-          <div class="search-field">
-            <div class="search-icon">
-              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
-                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="search-placeholder">Поиск в Москве</div>
-          </div>
-        </div>
-      </div>
-    `;
+    // Apply unified search input styles (consistent across all screens)
+    const searchContainer = searchBarContainer.querySelector(
+      '.search-bar-container'
+    ) as HTMLElement;
+    if (searchContainer) {
+      HeaderStyles.applyUnifiedSearchInputStyles(searchContainer);
 
-    // Add click handler to search field
-    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
-    if (searchField) {
-      searchField.style.cursor = 'pointer';
-      searchField.addEventListener('click', () => {
+      // Make the entire search bar clickable for navigation
+      searchContainer.addEventListener('click', () => {
         this.handleSearchFieldClick();
       });
     }
-
-    header.appendChild(dragger);
-    header.appendChild(searchContainer);
-    this.bottomsheetElement.appendChild(header);
+    this.bottomsheetElement.appendChild(headerContainer);
   }
 
   /**
@@ -972,7 +958,8 @@ export class DashboardScreen {
         this.showDashboardContent();
         break;
       case ScreenType.SEARCH_RESULT:
-        this.showSearchResultContent(context);
+        // Always use the latest context from SearchFlowManager to ensure query is up-to-date
+        this.showSearchResultContent(this.props.searchFlowManager.searchContext);
         break;
       case ScreenType.ORGANIZATION:
         this.showOrganizationContent(context);
@@ -1001,10 +988,10 @@ export class DashboardScreen {
     this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
     this.snapToState(BottomsheetState.FULLSCREEN);
 
-    // Update header to suggest state
+    // Update header to suggest state FIRST to ensure proper search bar positioning
     this.updateHeaderForSuggest();
 
-    // Update content to suggest content
+    // Update content to suggest content AFTER header is fixed
     const contentContainer = this.bottomsheetElement?.querySelector(
       '.dashboard-content'
     ) as HTMLElement;
@@ -1019,13 +1006,14 @@ export class DashboardScreen {
   private showDashboardContent(): void {
     if (!this.bottomsheetElement) return;
 
-    // Snap to default height
+    // Snap to default height (55%) - call both manager and screen snapToState
     this.props.bottomsheetManager.snapToState(BottomsheetState.DEFAULT);
+    this.snapToState(BottomsheetState.DEFAULT);
 
-    // Update header to dashboard state
+    // Update header to dashboard state FIRST to ensure proper search bar positioning
     this.updateHeaderForDashboard();
 
-    // Update content to dashboard content
+    // Update content to dashboard content AFTER header is properly positioned
     const contentContainer = this.bottomsheetElement?.querySelector(
       '.dashboard-content'
     ) as HTMLElement;
@@ -1044,10 +1032,10 @@ export class DashboardScreen {
     this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
     this.snapToState(BottomsheetState.FULLSCREEN);
 
-    // Update header to search result state
+    // Update header to search result state FIRST to ensure proper search bar positioning
     this.updateHeaderForSearchResult(context);
 
-    // Update content to search result content
+    // Update content to search result content AFTER header is properly positioned
     const contentContainer = this.bottomsheetElement?.querySelector(
       '.dashboard-content'
     ) as HTMLElement;
@@ -1088,8 +1076,10 @@ export class DashboardScreen {
             this.organizationScreen.destroy();
             this.organizationScreen = undefined;
           }
-          // Restore the original dashboard content
-          this.restoreDashboardBottomsheet();
+
+          // Use SearchFlowManager's built-in goBack() method for proper navigation
+          // This ensures proper state management and header restoration
+          this.props.searchFlowManager.goBack();
         },
       });
 
@@ -1336,7 +1326,9 @@ export class DashboardScreen {
     this.bottomsheetElement.appendChild(content);
 
     // Restore dashboard content based on current screen
-    switch (this.currentScreen) {
+    // Use SearchFlowManager's current screen to ensure consistency
+    const targetScreen = this.props.searchFlowManager.currentScreen;
+    switch (targetScreen) {
       case ScreenType.DASHBOARD:
         this.showDashboardContent();
         break;
@@ -1350,6 +1342,9 @@ export class DashboardScreen {
         this.showDashboardContent();
         break;
     }
+
+    // Update our local currentScreen to match
+    this.currentScreen = targetScreen;
   }
 
   /**
@@ -1358,6 +1353,12 @@ export class DashboardScreen {
   private updateHeaderForSuggest(): void {
     const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
     if (!header) return;
+
+    // Clean up existing search bar before creating new content
+    if (this.searchBar) {
+      this.searchBar.destroy();
+      this.searchBar = undefined;
+    }
 
     // Clear existing header and apply exact Figma CSS structure
     header.innerHTML = '';
@@ -1643,224 +1644,147 @@ export class DashboardScreen {
 
     // Focus the search input
     setTimeout(() => searchInput.focus(), 100);
+    
+    // Force the header to be the first child of the bottomsheet for correct positioning
+    const contentArea = this.bottomsheetElement?.querySelector('.dashboard-content');
+    if (header && contentArea && this.bottomsheetElement) {
+      // Ensure header comes before content
+      this.bottomsheetElement.insertBefore(header, contentArea);
+    }
   }
 
   /**
    * Update header for dashboard screen
    */
   private updateHeaderForDashboard(): void {
-    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
-    if (!header) return;
-
-    // Clear existing header
-    header.innerHTML = '';
-
-    // Create dashboard header with clickable search field
-    const dragger = document.createElement('div');
-    dragger.className = 'dragger';
-    const draggerHandle = document.createElement('div');
-    draggerHandle.className = 'dragger-handle';
-    dragger.appendChild(draggerHandle);
-
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-nav-bar';
-    searchContainer.innerHTML = `
-      <div class="search-nav-content">
-        <div class="search-field-container">
-          <div class="search-field">
-            <div class="search-icon">
-              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
-                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="search-placeholder">Поиск в Москве</div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Add click handler to search field
-    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
-    if (searchField) {
-      searchField.style.cursor = 'pointer';
-      searchField.addEventListener('click', () => {
-        this.handleSearchFieldClick();
-      });
+    // Clean up existing search bar
+    if (this.searchBar) {
+      this.searchBar.destroy();
+      this.searchBar = undefined;
     }
 
-    header.appendChild(dragger);
-    header.appendChild(searchContainer);
+    // Remove ALL existing header elements to prevent duplicates
+    const existingHeaders = this.bottomsheetElement?.querySelectorAll('.bottomsheet-header, .inline-element-1, [class*="inline-element"]');
+    existingHeaders?.forEach(header => {
+      header.remove();
+    });
+
+    // Recreate dashboard header with unified SearchBar - ensure it's at the TOP
+    this.createFigmaHeader();
+    
+    // Force the header to be the first child of the bottomsheet
+    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header');
+    const contentArea = this.bottomsheetElement?.querySelector('.dashboard-content');
+    if (header && contentArea && this.bottomsheetElement) {
+      // Ensure header comes before content
+      this.bottomsheetElement.insertBefore(header, contentArea);
+    }
   }
 
   /**
    * Update header for search result screen (based on Figma design)
    */
   private updateHeaderForSearchResult(context: SearchContext): void {
-    const header = this.bottomsheetElement?.querySelector('.bottomsheet-header') as HTMLElement;
-    if (!header) return;
+    // Find header element regardless of its current class name (could be .bottomsheet-header or .inline-element-1)
+    const header = (this.bottomsheetElement?.querySelector('.bottomsheet-header') || 
+                   this.bottomsheetElement?.querySelector('.inline-element-1') ||
+                   this.bottomsheetElement?.querySelector('[class*="bottomsheet-header"]') ||
+                   this.bottomsheetElement?.querySelector('[class*="inline-element-1"]')) as HTMLElement;
+    
+    if (!header) {
+      // Header is missing - this can happen after Organization screen cleanup issues
+      // Try to recreate the header structure by finding any existing header-like container
+      const bottomsheetContainer = this.bottomsheetElement?.querySelector('.dashboard-content')?.parentElement;
+      if (bottomsheetContainer) {
+        // Create a new header element
+        const newHeader = document.createElement('div');
+        newHeader.className = 'bottomsheet-header';
+        bottomsheetContainer.insertBefore(newHeader, bottomsheetContainer.firstChild);
+        // Proceed with this new header
+        this.createSearchResultHeader(newHeader, context);
+        return;
+      }
+      // If we still can't create a header, just return silently
+      return;
+    }
 
-    // Clear existing header
+    this.createSearchResultHeader(header, context);
+  }
+
+  /**
+   * Create search result header content (extracted to avoid duplication)
+   */
+  private createSearchResultHeader(header: HTMLElement, context: SearchContext): void {
+    // Clear existing header and rebuild with unified structure
     header.innerHTML = '';
-    header.className = 'inline-element-1';
+    header.className = 'bottomsheet-header';
+    header.style.cssText = UNIFIED_HEADER_STYLES.BASE_HEADER;
 
-    // Apply header styles from Figma - search result header
-    header.style.cssText = `
-      display: flex;
-      padding: 16px 0 8px 0;
-      flex-direction: column;
-      align-items: flex-start;
-      align-self: stretch;
-      border-radius: 16px 16px 0 0;
-      background: rgba(255, 255, 255, 0.70);
-      backdrop-filter: blur(20px);
-      position: relative;
-    `;
-
-    // Drag handle section
+    // Create unified structure components
     const dragSection = document.createElement('div');
-    dragSection.className = 'inline-element-3';
-    dragSection.style.cssText = `
-      display: flex;
-      height: 0;
-      padding-bottom: 6px;
-      flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-      align-self: stretch;
-      position: relative;
-    `;
+    dragSection.style.cssText = UNIFIED_HEADER_STYLES.DRAG_SECTION;
 
     const dragHandle = document.createElement('div');
-    dragHandle.className = 'inline-element-4';
-    dragHandle.style.cssText = `
-      width: 40px;
-      height: 4px;
-      flex-shrink: 0;
-      border-radius: 6px;
-      background: rgba(20, 20, 20, 0.09);
-      position: relative;
-    `;
+    dragHandle.style.cssText = UNIFIED_HEADER_STYLES.DRAG_HANDLE;
     dragSection.appendChild(dragHandle);
 
-    // Nav bar section
-    const navBar = document.createElement('div');
-    navBar.className = 'inline-element-5';
-    navBar.style.cssText = `
-      display: flex;
-      align-items: flex-start;
-      align-self: stretch;
-      position: relative;
-    `;
+    const searchBarContainer = document.createElement('div');
+    searchBarContainer.style.cssText = UNIFIED_HEADER_STYLES.SEARCH_BAR_CONTAINER;
 
-    const navBarInner = document.createElement('div');
-    navBarInner.className = 'inline-element-6';
-    navBarInner.style.cssText = `
-      display: flex;
-      padding: 0 16px;
-      align-items: flex-start;
-      gap: 12px;
-      flex: 1 0 0;
-      position: relative;
-    `;
+    // Create unified SearchBar with cross icon for clearing and navigation
+    // Ensure we always use the latest query from SearchFlowManager context
+    const latestQuery = this.props.searchFlowManager.searchContext.query || context.query || '';
+    this.searchBar = SearchBarFactory.createSearchResult(searchBarContainer, latestQuery, () => {
+      // Clear query and navigate back to Dashboard
+      this.handleClearAndNavigateBack();
+    });
 
-    // Search field container
-    const searchFieldContainer = document.createElement('div');
-    searchFieldContainer.style.cssText = `
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      flex: 1 0 0;
-      position: relative;
-    `;
+    // Set up event handlers
+    this.searchBar.updateProps({
+      onChange: (query: string) => {
+        this.props.searchFlowManager.updateQuery(query);
+      },
+      onSubmit: (query: string) => {
+        if (query.trim()) {
+          this.props.searchFlowManager.goToSearchResults(query.trim());
+        }
+      },
+      onClear: () => {
+        this.props.searchFlowManager.updateQuery('');
+      },
+      onFocus: () => {
+        // Navigate to suggest screen on focus
+        this.props.searchFlowManager.goToSuggest();
+      },
+    });
 
-    const searchField = document.createElement('div');
-    searchField.style.cssText = `
-      display: flex;
-      height: 40px;
-      padding: 10px 8px;
-      align-items: center;
-      align-self: stretch;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 1);
-      border: 1px solid rgba(137, 137, 137, 0.30);
-      position: relative;
-      gap: 4px;
-    `;
-
-    const searchIcon = document.createElement('div');
-    searchIcon.innerHTML = `<svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#898989" stroke-width="1.5"/><path d="m21 21-4.35-4.35" stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    searchIcon.style.cssText = `
-      width: 19px;
-      height: 19px;
-      flex-shrink: 0;
-    `;
-
-    const queryText = document.createElement('span');
-    queryText.textContent = context.query || 'Автосервис';
-    queryText.style.cssText = `
-      color: #141414;
-      font-family: SB Sans Text, -apple-system, Roboto, Helvetica, sans-serif;
-      font-weight: 400;
-      font-size: 15px;
-      font-style: normal;
-      line-height: 20px;
-      letter-spacing: -0.3px;
-      flex: 1;
-    `;
-
-    const salutIcon = document.createElement('div');
-    salutIcon.innerHTML = `<div style="width: 24px; height: 24px; background: #F5353C; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">S</div>`;
-    salutIcon.style.cssText = `
-      width: 24px;
-      height: 24px;
-      flex-shrink: 0;
-    `;
-
-    searchField.appendChild(searchIcon);
-    searchField.appendChild(queryText);
-    searchField.appendChild(salutIcon);
-    searchFieldContainer.appendChild(searchField);
-    navBarInner.appendChild(searchFieldContainer);
-
-    const closeButton = document.createElement('div');
-    closeButton.className = 'inline-element-17';
-    closeButton.style.cssText = `
-      display: flex;
-      align-items: flex-start;
-      border-radius: 8px;
-      cursor: pointer;
-    `;
-
-    const closeButtonInner = document.createElement('div');
-    closeButtonInner.className = 'inline-element-18';
-    closeButtonInner.style.cssText = `
-      display: flex;
-      padding: 8px;
-      justify-content: center;
-      align-items: center;
-      background: rgba(20, 20, 20, 0.06);
-      border-radius: 8px;
-    `;
-
-    const closeIcon = document.createElement('div');
-    closeIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    closeIcon.style.cssText = `
-      width: 13px;
-      height: 13px;
-    `;
-
-    closeButtonInner.appendChild(closeIcon);
-    closeButton.appendChild(closeButtonInner);
-    navBarInner.appendChild(closeButton);
-    navBar.appendChild(navBarInner);
+    // Apply unified search input styles (consistent across all screens)
+    const searchContainer = searchBarContainer.querySelector(
+      '.search-bar-container'
+    ) as HTMLElement;
+    if (searchContainer) {
+      HeaderStyles.applyUnifiedSearchInputStyles(searchContainer);
+    }
 
     header.appendChild(dragSection);
-    header.appendChild(navBar);
+    header.appendChild(searchBarContainer);
+    
+    // Force the header to be the first child of the bottomsheet for correct positioning
+    const contentArea = this.bottomsheetElement?.querySelector('.dashboard-content');
+    if (header && contentArea && this.bottomsheetElement) {
+      // Ensure header comes before content
+      this.bottomsheetElement.insertBefore(header, contentArea);
+    }
+  }
 
-    closeButton.addEventListener('click', () => {
-      this.props.searchFlowManager.goToDashboard();
-    });
+  /**
+   * Handle clear and navigate back from search result screen
+   */
+  private handleClearAndNavigateBack(): void {
+    // Clear the search query first
+    this.props.searchFlowManager.updateQuery('');
+    // Navigate back to Dashboard
+    this.props.searchFlowManager.goToDashboard();
   }
 
   private createBottomFilterBar(container: HTMLElement): void {

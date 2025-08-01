@@ -9,7 +9,15 @@
 export interface SuggestionConfig {
   id: string;
   text: string;
-  type: 'history' | 'popular' | 'organization' | 'address' | 'category' | 'home' | 'search' | 'branch';
+  type:
+    | 'history'
+    | 'popular'
+    | 'organization'
+    | 'address'
+    | 'category'
+    | 'home'
+    | 'search'
+    | 'branch';
   subtitle?: string[];
   hasSubtitle?: boolean;
   icon?: string;
@@ -330,13 +338,13 @@ export class ElementFactory {
 
     // Event handlers
     if (onInput) {
-      input.addEventListener('input', (e) => {
+      input.addEventListener('input', e => {
         onInput((e.target as HTMLInputElement).value);
       });
     }
 
     if (onEnter) {
-      input.addEventListener('keydown', (e) => {
+      input.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
           e.preventDefault();
           onEnter((e.target as HTMLInputElement).value);
@@ -418,7 +426,7 @@ export class ElementFactory {
       position: relative;
     `;
 
-    tabs.forEach((tab) => {
+    tabs.forEach(tab => {
       const tabButton = document.createElement('button');
       tabButton.textContent = tab.text;
       tabButton.style.cssText = `

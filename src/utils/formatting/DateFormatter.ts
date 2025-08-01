@@ -29,8 +29,18 @@ export class DateFormatter {
     ];
 
     const monthNames = [
-      'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
+      'января',
+      'февраля',
+      'марта',
+      'апреля',
+      'мая',
+      'июня',
+      'июля',
+      'августа',
+      'сентября',
+      'октября',
+      'ноября',
+      'декабря',
     ];
 
     const dayName = dayNames[date.getDay()];
@@ -81,10 +91,16 @@ export class DateFormatter {
 
     // Check if it's within this week
     const daysDiff = Math.floor((compareDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysDiff >= 2 && daysDiff <= 6) {
       const dayNames = [
-        'Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'
+        'Воскресенье',
+        'Понедельник',
+        'Вторник',
+        'Среда',
+        'Четверг',
+        'Пятница',
+        'Суббота',
       ];
       return dayNames[date.getDay()];
     }
@@ -95,7 +111,9 @@ export class DateFormatter {
   /**
    * Get delivery time options for a given date
    */
-  static getDeliveryTimeSlots(date: Date): Array<{ value: string; label: string; available: boolean }> {
+  static getDeliveryTimeSlots(
+    date: Date
+  ): Array<{ value: string; label: string; available: boolean }> {
     const slots = [
       { start: 9, end: 12, label: '9:00 - 12:00' },
       { start: 12, end: 15, label: '12:00 - 15:00' },
@@ -145,7 +163,7 @@ export class DateFormatter {
     // Simple implementation - in real app would parse working hours properly
     const now = new Date();
     const currentHour = now.getHours();
-    
+
     // Assume most places are open 9-21
     return currentHour >= 9 && currentHour < 21;
   }
@@ -182,11 +200,14 @@ export class DateFormatter {
   /**
    * Get next available delivery dates (excluding Sundays)
    */
-  static getAvailableDeliveryDates(count: number = 7): Array<{ date: Date; label: string; available: boolean }> {
+  static getAvailableDeliveryDates(
+    count: number = 7
+  ): Array<{ date: Date; label: string; available: boolean }> {
     const dates: Array<{ date: Date; label: string; available: boolean }> = [];
     const today = new Date();
 
-    for (let i = 0; i < count + 2; i++) { // Add extra days to account for Sundays
+    for (let i = 0; i < count + 2; i++) {
+      // Add extra days to account for Sundays
       const date = new Date(today);
       date.setDate(today.getDate() + i);
 
@@ -226,7 +247,7 @@ export class DateFormatter {
     const year = parseInt(parts[2], 10);
 
     const date = new Date(year, month, day);
-    
+
     // Validate the date
     if (date.getDate() !== day || date.getMonth() !== month || date.getFullYear() !== year) {
       return null;

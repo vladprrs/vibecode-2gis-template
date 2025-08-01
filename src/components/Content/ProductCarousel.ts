@@ -97,8 +97,8 @@ export class ProductCarousel {
     }
 
     this.intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting && !this.isInitialized) {
             this.isVisible = true;
             this.initializeContent();
@@ -121,7 +121,7 @@ export class ProductCarousel {
    */
   private initializeContent(): void {
     if (this.isInitialized) return;
-    
+
     this.isInitialized = true;
     this.element.innerHTML = '';
     this.createContent();
@@ -209,18 +209,21 @@ export class ProductCarousel {
     this.element.appendChild(gallery);
 
     // Обработчик клика на весь блок карусели для открытия магазина
-    this.element.addEventListener('click', (event) => {
+    this.element.addEventListener('click', event => {
       // Проверяем, что клик не на кнопке добавления в корзину или на отдельном товаре
       const target = event.target as HTMLElement;
       const isAddButton = target.closest('button') && target.closest('button')?.textContent === '+';
-      const isStepperButton = target.closest('button') && (target.closest('button')?.textContent === '−' || target.closest('button')?.textContent === '+');
+      const isStepperButton =
+        target.closest('button') &&
+        (target.closest('button')?.textContent === '−' ||
+          target.closest('button')?.textContent === '+');
       const isProductItem = target.closest('.product-item');
-      
+
       // Если клик не на кнопке добавления/удаления или на отдельном товаре, открываем магазин
       if (!isAddButton && !isStepperButton && !isProductItem) {
         event.preventDefault();
         event.stopPropagation();
-        
+
         console.log('Carousel clicked - opening shop');
         this.props.onCarouselClick?.();
       }
@@ -284,13 +287,13 @@ export class ProductCarousel {
       });
       img.src = product.imageUrl;
       img.alt = product.title;
-      
+
       // Обработчик клика на изображение
-      img.addEventListener('click', (event) => {
+      img.addEventListener('click', event => {
         event.stopPropagation();
         this.props.onProductClick?.(product);
       });
-      
+
       photo.appendChild(img);
     } else {
       // Плейсхолдер
@@ -353,7 +356,7 @@ export class ProductCarousel {
     title.textContent = product.title;
 
     // Обработчик клика на название
-    title.addEventListener('click', (event) => {
+    title.addEventListener('click', event => {
       event.stopPropagation();
       this.props.onProductClick?.(product);
     });
@@ -405,7 +408,7 @@ export class ProductCarousel {
 
     button.innerHTML = '+';
 
-    button.addEventListener('click', (event) => {
+    button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
 
@@ -489,14 +492,14 @@ export class ProductCarousel {
     increaseButton.innerHTML = '+';
 
     // Обработчики событий
-    decreaseButton.addEventListener('click', (event) => {
+    decreaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = quantity - 1;
       this.props.cartService.updateQuantity(product.id, newQuantity);
     });
 
-    increaseButton.addEventListener('click', (event) => {
+    increaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = quantity + 1;

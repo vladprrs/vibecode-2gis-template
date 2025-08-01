@@ -11,6 +11,16 @@ export enum SearchBarState {
 }
 
 /**
+ * Варианты правой иконки
+ */
+export enum SearchBarVariant {
+  /** Бургер меню (3 линии) для Dashboard */
+  BURGER = 'burger',
+  /** Крестик (X) для Suggest и SearchResult */
+  CLEAR = 'clear',
+}
+
+/**
  * Пропсы для SearchBar
  */
 export interface SearchBarProps {
@@ -20,6 +30,8 @@ export interface SearchBarProps {
   placeholder?: string;
   /** Текущее состояние */
   state?: SearchBarState;
+  /** Вариант правой иконки */
+  variant?: SearchBarVariant;
   /** Показывать ли иконку поиска */
   showSearchIcon?: boolean;
   /** Показывать ли кнопку очистки */
@@ -34,6 +46,8 @@ export interface SearchBarProps {
   onChange?: (value: string) => void;
   onSubmit?: (value: string) => void;
   onClear?: () => void;
+  /** Обработчик клика по правой иконке */
+  onRightIconClick?: () => void;
   /** Дебаунс для onChange в мс */
   debounceMs?: number;
 }
@@ -47,6 +61,7 @@ export class SearchBar {
   private props: SearchBarProps;
   private input?: HTMLInputElement;
   private clearButton?: HTMLElement;
+  private rightIcon?: HTMLElement;
   private container?: HTMLElement;
   private debounceTimer?: number;
 
@@ -55,6 +70,7 @@ export class SearchBar {
     this.props = {
       placeholder: 'Поиск в Москве',
       state: SearchBarState.INACTIVE,
+      variant: SearchBarVariant.CLEAR,
       showSearchIcon: true,
       showClearButton: true,
       autoFocus: false,
@@ -94,20 +110,31 @@ export class SearchBar {
    * Создание поисковой строки
    */
   private createSearchBar(): void {
-    this.container = document.createElement('div');
+    // Create outer wrapper that contains both input container and right icon
+    const outerWrapper = document.createElement('div');
+    Object.assign(outerWrapper.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      flex: '1 0 0',
+    });
 
+    // Create input container (the actual search bar part) with unified styles
+    this.container = document.createElement('div');
     Object.assign(this.container.style, {
       display: 'flex',
       alignItems: 'center',
-      flex: '1',
-      minHeight: '48px',
-      padding: '12px 16px',
-      borderRadius: '12px',
+      flex: '1 0 0',
+      height: '40px',
+      padding: '10px 8px',
+      borderRadius: '8px',
       transition: 'all 0.2s ease',
       border: '1px solid transparent',
+      gap: '4px',
+      background: 'rgba(20, 20, 20, 0.09)', // Unified gray background for all screens
     });
 
-    // Создаем содержимое
+    // Создаем содержимое input контейнера
     this.createSearchIcon();
     this.createInput();
     this.createClearButton();
@@ -115,17 +142,24 @@ export class SearchBar {
     // Добавляем класс для стилизации
     this.container.className = 'search-bar-container';
 
-    this.element.appendChild(this.container);
+    // Add input container to wrapper
+    outerWrapper.appendChild(this.container);
+
+    // Create right icon outside the input container
+    this.createRightIcon(outerWrapper);
+
+    this.element.appendChild(outerWrapper);
   }
 
   /**
-   * Создание иконки поиска
+   * Создание иконки поиска с унифицированными стилями
    */
   private createSearchIcon(): void {
     if (!this.props.showSearchIcon || !this.container) return;
 
     const icon = document.createElement('div');
 
+    // Apply unified search icon styles
     Object.assign(icon.style, {
       width: '20px',
       height: '20px',
@@ -138,11 +172,11 @@ export class SearchBar {
       transition: 'opacity 0.2s ease',
     });
 
-    // SVG иконка поиска
+    // Use improved search icon SVG (better visual design from legacy Suggest screen)
     icon.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="2"/>
-        <path d="m19 19-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+        <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     `;
 
@@ -184,13 +218,14 @@ export class SearchBar {
   }
 
   /**
-   * Создание кнопки очистки
+   * Создание кнопки очистки с унифицированными стилями
    */
   private createClearButton(): void {
     if (!this.props.showClearButton || !this.container) return;
 
     this.clearButton = document.createElement('button');
 
+    // Apply unified clear button styles (best from SearchResult screen)
     Object.assign(this.clearButton.style, {
       width: '24px',
       height: '24px',
@@ -207,14 +242,14 @@ export class SearchBar {
       flexShrink: '0',
     });
 
-    // SVG иконка крестика
+    // Use unified clear button SVG (best from SearchResult screen)
     this.clearButton.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 4 4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     `;
 
-    // Hover и active эффекты
+    // Unified hover and active effects (polished version from SearchResult)
     this.clearButton.addEventListener('mouseenter', () => {
       this.clearButton!.style.opacity = '1';
       this.clearButton!.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
@@ -235,6 +270,55 @@ export class SearchBar {
 
     this.clearButton.className = 'search-clear-button';
     this.container.appendChild(this.clearButton);
+  }
+
+  /**
+   * Создание правой иконки (бургер или крестик в зависимости от варианта)
+   */
+  private createRightIcon(parentContainer: HTMLElement): void {
+    this.rightIcon = document.createElement('div');
+
+    Object.assign(this.rightIcon.style, {
+      width: '40px',
+      height: '40px',
+      flexShrink: '0',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: '8px',
+      background: 'rgba(20, 20, 20, 0.06)',
+      transition: 'all 0.2s ease',
+    });
+
+    // Устанавливаем иконку в зависимости от варианта
+    if (this.props.variant === SearchBarVariant.BURGER) {
+      // Бургер меню иконка для Dashboard
+      this.rightIcon.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 3h12M2 8h12M2 13h12" stroke="#141414" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      `;
+    } else {
+      // Крестик для Suggest и SearchResult
+      this.rightIcon.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1L1 12M1 1l11 11" stroke="#141414" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+    }
+
+    // Hover эффекты
+    this.rightIcon.addEventListener('mouseenter', () => {
+      this.rightIcon!.style.opacity = '0.8';
+    });
+
+    this.rightIcon.addEventListener('mouseleave', () => {
+      this.rightIcon!.style.opacity = '1';
+    });
+
+    this.rightIcon.className = 'search-right-icon';
+    parentContainer.appendChild(this.rightIcon);
   }
 
   /**
@@ -273,6 +357,13 @@ export class SearchBar {
       e.preventDefault();
       e.stopPropagation();
       this.handleClear();
+    });
+
+    // Обработчик для правой иконки
+    this.rightIcon?.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleRightIconClick();
     });
   }
 
@@ -345,6 +436,30 @@ export class SearchBar {
 
     this.props.onChange?.('');
     this.props.onClear?.();
+  }
+
+  /**
+   * Обработка клика по правой иконке
+   */
+  private handleRightIconClick(): void {
+    if (this.props.variant === SearchBarVariant.CLEAR) {
+      // Для CLEAR варианта: очищаем поисковый запрос перед навигацией
+      if (this.input) {
+        this.input.value = '';
+      }
+
+      // Отменяем debounce и сразу вызываем onChange с пустой строкой
+      if (this.debounceTimer) {
+        clearTimeout(this.debounceTimer);
+      }
+
+      this.props.onChange?.('');
+      this.updateClearButtonVisibility('');
+      this.updateVisualState(SearchBarState.INACTIVE);
+    }
+
+    // Вызываем callback для навигации (общий для всех вариантов)
+    this.props.onRightIconClick?.();
   }
 
   /**
@@ -478,6 +593,13 @@ export class SearchBar {
   }
 
   /**
+   * Получение текущего варианта
+   */
+  public getVariant(): SearchBarVariant {
+    return this.props.variant || SearchBarVariant.CLEAR;
+  }
+
+  /**
    * Обновление пропсов
    */
   public updateProps(newProps: Partial<SearchBarProps>): void {
@@ -509,6 +631,7 @@ export class SearchBar {
     // DOM элементы будут очищены автоматически
     this.input = undefined;
     this.clearButton = undefined;
+    this.rightIcon = undefined;
     this.container = undefined;
   }
 }
@@ -525,29 +648,68 @@ export class SearchBarFactory {
   }
 
   /**
-   * Создание неактивной поисковой строки для дашборда
+   * Создание поисковой строки для дашборда с бургер иконкой
    */
-  static createInactive(containerElement: HTMLElement): SearchBar {
+  static createDashboard(containerElement: HTMLElement, onRightIconClick?: () => void): SearchBar {
     return new SearchBar(containerElement, {
       placeholder: 'Поиск в Москве',
       state: SearchBarState.INACTIVE,
+      variant: SearchBarVariant.BURGER,
       showSearchIcon: true,
       showClearButton: false,
       autoFocus: false,
+      onRightIconClick,
     });
   }
 
   /**
-   * Создание активной поисковой строки для поиска
+   * Создание поисковой строки для экрана подсказок с крестиком
    */
-  static createActive(containerElement: HTMLElement): SearchBar {
+  static createSuggest(containerElement: HTMLElement, onRightIconClick?: () => void): SearchBar {
     return new SearchBar(containerElement, {
       placeholder: 'Введите запрос...',
       state: SearchBarState.ACTIVE,
+      variant: SearchBarVariant.CLEAR,
       showSearchIcon: true,
       showClearButton: true,
       autoFocus: true,
-      debounceMs: 300,
+      debounceMs: 150,
+      onRightIconClick,
     });
+  }
+
+  /**
+   * Создание поисковой строки для результатов поиска с крестиком
+   */
+  static createSearchResult(
+    containerElement: HTMLElement,
+    query: string,
+    onRightIconClick?: () => void
+  ): SearchBar {
+    return new SearchBar(containerElement, {
+      placeholder: 'Поиск в Москве',
+      state: SearchBarState.FILLED,
+      variant: SearchBarVariant.CLEAR,
+      value: query,
+      showSearchIcon: true,
+      showClearButton: true,
+      autoFocus: false,
+      debounceMs: 500,
+      onRightIconClick,
+    });
+  }
+
+  /**
+   * Создание неактивной поисковой строки для дашборда (legacy)
+   */
+  static createInactive(containerElement: HTMLElement): SearchBar {
+    return SearchBarFactory.createDashboard(containerElement);
+  }
+
+  /**
+   * Создание активной поисковой строки для поиска (legacy)
+   */
+  static createActive(containerElement: HTMLElement): SearchBar {
+    return SearchBarFactory.createSuggest(containerElement);
   }
 }

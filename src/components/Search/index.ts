@@ -1,5 +1,11 @@
 // Экспорт поисковой строки
-export { SearchBar, SearchBarFactory, SearchBarState, type SearchBarProps } from './SearchBar';
+export {
+  SearchBar,
+  SearchBarFactory,
+  SearchBarState,
+  SearchBarVariant,
+  type SearchBarProps,
+} from './SearchBar';
 
 // Экспорт компонента подсказок
 export {

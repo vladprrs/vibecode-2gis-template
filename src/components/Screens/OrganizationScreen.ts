@@ -1047,7 +1047,7 @@ export class OrganizationScreen {
    */
   private createMenuPreviewItemWithCart(product: Product): HTMLElement {
     const item = this.createMenuPreviewItem(product);
-    
+
     // Добавляем кнопку или stepper для работы с корзиной
     const actionContainer = document.createElement('div');
     Object.assign(actionContainer.style, {
@@ -1056,9 +1056,9 @@ export class OrganizationScreen {
       right: '8px',
       zIndex: '2',
     });
-    
+
     const quantity = this.props.cartService.getProductQuantity(product.id);
-    
+
     if (quantity > 0) {
       // Товар в корзине - показываем stepper
       const stepper = this.createStepper(product, quantity);
@@ -1068,14 +1068,14 @@ export class OrganizationScreen {
       const addButton = this.createAddButton(product);
       actionContainer.appendChild(addButton);
     }
-    
+
     // Настраиваем позиционирование для фото
     const photo = item.querySelector('div') as HTMLElement;
     if (photo) {
       photo.style.position = 'relative';
       photo.appendChild(actionContainer);
     }
-    
+
     return item;
   }
 
@@ -1194,13 +1194,13 @@ export class OrganizationScreen {
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
       transition: 'all 0.2s ease',
     });
-    
+
     button.innerHTML = '+';
-    
-    button.addEventListener('click', (event) => {
+
+    button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      
+
       // Конвертируем Product обратно в ShopProduct формат для CartService
       const shopProduct = this.getShopProducts().find(p => p.id === product.id);
       if (shopProduct) {
@@ -1215,17 +1215,17 @@ export class OrganizationScreen {
         this.props.cartService.addToCart(cartProduct);
       }
     });
-    
+
     button.addEventListener('mouseenter', () => {
       button.style.backgroundColor = '#1565C0';
       button.style.transform = 'scale(1.05)';
     });
-    
+
     button.addEventListener('mouseleave', () => {
       button.style.backgroundColor = '#1976D2';
       button.style.transform = 'scale(1)';
     });
-    
+
     return button;
   }
 
@@ -1242,7 +1242,7 @@ export class OrganizationScreen {
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
       overflow: 'hidden',
     });
-    
+
     // Кнопка уменьшения
     const decreaseButton = document.createElement('button');
     Object.assign(decreaseButton.style, {
@@ -1258,9 +1258,9 @@ export class OrganizationScreen {
       fontSize: '18px',
       fontWeight: 'bold',
     });
-    
+
     decreaseButton.innerHTML = '−';
-    
+
     // Количество
     const quantityDisplay = document.createElement('div');
     Object.assign(quantityDisplay.style, {
@@ -1272,7 +1272,7 @@ export class OrganizationScreen {
       fontWeight: '600',
     });
     quantityDisplay.textContent = quantity.toString();
-    
+
     // Кнопка увеличения
     const increaseButton = document.createElement('button');
     Object.assign(increaseButton.style, {
@@ -1288,28 +1288,28 @@ export class OrganizationScreen {
       fontSize: '18px',
       fontWeight: 'bold',
     });
-    
+
     increaseButton.innerHTML = '+';
-    
+
     // Обработчики событий
-    decreaseButton.addEventListener('click', (event) => {
+    decreaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = quantity - 1;
       this.props.cartService.updateQuantity(product.id, newQuantity);
     });
-    
-    increaseButton.addEventListener('click', (event) => {
+
+    increaseButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       const newQuantity = quantity + 1;
       this.props.cartService.updateQuantity(product.id, newQuantity);
     });
-    
+
     stepper.appendChild(decreaseButton);
     stepper.appendChild(quantityDisplay);
     stepper.appendChild(increaseButton);
-    
+
     return stepper;
   }
 
@@ -1709,14 +1709,14 @@ export class OrganizationScreen {
     if (gallery) {
       // Очищаем содержимое
       gallery.innerHTML = '';
-      
+
       // Пересоздаем элементы
       const products = this.convertShopProductsToProducts();
       products.forEach(product => {
         const item = this.createMenuPreviewItemWithCart(product);
         gallery.appendChild(item);
       });
-      
+
       // Добавляем спейсер
       const spacer = document.createElement('div');
       Object.assign(spacer.style, {
@@ -1733,7 +1733,7 @@ export class OrganizationScreen {
       this.cartSubscription();
       this.cartSubscription = undefined;
     }
-    
+
     window.removeEventListener('resize', this.handleResize.bind(this));
     document.removeEventListener('keydown', this.handleKeyDown.bind(this));
 

@@ -17,6 +17,8 @@ export class ContentManager {
     if (!this.dashboardContent) {
       this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
     }
+    
+    // Clear only the content, preserve any header elements that might exist
     contentContainer.innerHTML = '';
     contentContainer.style.cssText = `
       display: flex;
@@ -29,6 +31,7 @@ export class ContentManager {
       padding: 0;
       margin: 0;
       overflow-y: auto;
+      padding-top: 16px;
     `;
 
     const suggestions = [
@@ -302,6 +305,8 @@ export class ContentManager {
 
   updateContentForDashboard(contentContainer: HTMLElement): void {
     if (!contentContainer || !this.dashboardContent) return;
+    
+    // Clear only the content, preserve any header elements that might exist
     contentContainer.innerHTML = '';
     const restoredContent = this.dashboardContent.cloneNode(true) as HTMLElement;
     while (restoredContent.firstChild) {
@@ -314,6 +319,8 @@ export class ContentManager {
     if (!this.dashboardContent) {
       this.dashboardContent = contentContainer.cloneNode(true) as HTMLElement;
     }
+    
+    // Clear only the content, preserve any header elements that might exist
     contentContainer.innerHTML = '';
     contentContainer.style.cssText = `
       display: flex;
@@ -443,7 +450,7 @@ export class ContentManager {
           id: 'advertiser-3',
           name: 'СпортМакс',
           address: 'ул. Спортивная, 15, Москва',
-          coordinates: [37.6000, 55.7500] as [number, number],
+          coordinates: [37.6, 55.75] as [number, number],
           isAdvertiser: true,
           rating: 4.7,
           reviewsCount: 189,
@@ -471,7 +478,7 @@ export class ContentManager {
           id: 'non-advertiser-2',
           name: 'ФитнесПлюс',
           address: 'ул. Фитнесная, 8, Москва',
-          coordinates: [37.6100, 55.7400] as [number, number],
+          coordinates: [37.61, 55.74] as [number, number],
           isAdvertiser: false,
           rating: 4.3,
           reviewsCount: 67,
@@ -499,13 +506,12 @@ export class ContentManager {
           id: 'advertiser-4',
           name: 'Премиум Фитнес',
           address: 'Ленинградский проспект, 45, Москва',
-          coordinates: [37.5900, 55.7600] as [number, number],
+          coordinates: [37.59, 55.76] as [number, number],
           isAdvertiser: true,
           rating: 4.9,
           reviewsCount: 312,
           category: 'Фитнес-клуб',
-          description:
-            'Элитный фитнес-клуб с премиальным оборудованием и индивидуальным подходом.',
+          description: 'Элитный фитнес-клуб с премиальным оборудованием и индивидуальным подходом.',
           phone: '+7 (495) 777-88-99',
           workingHours: 'Круглосуточно',
         },
@@ -541,7 +547,8 @@ export class ContentManager {
         title: 'Мужские спортивные брюки Nike French Terry, серые, S',
         description: 'Дышащие спортивные брюки Nike',
         price: 2455,
-        imageUrl: 'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
+        imageUrl:
+          'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
         badges: ['Хит продаж', 'Быстрая доставка'],
         brand: 'Nike',
         size: 'S',
@@ -620,31 +627,31 @@ export class ContentManager {
     // Lazy load the carousel when it comes into view
     if ('IntersectionObserver' in window) {
       const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
+        entries => {
+          entries.forEach(entry => {
             if (entry.isIntersecting) {
               // Replace placeholder with actual carousel
               carouselContainer.innerHTML = '';
-                             if (this.cartService) {
-                 const carousel = new ProductCarousel({
-                   container: carouselContainer,
-                   cartService: this.cartService,
-                   products: products,
-                   onProductClick: (product) => {
-                     console.log('Product clicked:', product.title);
-                     // Could navigate to shop or product details
-                   },
-                   onAddToCart: (product) => {
-                     console.log('Product added to cart:', product.title);
-                     // CartService handles the state update automatically
-                   },
-                   onCarouselClick: () => {
-                     console.log('Carousel clicked - opening shop');
-                     // Открываем магазин через SearchFlowManager
-                     this.openShop();
-                   },
-                 });
-               }
+              if (this.cartService) {
+                const carousel = new ProductCarousel({
+                  container: carouselContainer,
+                  cartService: this.cartService,
+                  products: products,
+                  onProductClick: product => {
+                    console.log('Product clicked:', product.title);
+                    // Could navigate to shop or product details
+                  },
+                  onAddToCart: product => {
+                    console.log('Product added to cart:', product.title);
+                    // CartService handles the state update automatically
+                  },
+                  onCarouselClick: () => {
+                    console.log('Carousel clicked - opening shop');
+                    // Открываем магазин через SearchFlowManager
+                    this.openShop();
+                  },
+                });
+              }
               observer.disconnect();
             }
           });
@@ -664,10 +671,10 @@ export class ContentManager {
           container: carouselContainer,
           cartService: this.cartService,
           products: products,
-          onProductClick: (product) => {
+          onProductClick: product => {
             console.log('Product clicked:', product.title);
           },
-          onAddToCart: (product) => {
+          onAddToCart: product => {
             console.log('Product added to cart:', product.title);
           },
           onCarouselClick: () => {

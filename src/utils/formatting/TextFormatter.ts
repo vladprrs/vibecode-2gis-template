@@ -43,16 +43,16 @@ export class TextFormatter {
   static formatPhoneNumber(phone: string): string {
     // Remove all non-digits
     const digits = phone.replace(/\D/g, '');
-    
+
     // Handle Russian phone numbers
     if (digits.length === 11 && digits.startsWith('7')) {
       return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9)}`;
     }
-    
+
     if (digits.length === 10) {
       return `+7 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8)}`;
     }
-    
+
     return phone; // Return original if can't format
   }
 
@@ -62,11 +62,11 @@ export class TextFormatter {
   static formatRating(rating: number, reviewsCount?: number): string {
     const stars = '⭐'.repeat(Math.floor(rating));
     const baseText = `${rating.toFixed(1)}`;
-    
+
     if (reviewsCount) {
       return `${baseText} (${reviewsCount})`;
     }
-    
+
     return baseText;
   }
 
@@ -77,12 +77,12 @@ export class TextFormatter {
     if (distanceInMeters < 1000) {
       return `${Math.round(distanceInMeters)} м`;
     }
-    
+
     const km = distanceInMeters / 1000;
     if (km < 10) {
       return `${km.toFixed(1)} км`;
     }
-    
+
     return `${Math.round(km)} км`;
   }
 
@@ -93,10 +93,10 @@ export class TextFormatter {
     if (!searchTerm.trim()) {
       return text;
     }
-    
+
     const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedTerm})`, 'gi');
-    
+
     return text.replace(regex, '<mark>$1</mark>');
   }
 
@@ -130,12 +130,12 @@ export class TextFormatter {
   static formatBrandName(brand: string): string {
     // Handle special cases for common brands
     const specialCases: Record<string, string> = {
-      'nike': 'Nike',
-      'adidas': 'Adidas',
+      nike: 'Nike',
+      adidas: 'Adidas',
       'tommy hilfiger': 'Tommy Hilfiger',
       'calvin klein': 'Calvin Klein',
     };
-    
+
     const lowerBrand = brand.toLowerCase();
     return specialCases[lowerBrand] || this.capitalizeWords(brand);
   }
@@ -144,7 +144,7 @@ export class TextFormatter {
    * Capitalize each word in a string
    */
   static capitalizeWords(text: string): string {
-    return text.replace(/\b\w/g, (char) => char.toUpperCase());
+    return text.replace(/\b\w/g, char => char.toUpperCase());
   }
 
   /**
@@ -171,10 +171,10 @@ export class TextFormatter {
    */
   static formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 B';
-    
+
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    
+
     return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
   }
 
@@ -199,13 +199,41 @@ export class TextFormatter {
    */
   static toSlug(text: string): string {
     const cyrillicToLatin: Record<string, string> = {
-      'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo',
-      'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm',
-      'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
-      'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch',
-      'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+      а: 'a',
+      б: 'b',
+      в: 'v',
+      г: 'g',
+      д: 'd',
+      е: 'e',
+      ё: 'yo',
+      ж: 'zh',
+      з: 'z',
+      и: 'i',
+      й: 'y',
+      к: 'k',
+      л: 'l',
+      м: 'm',
+      н: 'n',
+      о: 'o',
+      п: 'p',
+      р: 'r',
+      с: 's',
+      т: 't',
+      у: 'u',
+      ф: 'f',
+      х: 'h',
+      ц: 'ts',
+      ч: 'ch',
+      ш: 'sh',
+      щ: 'sch',
+      ъ: '',
+      ы: 'y',
+      ь: '',
+      э: 'e',
+      ю: 'yu',
+      я: 'ya',
     };
-    
+
     return text
       .toLowerCase()
       .split('')
@@ -245,11 +273,11 @@ export class TextFormatter {
     // Convert technical errors to user-friendly messages
     const errorMap: Record<string, string> = {
       'Network Error': 'Проблемы с подключением к интернету',
-      'Timeout': 'Превышено время ожидания',
+      Timeout: 'Превышено время ожидания',
       'Not Found': 'Запрашиваемая информация не найдена',
       'Server Error': 'Ошибка на сервере, попробуйте позже',
     };
-    
+
     return errorMap[error] || 'Произошла ошибка, попробуйте еще раз';
   }
 }

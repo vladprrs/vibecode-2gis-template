@@ -46,7 +46,8 @@ export const SPORTS_CLOTHING_PRODUCTS: Product[] = [
     title: 'Мужские спортивные брюки Nike French Terry, серые, S',
     description: 'Дышащие спортивные брюки Nike',
     price: 2455,
-    imageUrl: 'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
+    imageUrl:
+      'https://cm.samokat.ru/processed/l/product_card/7cd57dbc-42aa-4977-859f-37bd02df6309.jpg',
     badges: ['Хит продаж', 'Быстрая доставка'],
     brand: 'Nike',
     size: 'S',

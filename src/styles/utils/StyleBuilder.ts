@@ -15,13 +15,15 @@ export class StyleBuilder {
    * Create a CSS text string from style object
    */
   static toCSSText(styles: StyleObject): string {
-    return Object.entries(styles)
-      .map(([property, value]) => {
-        // Convert camelCase to kebab-case
-        const cssProperty = property.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`);
-        return `${cssProperty}: ${value}`;
-      })
-      .join(';\n      ') + ';';
+    return (
+      Object.entries(styles)
+        .map(([property, value]) => {
+          // Convert camelCase to kebab-case
+          const cssProperty = property.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`);
+          return `${cssProperty}: ${value}`;
+        })
+        .join(';\n      ') + ';'
+    );
   }
 
   /**
