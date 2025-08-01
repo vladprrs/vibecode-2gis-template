@@ -215,7 +215,6 @@ export class CartScreen {
     button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      console.log('🔙 Cart back button clicked');
       this.props.onBack?.();
       this.props.searchFlowManager.goBack();
     });
@@ -463,7 +462,6 @@ export class CartScreen {
       `К оплате — ${this.props.cartService.getFormattedSubtotal()}`,
       () => {
         this.props.onOrderClick?.(this.cartState);
-        console.log('🛒 Proceeding to checkout:', this.cartState);
         this.props.searchFlowManager.goToCheckout();
       },
       'primary'
@@ -519,7 +517,6 @@ export class CartScreen {
    */
   public activate(): void {
     // Можно добавить дополнительную логику активации
-    console.log('🛒 CartScreen activated');
   }
 
   /**
@@ -537,7 +534,5 @@ export class CartScreen {
 
     // Очищаем содержимое
     this.element.innerHTML = '';
-
-    console.log('🛒 CartScreen destroyed');
   }
 }

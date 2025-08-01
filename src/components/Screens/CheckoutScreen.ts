@@ -233,7 +233,6 @@ export class CheckoutScreen {
     button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      console.log('🗙 Checkout close button clicked');
       this.props.onClose?.();
       this.props.searchFlowManager.goBack();
     });
@@ -297,7 +296,6 @@ export class CheckoutScreen {
       'Бесплатно',
       true,
       () => {
-        console.log('Delivery method clicked');
         // TODO: Open delivery method selector
       }
     );
@@ -311,7 +309,6 @@ export class CheckoutScreen {
       '',
       true,
       () => {
-        console.log('Recipient clicked');
         // TODO: Open recipient editor
       }
     );
@@ -927,7 +924,6 @@ export class CheckoutScreen {
       `К оплате — ${this.props.checkoutService.getFormattedTotal()}`,
       () => {
         this.props.onProcessPayment?.(this.checkoutState);
-        console.log('💳 Payment clicked:', this.checkoutState);
       },
       'primary'
     );
@@ -995,7 +991,7 @@ export class CheckoutScreen {
    * Активация экрана
    */
   public activate(): void {
-    console.log('💳 CheckoutScreen activated');
+    // CheckoutScreen activated
   }
 
   /**
@@ -1018,7 +1014,5 @@ export class CheckoutScreen {
 
     // Очищаем содержимое
     this.element.innerHTML = '';
-
-    console.log('💳 CheckoutScreen destroyed');
   }
 }

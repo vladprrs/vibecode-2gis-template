@@ -16,11 +16,10 @@ import {
 
 import {
   BottomsheetContainer,
-  BottomsheetContainerProps,
   BottomsheetContent,
   BottomsheetHeader,
 } from '../Bottomsheet';
-import { SearchBar, SearchBarFactory, SearchBarState, SearchBarVariant } from '../Search';
+import { SearchBar, SearchBarFactory } from '../Search';
 import { OrganizationScreen } from './OrganizationScreen';
 import { ShopScreen } from './ShopScreen';
 import { CartScreen } from './CartScreen';
@@ -361,7 +360,6 @@ export class DashboardScreen {
       container: buttonRowContainer,
       items: buttonItems,
       onButtonClick: (buttonId: string) => {
-        console.log('Button clicked:', buttonId);
         // Handle button clicks here
       },
     });
@@ -386,7 +384,6 @@ export class DashboardScreen {
     new StoriesCarousel({
       container: storiesContainer,
       onStoryClick: (storyId: string) => {
-        console.log('Story clicked:', storyId);
         this.props.onStoryClick?.(storyId);
       },
     });
@@ -450,7 +447,6 @@ export class DashboardScreen {
         new AdviceGrid({
           container,
           onItemClick: (itemId: string) => {
-            console.log('Advice item clicked:', itemId);
             this.props.onMetaItemClick?.(itemId);
           },
         });
@@ -982,7 +978,6 @@ export class DashboardScreen {
    * Handle screen changes from SearchFlowManager
    */
   public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
-    console.log(`📱 DashboardScreen handling navigation: ${from} → ${to}`);
 
     // Clear dashboard content when leaving dashboard screen
     if (from === ScreenType.DASHBOARD && to !== ScreenType.DASHBOARD) {
@@ -1066,22 +1061,7 @@ export class DashboardScreen {
     this.filterBarManager.hide();
   }
 
-  /**
-   * Show suggest content in the bottomsheet (DEPRECATED - use showSuggestScreen instead)
-   */
-  private showSuggestContent(): void {
-    if (!this.bottomsheetElement) return;
 
-    // First snap to fullscreen using both managers
-    this.props.bottomsheetManager.snapToState(BottomsheetState.FULLSCREEN);
-    this.snapToState(BottomsheetState.FULLSCREEN);
-
-    // Update header to suggest state FIRST to ensure proper search bar positioning
-    this.updateHeaderForSuggest();
-
-    // Note: Content is now managed by SuggestScreen directly, not ContentManager
-    // The SuggestScreen creates its own unified SearchBar component and suggestions
-  }
 
   /**
    * Show SuggestScreen with unified SearchBar component
@@ -1106,7 +1086,7 @@ export class DashboardScreen {
       mapSyncService: this.props.mapSyncService,
       initialQuery: this.props.searchFlowManager.searchContext.query,
       onSuggestionSelect: suggestion => {
-        console.log('Suggestion selected:', suggestion);
+        // Suggestion selected
       },
       onBackToDashboard: () => {
         this.props.searchFlowManager.goToDashboard();
@@ -1352,7 +1332,6 @@ export class DashboardScreen {
           // Navigation back is handled within CartScreen
         },
         onOrderClick: cartState => {
-          console.log('Order clicked from cart:', cartState);
           // TODO: Implement order functionality
         },
       });
@@ -1403,7 +1382,6 @@ export class DashboardScreen {
           this.props.searchFlowManager.goBack();
         },
         onProcessPayment: checkoutState => {
-          console.log('Payment processing:', checkoutState);
           // TODO: Implement payment processing
         },
       });

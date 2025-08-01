@@ -2,18 +2,15 @@ import { BottomsheetState, ScreenType, SearchSuggestion } from '../../types';
 import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
 import {
   BottomsheetContainer,
-  BottomsheetContainerProps,
   BottomsheetContent,
   BottomsheetHeader,
 } from '../Bottomsheet';
 import {
   SearchBar,
   SearchBarFactory,
-  SearchBarState,
-  SearchBarVariant,
   SearchSuggestions,
 } from '../Search';
-import { HeaderStyles, UNIFIED_HEADER_STYLES } from '../../styles/components/HeaderStyles';
+import { HeaderStyles } from '../../styles/components/HeaderStyles';
 
 /**
  * Пропсы для SuggestScreen
@@ -110,7 +107,7 @@ export class SuggestScreen {
     this.element.appendChild(bottomsheetElement);
 
     // Создаем шторку с состоянием FULLSCREEN для подсказок
-    const bottomsheetConfig: BottomsheetContainerProps = {
+    const bottomsheetConfig = {
       config: {
         state: this.props.bottomsheetManager.getCurrentState().currentState,
         snapPoints: [0.2, 0.5, 0.95, 1.0],
@@ -118,7 +115,7 @@ export class SuggestScreen {
         hasScrollableContent: true,
       },
       events: {
-        onStateChange: newState => {
+        onStateChange: (newState: any) => {
           // Синхронизируем состояние с менеджером шторки
           this.props.bottomsheetManager.snapToState(newState);
 
@@ -242,10 +239,10 @@ export class SuggestScreen {
       suggestions: this.suggestions,
       showGroupHeaders: true,
       maxSuggestions: 20,
-      onSuggestionClick: (suggestion, index) => {
+      onSuggestionClick: (suggestion, _index) => {
         this.handleSuggestionSelect(suggestion);
       },
-      onSuggestionHover: (suggestion, index) => {
+      onSuggestionHover: (_suggestion, _index) => {
         // Можно показать превью на карте
         if (this.props.mapSyncService) {
           // Подсвечиваем соответствующий элемент на карте
@@ -525,16 +522,14 @@ export class SuggestScreen {
    */
   private handleResize(): void {
     // Обновляем высоты и адаптируем интерфейс
-    const newHeight = window.innerHeight;
     // Resize handling is managed by the main bottomsheet manager
   }
 
   /**
    * Добавление запроса в историю
    */
-  private addQueryToHistory(query: string): void {
+  private addQueryToHistory(_query: string): void {
     // В реальном приложении здесь будет сохранение в localStorage или API
-    console.log('Adding to search history:', query);
   }
 
   /**

@@ -1,6 +1,5 @@
 // Dashboard Screen
 export { DashboardScreen, DashboardScreenFactory } from './DashboardScreen';
-export type { DashboardScreenProps } from './DashboardScreen';
 
 // Organization Screen
 export { OrganizationScreen } from './OrganizationScreen';
@@ -13,12 +12,9 @@ export { SuggestScreen } from './SuggestScreen';
 
 // Shop Screen
 export { ShopScreen } from './ShopScreen';
-export type { ShopScreenProps } from './ShopScreen';
 
 // Cart Screen
 export { CartScreen } from './CartScreen';
-export type { CartScreenProps } from './CartScreen';
 
 // Checkout Screen
 export { CheckoutScreen } from './CheckoutScreen';
-export type { CheckoutScreenProps } from './CheckoutScreen';

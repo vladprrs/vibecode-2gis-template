@@ -224,7 +224,6 @@ export class ProductCarousel {
         event.preventDefault();
         event.stopPropagation();
 
-        console.log('Carousel clicked - opening shop');
         this.props.onCarouselClick?.();
       }
     });
@@ -233,7 +232,6 @@ export class ProductCarousel {
     if (this.props.onProductClick) {
       headerContainer.addEventListener('click', () => {
         // Можно открыть магазин или другое действие
-        console.log('Header clicked - could navigate to shop');
       });
     }
 

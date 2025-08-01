@@ -50,15 +50,11 @@ class App {
    */
   async initialize(): Promise<void> {
     try {
-      console.log(`🚀 2GIS Dashboard v${APP_VERSION} starting...`);
-
       // Initialize services
       this.initializeServices();
 
       // Create dashboard screen using the modular component
       this.createDashboardScreen();
-
-      console.log('✅ Dashboard initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize dashboard:', error);
       this.showError(error);
@@ -76,12 +72,11 @@ class App {
     // Initialize SearchFlowManager with navigation events
     this.searchFlowManager = new SearchFlowManager(ScreenType.DASHBOARD, {
       onScreenChange: (from, to, context) => {
-        console.log(`📱 Navigation: ${from} → ${to}`, context);
         // Delegate screen changes to the DashboardScreen
         this.dashboardScreen?.handleScreenChange(from, to, context);
       },
-      onSearchInitiated: (query, source) => {
-        console.log(`🔍 Search initiated: "${query}" from ${source}`);
+      onSearchInitiated: (_query, _source) => {
+        // Search initiated
       },
     });
 
@@ -97,17 +92,16 @@ class App {
       bottomsheetConfig,
       {
         onStateChange: (fromState, toState) => {
-          console.log(`📋 Bottomsheet: ${fromState} → ${toState}`);
           // Save the current bottomsheet state for the active screen
           if (this.searchFlowManager) {
             this.searchFlowManager.saveCurrentBottomsheetState(toState);
           }
         },
-        onDragStart: height => {
-          console.log(`🖱️ Drag start: ${height}px`);
+        onDragStart: _height => {
+          // Drag started
         },
-        onDragEnd: (startHeight, endHeight) => {
-          console.log(`🖱️ Drag end: ${startHeight}px → ${endHeight}px`);
+        onDragEnd: (_startHeight, _endHeight) => {
+          // Drag ended
         },
       },
       window.innerHeight
@@ -118,30 +112,30 @@ class App {
 
     // Initialize CartService
     this.cartService = new CartService({
-      onCartUpdated: state => {
-        console.log('🛒 Cart updated:', state);
+      onCartUpdated: _state => {
+        // Cart updated
       },
-      onItemAdded: item => {
-        console.log('🛒 Item added to cart:', item);
+      onItemAdded: _item => {
+        // Item added to cart
       },
-      onItemRemoved: productId => {
-        console.log('🛒 Item removed from cart:', productId);
+      onItemRemoved: _productId => {
+        // Item removed from cart
       },
     });
 
     // Initialize CheckoutService
     this.checkoutService = new CheckoutService(0, {
-      onCheckoutUpdated: state => {
-        console.log('💳 Checkout updated:', state);
+      onCheckoutUpdated: _state => {
+        // Checkout updated
       },
-      onPromoCodeChanged: promoCode => {
-        console.log('💳 Promo code changed:', promoCode);
+      onPromoCodeChanged: _promoCode => {
+        // Promo code changed
       },
-      onLoyaltyToggled: enabled => {
-        console.log('💳 Loyalty toggled:', enabled);
+      onLoyaltyToggled: _enabled => {
+        // Loyalty toggled
       },
-      onDateSelected: date => {
-        console.log('💳 Date selected:', date);
+      onDateSelected: _date => {
+        // Date selected
       },
     });
 

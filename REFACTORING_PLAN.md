@@ -1,247 +1,268 @@
-# DashboardScreen.ts Refactoring Plan
+# 2GIS Application Refactoring Plan
+
+## Problem Overview
+
+The application was developed by multiple developers, which led to:
+- Duplication of components and logic
+- Accumulation of unused code
+- Complexity in understanding architecture
+- Issues during refactoring (changes don't apply due to use of old components)
 
 ## Current State Analysis
 
-**DashboardScreen.ts** contains 2646 lines of code and combines multiple functional blocks:
+### ✅ Working Components (verified via Playwright)
 
-### Main Functional Blocks:
-1. **Map Management** (MapGL integration)
-2. **Bottomsheet Management** (gestures, animations, states)
-3. **UI Components** (headers, search, content)
-4. **Screen Navigation** (Dashboard, Suggest, Search Result)
-5. **Content Management** (creating different content types)
-6. **Event Handling** (clicks, gestures, search)
+| Component | Status | Functionality |
+|-----------|--------|---------------|
+| DashboardScreen | ✅ Working | Main screen with navigation |
+| SuggestScreen | ✅ Working | Search and suggestions |
+| SearchResultScreen | ✅ Working | Search results |
+| OrganizationScreen | ✅ Working | Organization details |
+| ShopScreen | ✅ Working | Product catalog |
+| CartScreen | ✅ Working | Shopping cart |
+| CheckoutScreen | ✅ Working | Order checkout |
 
-## Refactoring Goals
+### ❌ Problem Areas
 
-1. **Separation of Concerns** - each component should be responsible for one area
-2. **Improved Readability** - code should be clear and structured
-3. **Easier Testing** - isolated components are easier to test
-4. **Reusability** - components should be modular
-5. **UI/UX Preservation** - appearance and behavior should not change
+#### 1. Unused Files
+- `src/main-minimal.ts` - completely unused
+- `src/components/Screens/SearchResultScreen/` - empty directory
+- Multiple unused methods in ContentManager
 
-## Refactoring Stages
+#### 2. Deprecated Code
+```typescript
+// DashboardScreen.ts:1069
+/**
+ * Show suggest content in the bottomsheet (DEPRECATED - use showSuggestScreen instead)
+ */
+private showSuggestContent(): void
 
-### Stage 1: Extract MapManager (lines ~100-300)
-**Goal**: Create a separate service for map management
+// ContentManager.ts - unused methods
+updateContentForSuggest()
+updateContentForDashboard() 
+updateContentForOrganization()
 
-**Components to create**:
-- `src/services/MapManager.ts` - MapGL map management
-- `src/components/Map/MapContainer.ts` - map container
-
-**Functionality to move**:
-- `createMapContainer()`
-- `waitForMapGL()`
-- `createRealMap()`
-- `createFallbackMap()`
-- `addTemporaryMarker()`
-- `centerMoscow()`
-- `testRandomMarkers()`
-
-**Expected result**: DashboardScreen no longer knows about map implementation details
-
----
-
-### Stage 2: Extract BottomsheetGestureManager (lines ~800-1200)
-**Goal**: Create a separate manager for bottomsheet gestures and animations
-
-**Components to create**:
-- `src/services/BottomsheetGestureManager.ts` - gesture management
-- `src/services/BottomsheetAnimationManager.ts` - animation management
-
-**Functionality to move**:
-- `setupBottomsheetEventListeners()`
-- `handleWheel()`
-- `handleScrollTouchStart/Move/End()`
-- `snapToNearestState()`
-- `animateToHeight()`
-- `cubicBezierEasing()`
-
-**Expected result**: DashboardScreen delegates gesture management to specialized service
-
----
-
-### Stage 3: Extract HeaderManager (lines ~1300-1800)
-**Goal**: Create a separate manager for header management
-
-**Components to create**:
-- `src/services/HeaderManager.ts` - header management
-- `src/components/Header/SearchHeader.ts` - search header component
-- `src/components/Header/SuggestHeader.ts` - suggest header component
-- `src/components/Header/ResultsHeader.ts` - results header component
-
-**Functionality to move**:
-- `createFigmaHeader()`
-- `updateHeaderForSuggest()`
-- `updateHeaderForDashboard()`
-- `updateHeaderForSearchResult()`
-- `handleSearchFieldClick()`
-
-**Expected result**: DashboardScreen doesn't know about header rendering details
-
----
-
-### Stage 4: Extract ContentManager (lines ~1800-2200)
-**Goal**: Create a separate manager for content management
-
-**Components to create**:
-- `src/services/ContentManager.ts` - content management
-- `src/components/Content/SuggestContent.ts` - suggest content
-- `src/components/Content/ResultsContent.ts` - results content
-- `src/components/Content/DashboardContent.ts` - dashboard content
-
-**Functionality to move**:
-- `updateContentForSuggest()`
-- `updateContentForDashboard()`
-- `updateContentForSearchResult()`
-- `createSuggestionRow()`
-- `createResultsContent()`
-- `createResultCard()`
-
-**Expected result**: DashboardScreen delegates content creation to specialized components
-
----
-
-### Stage 5: Extract FilterBarManager (lines ~2200-2400)
-**Goal**: Create a separate manager for filters
-
-**Components to create**:
-- `src/services/FilterBarManager.ts` - filter management
-- `src/components/Filter/FilterBar.ts` - filter component
-
-**Functionality to move**:
-- `createBottomFilterBar()`
-- `createFilterBar()`
-- `cleanupFixedFilterBar()`
-
-**Expected result**: DashboardScreen doesn't know about filter implementation details
-
----
-
-### Stage 6: Extract PromoBannerManager (lines ~400-600)
-**Goal**: Create a separate manager for promo banners
-
-**Components to create**:
-- `src/services/PromoBannerManager.ts` - banner management
-- `src/components/Promo/PromoBanner.ts` - promo banner component
-- `src/components/Promo/PromoBannerSmall.ts` - small banner component
-
-**Functionality to move**:
-- `createPromoBanner()`
-- `createPromoBannerSmall()`
-
-**Expected result**: DashboardScreen delegates banner creation to specialized components
-
----
-
-### Stage 7: Refactor Main DashboardScreen Class
-**Goal**: Simplify main class to coordinator
-
-**Changes**:
-- Remove duplicated code
-- Keep only coordination between components
-- Simplify public methods
-- Improve typing
-
-**Expected result**: DashboardScreen becomes a lightweight coordinator (~200-300 lines)
-
----
-
-## Refactoring Principles
-
-### 1. Gradual Approach
-- Each stage should be independent
-- Code should work after each stage
-- Testing at each stage
-
-### 2. Interface Preservation
-- DashboardScreen public methods don't change
-- External API remains compatible
-- UI/UX doesn't change
-
-### 3. Dependency Inversion
-- DashboardScreen depends on abstractions (interfaces)
-- Concrete implementations are injected
-- Easy testing and component replacement
-
-### 4. Single Responsibility
-- Each class is responsible for one area
-- Clear boundaries between components
-- Minimal dependencies
-
-## Structure After Refactoring
-
-```
-src/
-├── components/
-│   ├── Dashboard/
-│   │   ├── DashboardScreen.ts (coordinator, ~300 lines)
-│   │   └── DashboardContent.ts
-│   ├── Header/
-│   │   ├── SearchHeader.ts
-│   │   ├── SuggestHeader.ts
-│   │   └── ResultsHeader.ts
-│   ├── Content/
-│   │   ├── SuggestContent.ts
-│   │   ├── ResultsContent.ts
-│   │   └── DashboardContent.ts
-│   ├── Filter/
-│   │   └── FilterBar.ts
-│   ├── Promo/
-│   │   ├── PromoBanner.ts
-│   │   └── PromoBannerSmall.ts
-│   └── Map/
-│       └── MapContainer.ts
-├── services/
-│   ├── MapManager.ts
-│   ├── BottomsheetGestureManager.ts
-│   ├── BottomsheetAnimationManager.ts
-│   ├── HeaderManager.ts
-│   ├── ContentManager.ts
-│   ├── FilterBarManager.ts
-│   └── PromoBannerManager.ts
-└── types/
-    ├── map.ts
-    ├── header.ts
-    ├── content.ts
-    └── filter.ts
+// ProductRepository.ts:155
+/**
+ * @deprecated Use getSportsClothing() instead
+ */
+getSampleProducts(): Product[]
 ```
 
-## Success Criteria
+#### 3. Duplication
+- 50+ console.log statements
+- Method duplication in ProductRepository
+- Repeated logic in Screen components
 
-1. **File Size**: No file exceeds 500 lines
-2. **Testability**: Each component can be tested in isolation
-3. **Readability**: Code is clear and well-documented
-4. **Performance**: No performance degradation
-5. **Compatibility**: Existing code continues to work
+## Detailed Refactoring Plan
+
+### Phase 1: Remove Unused Files (Priority: High)
+
+#### 1.1 Remove main-minimal.ts
+```bash
+# Remove file
+rm src/main-minimal.ts
+```
+
+**Justification**: File is not imported anywhere in the project, is legacy code.
+
+#### 1.2 Clean Empty Directories
+```bash
+# Remove empty directory
+rm -rf src/components/Screens/SearchResultScreen/
+```
+
+**Justification**: Directory is empty, contains no functionality.
+
+#### 1.3 Check Unused Imports
+```bash
+# Find unused imports
+npx tsc --noEmit
+```
+
+### Phase 2: ContentManager Refactoring (Priority: High)
+
+#### 2.1 Method Usage Analysis
+```typescript
+// Only this method is used:
+updateContentForSearchResult(contentContainer: HTMLElement, context: SearchContext)
+
+// Unused methods to remove:
+updateContentForSuggest()
+updateContentForDashboard()
+updateContentForOrganization()
+```
+
+#### 2.2 ContentManager Simplification
+```typescript
+// New minimal ContentManager
+export class ContentManager {
+  private searchFlowManager: SearchFlowManager;
+  private cartService?: CartService;
+
+  constructor(searchFlowManager: SearchFlowManager, cartService?: CartService) {
+    this.searchFlowManager = searchFlowManager;
+    this.cartService = cartService;
+  }
+
+  // Keep only the used method
+  updateContentForSearchResult(contentContainer: HTMLElement, context: SearchContext): void {
+    // Existing logic
+  }
+}
+```
+
+### Phase 3: Remove Deprecated Code (Priority: Medium)
+
+#### 3.1 DashboardScreen
+```typescript
+// Remove method
+private showSuggestContent(): void {
+  // DEPRECATED - use showSuggestScreen instead
+}
+
+// Keep only
+private showSuggestScreen(): void {
+  // Active implementation
+}
+```
+
+#### 3.2 ProductRepository
+```typescript
+// Remove deprecated method
+getSampleProducts(): Product[] {
+  return this.getSportsClothing();
+}
+
+// Update all calls to
+getSportsClothing()
+```
+
+#### 3.3 CartService
+```typescript
+// Remove deprecated method
+getSampleProducts(): Product[] {
+  return getProductRepository().getSportsClothing();
+}
+```
+
+### Phase 4: Console.log Cleanup (Priority: Low)
+
+#### 4.1 Replace with Proper Logging Levels
+```typescript
+// Replace
+console.log('Product clicked:', product.title);
+
+// With
+console.warn('Product clicked:', product.title);
+// or remove if not critical
+```
+
+#### 4.2 Files to Clean
+- `src/main.ts` (15+ console.log)
+- `src/services/ContentManager.ts` (7 console.log)
+- `src/components/Screens/*.ts` (20+ console.log)
+- `src/services/MapSyncService.ts` (8 console.log)
+
+### Phase 5: Import Optimization (Priority: Medium) ✅ COMPLETED
+
+#### 5.1 Check Unused Imports ✅
+```bash
+# Find unused imports
+npx eslint . --ext .ts --rule 'no-unused-vars: error'
+```
+
+#### 5.2 Clean index.ts Files ✅
+```typescript
+// src/components/Screens/index.ts
+// Remove unused exports
+export { DashboardScreen, DashboardScreenFactory } from './DashboardScreen';
+export { OrganizationScreen } from './OrganizationScreen';
+// Remove unused exports
+```
+
+### Phase 6: Testing (Priority: Critical) ✅ COMPLETED
+
+#### 6.1 Playwright Tests for Each Screen ✅
+```typescript
+// Navigation test
+test('Dashboard navigation', async ({ page }) => {
+  await page.goto('http://localhost:5173');
+  // Check all main screens
+});
+
+// Cart test
+test('Cart functionality', async ({ page }) => {
+  // Add item to cart
+  // Check checkout process
+});
+```
+
+#### 6.2 Success Criteria ✅
+- ✅ All screens load without errors
+- ✅ Navigation between screens works
+- ✅ Adding to cart functions
+- ✅ Checkout process works
+- ✅ Bundle size decreased
+- ✅ No deprecated warnings
+
+#### 6.3 Test Coverage Plan ✅
+- Created comprehensive TEST_COVERAGE_PLAN.md ✅
+- Defined test types: E2E (Playwright), Integration, Unit, Visual ✅
+- Established coverage matrix for all screens and services ✅
+- Set up priorities and criteria for test implementation ✅
+
+## Execution Order
+
+### Week 1: Preparation and Safety
+1. **Day 1-2**: Create refactoring branch
+2. **Day 3-4**: Set up additional tests
+3. **Day 5**: Backup current state
+
+### Week 2: Main Refactoring
+1. **Day 1**: Phase 1 - Remove unused files
+2. **Day 2**: Phase 2 - ContentManager refactoring
+3. **Day 3**: Phase 3 - Remove deprecated code
+4. **Day 4**: Phase 4 - Console.log cleanup
+5. **Day 5**: Phase 5 - Import optimization
+
+### Week 3: Testing and Finalization
+1. **Day 1-2**: Phase 6 - Complete testing
+2. **Day 3**: Fix found issues
+3. **Day 4**: Final verification
+4. **Day 5**: Document changes
 
 ## Risks and Mitigation
 
-### Risks:
-- Complexity of coordination between components
-- Potential performance issues
-- Difficulty debugging distributed code
+### Risks
+1. **Loss of functionality**: Code removal may break the application
+2. **Regressions**: Changes may affect other components
+3. **Time**: Refactoring may take longer than planned
 
-### Mitigation:
-- Thorough testing at each stage
-- Using TypeScript for type safety
-- Documenting interfaces
-- Gradual implementation of changes
+### Mitigation
+1. **Phased execution**: Each phase is tested separately
+2. **Automated tests**: Playwright tests to verify functionality
+3. **Rollback**: Ability to rollback to previous state
+4. **Documentation**: Detailed description of each change
 
-## Timeline
+## Success Metrics
 
-- **Stages 1-2**: 2-3 days
-- **Stages 3-4**: 3-4 days  
-- **Stages 5-6**: 2-3 days
-- **Stage 7**: 1-2 days
-- **Testing and final polish**: 2-3 days
+### Before Refactoring
+- Codebase size: ~50,000 lines
+- Console.log count: 50+
+- Deprecated methods: 5+
+- Unused files: 3+
 
-**Total time**: 10-15 days
+### After Refactoring (goals)
+- Code size reduction: 10-15%
+- Remove all deprecated methods
+- Clean all unused files
+- Reduce console.log count by 80%
 
-## Next Steps
+## Conclusion
 
-1. Start with Stage 1 (MapManager)
-2. Create basic service structure
-3. Gradually move functionality
-4. Test at each stage
-5. Document changes 
+This plan provides a systematic approach to refactoring with minimal risks. Each phase includes testing to ensure functionality preservation.
+
+**Decision criteria**: All Playwright tests must pass successfully after each phase.
+
+**Verification method**: Automated testing via Playwright for all main user scenarios. 

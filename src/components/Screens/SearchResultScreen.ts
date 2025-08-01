@@ -2,7 +2,6 @@ import { SearchFilters as ISearchFilters, Organization, Product, ScreenType } fr
 import { BottomsheetManager, CartService, MapSyncService, SearchFlowManager } from '../../services';
 import {
   BottomsheetContainer,
-  BottomsheetContainerProps,
   BottomsheetContent,
   BottomsheetHeader,
 } from '../Bottomsheet';
@@ -10,8 +9,6 @@ import {
   FilterItem,
   SearchBar,
   SearchBarFactory,
-  SearchBarState,
-  SearchBarVariant,
   SearchFilters,
 } from '../Search';
 import { CardSize, OrganizationCard } from '../Cards';
@@ -196,7 +193,7 @@ export class SearchResultScreen {
     this.element.appendChild(bottomsheetElement);
 
     // Создаем шторку с состоянием FULLSCREEN_SCROLL для результатов
-    const bottomsheetConfig: BottomsheetContainerProps = {
+    const bottomsheetConfig = {
       config: {
         state: this.props.bottomsheetManager.getCurrentState().currentState,
         snapPoints: [0.2, 0.5, 0.95, 1.0],
@@ -204,7 +201,7 @@ export class SearchResultScreen {
         hasScrollableContent: true,
       },
       events: {
-        onStateChange: newState => {
+        onStateChange: (newState: any) => {
           // Синхронизируем состояние с менеджером шторки
           this.props.bottomsheetManager.snapToState(newState);
 
@@ -322,7 +319,6 @@ export class SearchResultScreen {
       },
       onFilterModal: () => {
         // Можно открыть полноэкранный модал с фильтрами
-        console.log('Open filters modal');
       },
     });
   }
@@ -659,7 +655,6 @@ export class SearchResultScreen {
    */
   private handleProductClick(product: Product): void {
     // Можно перейти в магазин и выделить товар
-    console.log('Product clicked:', product.title);
     // TODO: Реализовать переход в Shop с выделением товара
   }
 
@@ -668,7 +663,6 @@ export class SearchResultScreen {
    */
   private handleAddToCart(product: Product): void {
     // Логика уже в ProductCarousel через CartService
-    console.log('Product added to cart:', product.title);
   }
 
   /**
@@ -1061,7 +1055,6 @@ export class SearchResultScreen {
 
   private handlePhotoClick(organization: Organization): void {
     // Можно открыть галерею фотографий
-    console.log('Photo clicked for:', organization.name);
   }
 
   private handleKeyDown(event: KeyboardEvent): void {

@@ -225,7 +225,6 @@ export class ShopScreen {
     button.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
-      console.log('🔙 Shop back button clicked');
       this.props.onBack?.();
       this.props.searchFlowManager.goBack();
     });
@@ -253,7 +252,7 @@ export class ShopScreen {
         products,
         cartService: this.props.cartService,
         onAddToCart: product => {
-          console.log('🛒 Product added to cart:', product);
+          // Product added to cart
         },
       });
 
@@ -306,7 +305,6 @@ export class ShopScreen {
       'Корзина',
       () => {
         this.props.onCartClick?.();
-        console.log('🛒 Cart button clicked');
       },
       'primary'
     );
@@ -350,7 +348,7 @@ export class ShopScreen {
    * Активация экрана
    */
   public activate(): void {
-    console.log('🛍️ ShopScreen activated');
+    // ShopScreen activated
   }
 
   /**
@@ -372,7 +370,5 @@ export class ShopScreen {
 
     // Очищаем содержимое
     this.element.innerHTML = '';
-
-    console.log('🛍️ ShopScreen destroyed');
   }
 }
