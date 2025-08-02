@@ -42,7 +42,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Синхронизация пинов с содержимым экрана
    */
   syncPinsWithContent(contentType: MapContentType, data: any): void {
-
     let newPins: MapPin[] = [];
 
     switch (contentType) {
@@ -243,7 +242,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Выделение пина организации
    */
   highlightOrganizationPin(organizationId: string): void {
-
     // Обновляем состояние пинов
     this.currentPins = this.currentPins.map(pin => ({
       ...pin,
@@ -266,7 +264,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Снятие выделения со всех пинов
    */
   clearHighlights(): void {
-
     this.currentPins = this.currentPins.map(pin => ({
       ...pin,
       isHighlighted: false,
@@ -279,7 +276,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Адаптация видимой области карты под высоту шторки
    */
   adjustMapViewport(bottomsheetHeight: number): void {
-
     if (!this.mapRef.current) return;
 
     // Вычисляем отступы на основе высоты шторки
@@ -301,7 +297,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Центрирование карты на организации
    */
   centerOnOrganization(organization: Organization): void {
-
     if (!this.mapRef.current) return;
 
     // Генерируем координаты для организации (в реальном приложении будет геокодинг)
@@ -321,7 +316,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Подгонка карты под результаты поиска
    */
   fitToSearchResults(organizations: Organization[]): void {
-
     if (!this.mapRef.current || organizations.length === 0) return;
 
     // Генерируем координаты для всех организаций
@@ -345,7 +339,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Обновление местоположения пользователя
    */
   updateUserLocation(coordinates: [number, number]): void {
-
     // Удаляем старый пин пользователя
     this.currentPins = this.currentPins.filter(pin => pin.type !== 'user_location');
 
@@ -367,7 +360,6 @@ export class MapSyncService implements MapBottomsheetSync {
    * Получение видимых организаций в области карты
    */
   getVisibleOrganizations(): Organization[] {
-
     // Фильтруем пины организаций из текущих пинов
     const organizationPins = this.currentPins.filter(
       pin => pin.type === 'organization' && pin.organizationId

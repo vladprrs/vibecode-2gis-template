@@ -1,4 +1,5 @@
 import { BaseHeader, BaseHeaderConfig } from './BaseHeader';
+import { SearchBar, SearchBarFactory, SearchBarVariant } from '../../Search/SearchBar';
 
 /**
  * Configuration for SearchHeader
@@ -26,11 +27,10 @@ export interface SearchHeaderConfig extends BaseHeaderConfig {
 
 /**
  * Search header component for search result screens
- * Shows active search bar with back button and clear functionality
+ * Uses SearchBar component to eliminate duplication
  */
 export class SearchHeader extends BaseHeader {
-  private searchInput?: HTMLInputElement;
-  private clearButton?: HTMLElement;
+  private searchBar?: SearchBar;
   private searchConfig: SearchHeaderConfig;
 
   constructor(config: SearchHeaderConfig) {
@@ -48,141 +48,76 @@ export class SearchHeader extends BaseHeader {
       this.element.appendChild(dragger);
     }
 
-    // Create search bar
-    this.createSearchBar();
+    // Create search container
+    this.createSearchBarSection();
   }
 
-  private createSearchBar(): void {
+  private createSearchBarSection(): void {
     const searchContainer = this.createSearchBarContainer();
 
     // Back button
     const backButton = this.createBackButton(this.searchConfig.onBack);
     searchContainer.appendChild(backButton);
 
-    // Search input container
-    const inputContainer = document.createElement('div');
-    Object.assign(inputContainer.style, {
+    // Create SearchBar container
+    const searchBarContainer = document.createElement('div');
+    Object.assign(searchBarContainer.style, {
       flex: '1',
       display: 'flex',
-      alignItems: 'center',
-      backgroundColor: 'rgba(20, 20, 20, 0.06)',
-      borderRadius: '8px',
-      padding: '8px 12px',
-      gap: '8px',
     });
 
-    // Search icon
-    const searchIcon = this.createSearchIcon();
-    inputContainer.appendChild(searchIcon);
+    // Use SearchBar component instead of recreating search functionality
+    this.searchBar = SearchBarFactory.createSearchResult(
+      searchBarContainer,
+      this.searchConfig.searchQuery || '',
+      this.searchConfig.onBack // Right icon (X) navigates back
+    );
 
-    // Search input
-    this.searchInput = this.createSearchInput(this.searchConfig.placeholder || 'Поиск в Москве');
-
-    // Set initial value if provided
-    if (this.searchConfig.searchQuery) {
-      this.searchInput.value = this.searchConfig.searchQuery;
-    }
-
-    // Style for active search
-    Object.assign(this.searchInput.style, {
-      backgroundColor: 'transparent',
-      padding: '0',
+    // Configure SearchBar with our callbacks
+    this.searchBar.updateProps({
+      placeholder: this.searchConfig.placeholder || 'Поиск в Москве',
+      onChange: this.searchConfig.onSearchChange,
+      onSubmit: this.searchConfig.onSearchSubmit,
+      onClear: this.searchConfig.onClear,
+      onFocus: this.searchConfig.onSearchFocus,
+      onBlur: this.searchConfig.onSearchBlur,
     });
 
-    inputContainer.appendChild(this.searchInput);
-
-    // Clear button
-    this.clearButton = this.createClearButton(this.searchConfig.onClear);
-    inputContainer.appendChild(this.clearButton);
-
-    searchContainer.appendChild(inputContainer);
+    searchContainer.appendChild(searchBarContainer);
     this.element.appendChild(searchContainer);
-
-    // Update clear button visibility
-    this.updateClearButtonVisibility();
   }
 
   protected override setupEventListeners(): void {
-    if (!this.searchInput) return;
-
-    // Focus event
-    this.searchInput.addEventListener('focus', () => {
-      if (this.searchConfig.onSearchFocus) {
-        this.searchConfig.onSearchFocus();
-      }
-    });
-
-    // Blur event
-    this.searchInput.addEventListener('blur', () => {
-      if (this.searchConfig.onSearchBlur) {
-        this.searchConfig.onSearchBlur();
-      }
-    });
-
-    // Input event
-    this.searchInput.addEventListener('input', e => {
-      const target = e.target as HTMLInputElement;
-      this.updateClearButtonVisibility();
-
-      if (this.searchConfig.onSearchChange) {
-        this.searchConfig.onSearchChange(target.value);
-      }
-    });
-
-    // Submit event (Enter key)
-    this.searchInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const target = e.target as HTMLInputElement;
-        if (this.searchConfig.onSearchSubmit) {
-          this.searchConfig.onSearchSubmit(target.value);
-        }
-      }
-    });
-  }
-
-  private updateClearButtonVisibility(): void {
-    if (this.clearButton && this.searchInput) {
-      const hasValue = this.searchInput.value.length > 0;
-      this.clearButton.style.display = hasValue ? 'block' : 'none';
-    }
+    // Event handling is now delegated to SearchBar component
+    // No additional event listeners needed
   }
 
   /**
    * Update search query programmatically
    */
   public setSearchQuery(query: string): void {
-    if (this.searchInput) {
-      this.searchInput.value = query;
-      this.updateClearButtonVisibility();
-    }
+    this.searchBar?.setValue(query);
   }
 
   /**
    * Get current search query
    */
   public getSearchQuery(): string {
-    return this.searchInput?.value || '';
+    return this.searchBar?.getValue() || '';
   }
 
   /**
    * Focus the search input
    */
   public focusSearch(): void {
-    this.searchInput?.focus();
+    this.searchBar?.focus();
   }
 
   /**
    * Clear the search input
    */
   public clearSearch(): void {
-    if (this.searchInput) {
-      this.searchInput.value = '';
-      this.updateClearButtonVisibility();
-      if (this.searchConfig.onClear) {
-        this.searchConfig.onClear();
-      }
-    }
+    this.searchBar?.clear();
   }
 
   /**
@@ -190,6 +125,20 @@ export class SearchHeader extends BaseHeader {
    */
   public updateSearchConfig(newConfig: Partial<SearchHeaderConfig>): void {
     this.searchConfig = { ...this.searchConfig, ...newConfig };
+
+    // Update SearchBar with new configuration
+    if (this.searchBar && newConfig) {
+      this.searchBar.updateProps({
+        value: newConfig.searchQuery,
+        placeholder: newConfig.placeholder,
+        onChange: newConfig.onSearchChange,
+        onSubmit: newConfig.onSearchSubmit,
+        onClear: newConfig.onClear,
+        onFocus: newConfig.onSearchFocus,
+        onBlur: newConfig.onSearchBlur,
+      });
+    }
+
     this.updateConfig(newConfig);
   }
 }

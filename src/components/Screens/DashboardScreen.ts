@@ -14,11 +14,7 @@ import {
   SearchFlowManager,
 } from '../../services';
 
-import {
-  BottomsheetContainer,
-  BottomsheetContent,
-  BottomsheetHeader,
-} from '../Bottomsheet';
+import { BottomsheetContainer, BottomsheetContent, BottomsheetHeader } from '../Bottomsheet';
 import { SearchBar, SearchBarFactory } from '../Search';
 import { OrganizationScreen } from './OrganizationScreen';
 import { ShopScreen } from './ShopScreen';
@@ -978,7 +974,6 @@ export class DashboardScreen {
    * Handle screen changes from SearchFlowManager
    */
   public handleScreenChange(from: ScreenType, to: ScreenType, context: SearchContext): void {
-
     // Clear dashboard content when leaving dashboard screen
     if (from === ScreenType.DASHBOARD && to !== ScreenType.DASHBOARD) {
       this.clearDashboardContent();
@@ -1060,8 +1055,6 @@ export class DashboardScreen {
     // Hide filter bar
     this.filterBarManager.hide();
   }
-
-
 
   /**
    * Show SuggestScreen with unified SearchBar component

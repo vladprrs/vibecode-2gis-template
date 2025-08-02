@@ -6,11 +6,11 @@
   --space-12: 12px;
   --space-8: 8px;
   --space-4: 4px;
-  
+
   /* Color tokens from Figma export */
-  --color-surface-section: #F1F1F1;
-  --color-surface-white: #FFF;
+  --color-surface-section: #f1f1f1;
+  --color-surface-white: #fff;
   --color-text-primary: #141414;
   --color-text-secondary: #898989;
-  --color-accent-brand: #1BA136;
-} 
+  --color-accent-brand: #1ba136;
+}

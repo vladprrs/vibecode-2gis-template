@@ -2,34 +2,34 @@
 
 :root {
   /* Color Variables from Figma - точные значения */
-  --Background-01: #F1F1F1;
-  --Background-02: #FFF;
+  --Background-01: #f1f1f1;
+  --Background-02: #fff;
   --Surface-02: rgba(20, 20, 20, 0.09);
   --Surface-01: rgba(20, 20, 20, 0.06);
   --text-icons-secondary: #898989;
   --Button-Secondary: rgba(20, 20, 20, 0.06);
   --text-icons-primary: #141414;
-  --text-icons-traffic-heavy: #F5373C;
-  --text-icons-traffic-average: #EFA701;
-  --text-icons-traffic-light: #1BA136;
-  --text-icons-accent-brand: #1BA136;
-  --Special-Divider: rgba(137, 137, 137, 0.30);
+  --text-icons-traffic-heavy: #f5373c;
+  --text-icons-traffic-average: #efa701;
+  --text-icons-traffic-light: #1ba136;
+  --text-icons-accent-brand: #1ba136;
+  --Special-Divider: rgba(137, 137, 137, 0.3);
   --Surface-Section-02: rgba(20, 20, 20, 0.06);
-  --text-icons-global-white-primary: #FFF;
-  --Surface-Section-01: #FFF;
-  --Surface-Global-White: #FFF;
-  --text-icons-tertiary-transparent: rgba(20, 20, 20, 0.30);
-  --Overlay-02: rgba(0, 0, 0, 0.40);
-  --text-icons-primary-white: #FFF;
-  --text-icons-status-warning: #EFA701;
-  --text-icons-accent-subtle: #5A5A5A;
-  --text-icons-tertiary: #B8B8B8;
-  --Surface-00: rgba(0, 0, 0, 0.00);
-  --Button-Primary-brand: #1DB93C;
-  --Button-Map: #FFF;
-  --Background-Blur-02: rgba(255, 255, 255, 0.70);
-  --text-icons-accen-link-green: #1BA136;
-  --Background-Default-white: #FFF;
+  --text-icons-global-white-primary: #fff;
+  --Surface-Section-01: #fff;
+  --Surface-Global-White: #fff;
+  --text-icons-tertiary-transparent: rgba(20, 20, 20, 0.3);
+  --Overlay-02: rgba(0, 0, 0, 0.4);
+  --text-icons-primary-white: #fff;
+  --text-icons-status-warning: #efa701;
+  --text-icons-accent-subtle: #5a5a5a;
+  --text-icons-tertiary: #b8b8b8;
+  --Surface-00: rgba(0, 0, 0, 0);
+  --Button-Primary-brand: #1db93c;
+  --Button-Map: #fff;
+  --Background-Blur-02: rgba(255, 255, 255, 0.7);
+  --text-icons-accen-link-green: #1ba136;
+  --Background-Default-white: #fff;
 }
 
 /* Main Dashboard Container */
@@ -62,7 +62,7 @@
   position: absolute;
   left: 0;
   bottom: 0;
-  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
   z-index: 1000;
 }
@@ -171,7 +171,12 @@
 
 /* Search Placeholder - точная типографика из Figma */
 .search-placeholder {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 15px;
   font-style: normal;
   font-weight: 400;
@@ -250,7 +255,7 @@
   top: 0;
   width: 20px;
   height: 40px;
-  background: linear-gradient(270deg, rgba(255, 255, 255, 0) 5.63%, #FFF 100%);
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0) 5.63%, #fff 100%);
   z-index: 10;
 }
 
@@ -261,7 +266,7 @@
   top: 0;
   width: 20px;
   height: 40px;
-  background: linear-gradient(270deg, #FFF 5.63%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(270deg, #fff 5.63%, rgba(255, 255, 255, 0) 100%);
   z-index: 10;
 }
 
@@ -296,7 +301,12 @@
 }
 
 .smart-button-text {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 15px;
   font-style: normal;
   font-weight: 500;
@@ -429,7 +439,12 @@
 }
 
 .cover-title {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 500;
@@ -440,7 +455,12 @@
 }
 
 .cover-subtitle {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 13px;
   font-style: normal;
   font-weight: 400;
@@ -474,7 +494,12 @@
 }
 
 .meta-item-title {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 500;
@@ -484,7 +509,12 @@
 }
 
 .meta-item-subtitle {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 13px;
   font-style: normal;
   font-weight: 400;
@@ -538,7 +568,12 @@
 }
 
 .section-title {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 19px;
   font-style: normal;
   font-weight: 600;
@@ -576,7 +611,12 @@
 }
 
 .banner-title {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 600;
@@ -586,7 +626,12 @@
 }
 
 .banner-description {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -660,7 +705,12 @@
 }
 
 .rd-title {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 600;
@@ -675,7 +725,12 @@
 }
 
 .rd-subtitle {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -697,21 +752,36 @@
 }
 
 .rd-rating-value {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: var(--text-icons-primary);
 }
 
 .rd-distance {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: var(--text-icons-primary);
 }
 
 .rd-address {
-  font-family: 'SB Sans Text', -apple-system, Roboto, Helvetica, sans-serif;
+  font-family:
+    'SB Sans Text',
+    -apple-system,
+    Roboto,
+    Helvetica,
+    sans-serif;
   font-size: 14px;
   color: var(--text-icons-secondary);
 }
@@ -721,12 +791,12 @@
   .content-row {
     flex-direction: column;
   }
-  
+
   .left-column,
   .right-column {
     flex: none;
   }
-  
+
   .buttons-row-container {
     width: calc(100vw - 32px);
   }
@@ -754,11 +824,7 @@
 
 /* Обратная связь для пользователя при скролле */
 .scroll-blocked .dashboard-content:hover {
-  background: linear-gradient(
-    180deg, 
-    rgba(27, 161, 54, 0.02) 0%, 
-    transparent 100%
-  );
+  background: linear-gradient(180deg, rgba(27, 161, 54, 0.02) 0%, transparent 100%);
 }
 
 /* Animation Classes */
@@ -775,7 +841,7 @@
 }
 
 .bs-animating {
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Scrollbar Styling */
@@ -817,4 +883,4 @@
   color: var(--text-icons-secondary);
   font-size: 14px;
   line-height: 1.4;
-} 
+}

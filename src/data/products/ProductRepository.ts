@@ -150,8 +150,6 @@ export class ProductRepository {
     });
     return Array.from(brands).sort();
   }
-
-
 }
 
 /**

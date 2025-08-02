@@ -1,16 +1,7 @@
 import { SearchFilters as ISearchFilters, Organization, Product, ScreenType } from '../../types';
 import { BottomsheetManager, CartService, MapSyncService, SearchFlowManager } from '../../services';
-import {
-  BottomsheetContainer,
-  BottomsheetContent,
-  BottomsheetHeader,
-} from '../Bottomsheet';
-import {
-  FilterItem,
-  SearchBar,
-  SearchBarFactory,
-  SearchFilters,
-} from '../Search';
+import { BottomsheetContainer, BottomsheetContent, BottomsheetHeader } from '../Bottomsheet';
+import { FilterItem, SearchBar, SearchBarFactory, SearchFilters } from '../Search';
 import { CardSize, OrganizationCard } from '../Cards';
 import { ProductCarousel } from '../Content/ProductCarousel';
 import { HeaderStyles, UNIFIED_HEADER_STYLES } from '../../styles/components/HeaderStyles';

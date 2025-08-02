@@ -200,7 +200,10 @@ export class FormField {
 
     // Set attributes
     element.name = this.config.name;
-    if (this.config.placeholder && (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) {
+    if (
+      this.config.placeholder &&
+      (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)
+    ) {
       element.placeholder = this.config.placeholder;
     }
     if (this.config.value) {
@@ -218,7 +221,10 @@ export class FormField {
     if (this.config.minLength && element instanceof HTMLInputElement) {
       element.minLength = this.config.minLength;
     }
-    if (this.config.maxLength && (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) {
+    if (
+      this.config.maxLength &&
+      (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)
+    ) {
       element.maxLength = this.config.maxLength;
     }
 

@@ -1,15 +1,7 @@
 import { BottomsheetState, ScreenType, SearchSuggestion } from '../../types';
 import { BottomsheetManager, MapSyncService, SearchFlowManager } from '../../services';
-import {
-  BottomsheetContainer,
-  BottomsheetContent,
-  BottomsheetHeader,
-} from '../Bottomsheet';
-import {
-  SearchBar,
-  SearchBarFactory,
-  SearchSuggestions,
-} from '../Search';
+import { BottomsheetContainer, BottomsheetContent, BottomsheetHeader } from '../Bottomsheet';
+import { SearchBar, SearchBarFactory, SearchSuggestions } from '../Search';
 import { HeaderStyles } from '../../styles/components/HeaderStyles';
 
 /**

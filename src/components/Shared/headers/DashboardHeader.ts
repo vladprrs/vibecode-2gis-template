@@ -1,4 +1,5 @@
 import { BaseHeader, BaseHeaderConfig } from './BaseHeader';
+import { SearchBar, SearchBarFactory } from '../../Search/SearchBar';
 
 /**
  * Configuration for DashboardHeader
@@ -18,9 +19,10 @@ export interface DashboardHeaderConfig extends BaseHeaderConfig {
 
 /**
  * Dashboard header component
- * Shows search bar with placeholder text for main dashboard screen
+ * Uses SearchBar component to eliminate duplication
  */
 export class DashboardHeader extends BaseHeader {
+  private searchBar?: SearchBar;
   private dashboardConfig: DashboardHeaderConfig;
 
   constructor(config: DashboardHeaderConfig) {
@@ -37,8 +39,8 @@ export class DashboardHeader extends BaseHeader {
       this.createDashboardDragger();
     }
 
-    // Create search bar
-    this.createSearchBar();
+    // Create search section
+    this.createSearchSection();
   }
 
   private createDashboardDragger(): void {
@@ -51,70 +53,54 @@ export class DashboardHeader extends BaseHeader {
     this.element.appendChild(dragger);
   }
 
-  private createSearchBar(): void {
-    // Create search bar using the exact Figma structure
+  private createSearchSection(): void {
+    // Create search container
     const searchContainer = document.createElement('div');
     searchContainer.className = 'search-nav-bar';
+    Object.assign(searchContainer.style, {
+      padding: '0 16px 16px 16px',
+    });
 
-    searchContainer.innerHTML = `
-      <div class="search-nav-content">
-        <div class="search-field-container">
-          <div class="search-field">
-            <div class="search-icon">
-              <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-                <path d="M8.5 15.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM15.5 15.5l-3.87-3.87" 
-                      stroke="#898989" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <div class="search-placeholder">${this.dashboardConfig.placeholder || 'Поиск в Москве'}</div>
-          </div>
-        </div>
-      </div>
-    `;
+    // Use SearchBar component for dashboard (inactive state with burger menu)
+    this.searchBar = SearchBarFactory.createDashboard(
+      searchContainer,
+      this.dashboardConfig.onSearchFocus // Burger menu click navigates to suggest
+    );
 
-    // Add click handler to search field
-    const searchField = searchContainer.querySelector('.search-field') as HTMLElement;
-    if (searchField) {
-      searchField.style.cursor = 'pointer';
-      searchField.addEventListener('click', () => {
-        if (this.dashboardConfig.onSearchFocus) {
-          this.dashboardConfig.onSearchFocus();
-        }
-      });
-    }
+    // Configure SearchBar with dashboard-specific settings
+    this.searchBar.updateProps({
+      placeholder: this.dashboardConfig.placeholder || 'Поиск в Москве',
+      value: this.dashboardConfig.searchQuery,
+      onChange: this.dashboardConfig.onSearchChange,
+      onSubmit: this.dashboardConfig.onSearchSubmit,
+    });
 
     this.element.appendChild(searchContainer);
   }
 
   protected override setupEventListeners(): void {
-    // Event listeners are already set up in createSearchBar method
-    // Dashboard header uses click-to-navigate pattern instead of actual input
+    // Event handling is now delegated to SearchBar component
+    // No additional event listeners needed
   }
 
   /**
    * Update search query programmatically
    */
   public setSearchQuery(query: string): void {
-    // Update the placeholder text in the dashboard header
-    const placeholder = this.element.querySelector('.search-placeholder') as HTMLElement;
-    if (placeholder) {
-      placeholder.textContent = query || this.dashboardConfig.placeholder || 'Поиск в Москве';
-    }
+    this.searchBar?.setValue(query);
   }
 
   /**
    * Get current search query
    */
   public getSearchQuery(): string {
-    // Dashboard header doesn't store actual query, it's just a click target
-    return '';
+    return this.searchBar?.getValue() || '';
   }
 
   /**
-   * Focus the search input
+   * Focus the search input (navigates to suggest screen for dashboard)
    */
   public focusSearch(): void {
-    // Dashboard header doesn't have focusable input, clicking navigates to suggest screen
     if (this.dashboardConfig.onSearchFocus) {
       this.dashboardConfig.onSearchFocus();
     }
@@ -125,6 +111,17 @@ export class DashboardHeader extends BaseHeader {
    */
   public updateDashboardConfig(newConfig: Partial<DashboardHeaderConfig>): void {
     this.dashboardConfig = { ...this.dashboardConfig, ...newConfig };
+
+    // Update SearchBar with new configuration
+    if (this.searchBar && newConfig) {
+      this.searchBar.updateProps({
+        placeholder: newConfig.placeholder,
+        value: newConfig.searchQuery,
+        onChange: newConfig.onSearchChange,
+        onSubmit: newConfig.onSearchSubmit,
+      });
+    }
+
     this.updateConfig(newConfig);
   }
 }
